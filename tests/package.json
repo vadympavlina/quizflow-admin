@@ -1,0 +1,11 @@
+{
+  "name": "quizflow-admin-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

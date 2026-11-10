@@ -1,0 +1,14 @@
+# Автотести QuizFlow Admin (адмін-панель)
+
+Запускаються в GitHub Actions на кожен PR (`.github/workflows/tests.yml`).
+
+```bash
+cd tests
+npm ci
+npx playwright install chromium   # один раз
+npm run e2e     # інтерфейс: Playwright + мок Firebase (e2e/mock), справжня база не потрібна
+```
+
+- `e2e/fixtures.mjs` — мок SDK Firebase, адреси без `.html`, збір помилок сторінки.
+- `e2e/seeds/` — тестові дані (кладуться в `localStorage.mockdb`).
+- Нова сторінка → додати її в `e2e/smoke.spec.mjs`.
