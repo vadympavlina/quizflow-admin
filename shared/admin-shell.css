@@ -54,11 +54,10 @@ html.asb-boot .asb, html.asb-boot .asb *, html.asb-boot .app{ transition:none !i
 .asb-head{ display:flex; align-items:center; height:44px; padding:0 4px; margin-bottom:10px; overflow:hidden; flex:0 0 auto; }
 .asb-logo{ display:flex; align-items:center; gap:11px; min-width:0; text-decoration:none; color:#fff; border-radius:12px; }
 .asb-mark{
-  width:38px; height:38px; flex:0 0 auto; border-radius:12px; display:grid; place-items:center;
-  background:linear-gradient(140deg,#A78BFA 0%,#7C3AED 50%,#4F46E5 100%);
-  box-shadow:0 10px 22px -10px rgba(139,92,246,.95), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.18);
+  width:40px; height:40px; flex:0 0 auto; display:grid; place-items:center;
   transition:transform .2s var(--asb-ease);
 }
+.asb-mark img{ width:100%; height:100%; object-fit:contain; display:block; -webkit-user-drag:none; pointer-events:none; }
 .asb-logo:hover .asb-mark{ transform:rotate(-6deg) scale(1.04); }
 .asb-brand{ display:flex; flex-direction:column; gap:3px; min-width:0; }
 .asb-name{ font-weight:800; font-size:17px; letter-spacing:-.02em; line-height:1; white-space:nowrap; }
@@ -66,6 +65,7 @@ html.asb-boot .asb, html.asb-boot .asb *, html.asb-boot .app{ transition:none !i
 .asb-tag{ align-self:flex-start; display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#EDE9FE; background:rgba(139,92,246,.28); border:1px solid rgba(196,181,253,.3); padding:2px 7px; border-radius:6px; }
 .asb-tag::before{ content:""; width:5px; height:5px; border-radius:50%; background:#C4B5FD; box-shadow:0 0 6px rgba(196,181,253,.9); }
 .asb.collapsed .asb-head{ justify-content:center; padding:0; }
+.asb.collapsed .asb-mark{ width:32px; height:32px; margin-right:6px; }
 .asb.collapsed .asb-brand{ display:none; }
 
 .asb-toggle{
