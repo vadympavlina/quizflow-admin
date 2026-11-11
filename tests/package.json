@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "icons:mascot": "node scripts/icons-mascot.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1"
