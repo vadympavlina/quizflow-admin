@@ -50,3 +50,10 @@ test("неавторизований відкриває корінь — пот�
   expect(new URL(page.url()).search).toBe("");
   expect(errors.filter(e => !/no auth/.test(e)), "«no auth» — навмисне переривання скрипта до переходу на вхід").toEqual([]);
 });
+
+test("манифест адмінки: ярлик на екрані відкриває корінь, а не неіснуючу сторінку", async ({ page, request }) => {
+  await page.goto("/404.html");
+  const m = await (await request.get("/assets/icons/admin/site.webmanifest")).json();
+  expect(m.start_url).toBe("/");
+  expect((await request.get(m.start_url)).status()).toBe(200);
+});

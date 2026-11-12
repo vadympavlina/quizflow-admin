@@ -2,7 +2,7 @@
   "name": "QuizFlow — Адмінка",
   "short_name": "Адмінка",
   "lang": "uk",
-  "start_url": "/admin/overview",
+  "start_url": "/",
   "scope": "/",
   "display": "browser",
   "background_color": "#F4F6FB",
