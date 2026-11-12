@@ -52,7 +52,7 @@
 
   var NAV = [
     { label: "Панель", items: [
-      { id: "overview", label: "Огляд", href: "overview", icon: "overview" },
+      { id: "overview", label: "Огляд", href: "./", icon: "overview" },
       { id: "stats", label: "Статистика", href: "stats", icon: "stats" },
       { id: "problems", label: "Проблеми", href: "problems", icon: "problems", badge: "admin-problems-badge" },
       { id: "audit", label: "Журнал дій", href: "audit", icon: "audit" },
@@ -86,6 +86,7 @@
   }
   function pageKey() {
     var seg = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, "");
+    if (seg === "" || seg === "index") return "overview";   // головна сторінка — index.html
     return seg === "ai-settings" ? "ai" : seg;
   }
 
@@ -105,7 +106,7 @@
 
     return '<aside class="asb' + (collapsed ? " collapsed" : "") + '" id="admin-sidebar" aria-label="Навігація адмінки">' +
       '<div class="asb-head">' +
-        '<a class="asb-logo" href="overview" aria-label="QuizFlow Admin — огляд" data-tip="QuizFlow Admin">' +
+        '<a class="asb-logo" href="./" aria-label="QuizFlow Admin — огляд" data-tip="QuizFlow Admin">' +
           '<span class="asb-mark"><img src="/assets/icons/admin/owl.webp" alt="" width="40" height="40" draggable="false"></span>' +
           '<span class="asb-brand"><span class="asb-name">quiz<em>flow</em></span><span class="asb-tag">Admin</span></span>' +
         "</a>" +
