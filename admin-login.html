@@ -247,7 +247,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Повернення лише на сторінку адмінки (відносна адреса без переходу вгору)
 const nextUrl = (() => {
   const n = qs.get("next") || "";
-  return /^[a-z0-9][a-z0-9\-]*(\.html)?(\?[^#\s]*)?$/i.test(n) && !/^admin-login\b/.test(n) ? n : "overview";
+  return /^[a-z0-9][a-z0-9\-]*(\.html)?(\?[^#\s]*)?$/i.test(n) && !/^admin-login\b/.test(n) ? n : "./";
 })();
 const go = () => location.replace(nextUrl);
 

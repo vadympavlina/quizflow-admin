@@ -33,7 +33,7 @@
 ## Піддомени: зв'язки з іншими частинами
 Між частинами — лише абсолютні адреси (відносні шляхи між піддоменами не працюють):
 
-- Посилання на панель викладача й Live — app.quizflow.space (`shared/admin-nav.js`, `overview.html`, `admin-login.html`).
+- Посилання на панель викладача й Live — app.quizflow.space (`shared/admin-nav.js`, `index.html`, `admin-login.html`).
 - Посилання на реєстрацію за запрошенням і лист скидання пароля — app.quizflow.space (`invites.html`, `teachers.html`).
 
 ## Процес

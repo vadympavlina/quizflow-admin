@@ -3,7 +3,7 @@
 import { test, expect, seed } from "./fixtures.mjs";
 import { admSeed } from "./seeds/admin.mjs";
 
-const ADMIN = ["overview", "stats", "problems", "audit", "teachers", "roles", "features", "invites", "announcements", "mail", "news", "navigation", "ai-settings", "telegram", "cleanup"];
+const ADMIN = ["", "stats", "problems", "audit", "teachers", "roles", "features", "invites", "announcements", "mail", "news", "navigation", "ai-settings", "telegram", "cleanup"];
 
 test("кожна сторінка адмінки: шлях «Розділ / Сторінка», видимий заголовок не повторює його", async ({ page, errors }) => {
   await seed(page, admSeed(Date.now()), "t5");

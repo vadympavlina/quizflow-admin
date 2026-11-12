@@ -14,16 +14,18 @@ test("запрошення: посилання на реєстрацію вед�
 
 test("меню: «Панель викладача» і Live ведуть на app.quizflow.space", async ({ page, errors }) => {
   await seed(page, admSeed(Date.now()), "t5");
-  await page.goto("/overview"); await page.waitForTimeout(1400);
+  await page.goto("/"); await page.waitForTimeout(1400);
   await expect(page.locator(".asb-q").nth(0)).toHaveAttribute("href", "https://app.quizflow.space/");
   await expect(page.locator(".asb-q-live")).toHaveAttribute("href", "https://app.quizflow.space/live");
   await expect(page.locator(".pulse-live")).toHaveAttribute("href", "https://app.quizflow.space/live");
   expect(errors).toEqual([]);
 });
 
-test("корінь admin.quizflow.space відкриває огляд", async ({ page, errors }) => {
+test("огляд — це index.html: корінь відкриває його, старий /overview веде на корінь", async ({ page, errors }) => {
   await seed(page, admSeed(Date.now()), "t5");
-  await page.goto("/index.html");
-  await page.waitForURL(/\/overview$/);
+  await page.goto("/");
+  await expect(page.locator(".asb-item.on")).toHaveAttribute("data-id", "overview");
+  await page.goto("/overview?x=1");
+  await page.waitForURL(u => u.pathname === "/" && u.search === "?x=1");
   expect(errors).toEqual([]);
 });
