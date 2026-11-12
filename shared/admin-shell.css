@@ -65,7 +65,7 @@ html.asb-boot .asb, html.asb-boot .asb *, html.asb-boot .app{ transition:none !i
 .asb-tag{ align-self:flex-start; display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#EDE9FE; background:rgba(139,92,246,.28); border:1px solid rgba(196,181,253,.3); padding:2px 7px; border-radius:6px; }
 .asb-tag::before{ content:""; width:5px; height:5px; border-radius:50%; background:#C4B5FD; box-shadow:0 0 6px rgba(196,181,253,.9); }
 .asb.collapsed .asb-head{ justify-content:center; padding:0; }
-.asb.collapsed .asb-mark{ width:32px; height:32px; margin-right:6px; }
+.asb.collapsed .asb-mark{ width:32px; height:32px; margin:0; }
 .asb.collapsed .asb-brand{ display:none; }
 
 .asb-toggle{
