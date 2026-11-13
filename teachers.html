@@ -13,30 +13,30 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 /* ─── Викладачі: список зліва + картка викладача справа ─── */
 
 /* Ліва колонка: пошук, фільтри, список */
 .tp-it{display:flex;align-items:center;gap:11px;width:100%;padding:9px 10px;border-radius:12px;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:background .12s}
-.tp-it:hover{background:#F7F8FC}
-.tp-it.on{background:#F5F3FF;box-shadow:inset 0 0 0 1px #DDD6FE}
-.tp-it:focus-visible{outline:2px solid #7C3AED;outline-offset:-2px}
+.tp-it:hover{background:var(--sf-3)}
+.tp-it.on{background:var(--v-50);box-shadow:inset 0 0 0 1px var(--v-200)}
+.tp-it:focus-visible{outline:2px solid var(--v-500);outline-offset:-2px}
 .tp-it.is-blocked .tp-it-i{opacity:.55}
 .tp-it-i{flex:1;min-width:0}
-.tp-it-n{display:flex;align-items:center;gap:6px;font-weight:800;font-size:13.5px;color:var(--ink-900);white-space:nowrap;overflow:hidden}
+.tp-it-n{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--ink-900);white-space:nowrap;overflow:hidden}
 .tp-it-n span{overflow:hidden;text-overflow:ellipsis}
 .tp-it-n .me,.tp-it-n .tp-adm{font-style:normal}
 .tp-it-n .me{font-size:11px;font-weight:600;color:var(--ink-400);flex:0 0 auto}
-.tp-it-e{font-size:11.5px;color:var(--ink-400);font-family:"Geist Mono",monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tp-it-t{font-size:11.5px;color:var(--ink-400);font-weight:600;white-space:nowrap;flex:0 0 auto;text-align:right}
-.tp-it-t.recent{color:#15803D}
+.tp-it-e{font-size:12px;color:var(--ink-400);font-family:"Geist Mono",monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp-it-t{font-size:12px;color:var(--ink-400);font-weight:600;white-space:nowrap;flex:0 0 auto;text-align:right}
+.tp-it-t.recent{color:var(--grn-700)}
 .tp-dots{display:inline-flex;gap:3px;flex:0 0 auto}
 .tp-dots i{width:7px;height:7px;border-radius:50%}
-.tp-adm{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:linear-gradient(135deg,#7C3AED,#4F46E5);color:#fff;flex:0 0 auto}
+.tp-adm{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:linear-gradient(135deg,var(--v-500),var(--ind-600));color:#fff;flex:0 0 auto}
 
 /* Аватар із крапкою статусу */
-.tc-ava{position:relative;width:40px;height:40px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;background:linear-gradient(135deg,#A78BFA,#7C3AED)}
+.tc-ava{position:relative;width:40px;height:40px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;background:linear-gradient(135deg,var(--v-400),var(--v-500))}
 .tc-ava.b{background:linear-gradient(135deg,#60A5FA,#1D4ED8)}
 .tc-ava.g{background:linear-gradient(135deg,#6EE7B7,#047857)}
 .tc-ava.o{background:linear-gradient(135deg,#FDBA74,#C2410C)}
@@ -47,22 +47,22 @@
 
 /* Права колонка: картка викладача */
 .tp-hero{display:flex;gap:18px;align-items:center;padding:24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FAF8FF,#fff)}
-.tp-hero .tc-ava{width:68px;height:68px;border-radius:20px;font-size:22px}
+.tp-hero .tc-ava{width:68px;height:68px;border-radius:20px;font-size:20px}
 .tp-hero .tc-ava > i{width:16px;height:16px;border-width:3px}
 .tp-hi{flex:1;min-width:0}
-.tp-hi h2{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere;margin:0}
+.tp-hi h2{font-size:20px;font-weight:800;letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere;margin:0}
 .tp-hi h2 .me{font-size:13px;font-weight:600;color:var(--ink-400);margin-left:6px}
 .tp-mail{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font:600 13px "Geist Mono",monospace;color:var(--ink-500);background:none;border:0;padding:2px 0;cursor:pointer;max-width:100%}
 .tp-mail span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tp-mail svg{width:13px;height:13px;flex:0 0 auto;opacity:.6}
-.tp-mail:hover{color:#6D28D9}
+.tp-mail:hover{color:var(--v-600)}
 .tp-badges{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .tc-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
 .tc-status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.tc-status.ok{background:#DCFCE7;color:#15803D}
-.tc-status.first{background:#FEF3C7;color:#B45309}
-.tc-status.blocked{background:#FEE2E2;color:#B91C1C}
-.tc-status.adm{background:#EDE9FE;color:#6D28D9}
+.tc-status.ok{background:var(--grn-100);color:var(--grn-700)}
+.tc-status.first{background:var(--amb-100);color:var(--amb-700)}
+.tc-status.blocked{background:var(--red-100);color:var(--red-700)}
+.tc-status.adm{background:var(--v-100);color:var(--v-600)}
 .tc-status.adm::before{display:none}
 .tp-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto}
 
@@ -70,14 +70,14 @@
 .tp-stat{background:#fff;padding:16px 22px;min-width:0}
 .tp-stat .l{font-size:12px;font-weight:700;color:var(--ink-500);display:flex;align-items:center;gap:7px}
 .tp-stat .l svg{width:14px;height:14px;color:var(--ink-400)}
-.tp-stat .v{font:800 22px "Geist Mono",monospace;letter-spacing:-.02em;margin-top:6px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tp-stat .v.sm{font:700 15px "Manrope",sans-serif;letter-spacing:0;margin-top:9px}
+.tp-stat .v{font:800 20px "Geist Mono",monospace;letter-spacing:-.02em;margin-top:6px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp-stat .v.sm{font:700 16px "Manrope",sans-serif;letter-spacing:0;margin-top:9px}
 .tp-stat small{display:block;font-size:12px;font-weight:600;color:var(--ink-400);margin-top:3px}
-.tp-stat small.up{color:#15803D}
+.tp-stat small.up{color:var(--grn-700)}
 
 
 /* Системна роль: сегменти */
-.tp-seg{display:inline-flex;padding:3px;border-radius:11px;background:#F1F4FA;gap:3px}
+.tp-seg{display:inline-flex;padding:3px;border-radius:11px;background:var(--sf-2);gap:3px}
 .tp-seg button{border:0;background:transparent;padding:8px 14px;border-radius:9px;font:700 13px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
 .tp-seg button.on{background:#fff;color:var(--ink-900);box-shadow:0 1px 3px rgba(15,30,71,.12)}
 .tp-seg button:disabled{cursor:not-allowed;opacity:.6}
@@ -85,7 +85,7 @@
 
 /* Кастомні ролі: чипи-перемикачі */
 .tp-roles{display:flex;flex-wrap:wrap;gap:8px}
-.tp-role{--rc:#7C3AED;display:inline-flex;align-items:center;gap:8px;padding:8px 12px 8px 10px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-700);cursor:pointer;transition:all .12s}
+.tp-role{--rc:var(--v-500);display:inline-flex;align-items:center;gap:8px;padding:8px 12px 8px 10px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-700);cursor:pointer;transition:all .12s}
 .tp-role > i{width:10px;height:10px;border-radius:50%;background:var(--rc)}
 .tp-role:hover{border-color:var(--rc)}
 .tp-role.on{background:color-mix(in srgb,var(--rc) 11%,#fff);border-color:var(--rc);color:var(--ink-900)}
@@ -93,7 +93,7 @@
   --ck:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E")}
 .tp-role:disabled{opacity:.6;cursor:wait}
 .tp-none{font-size:13px;color:var(--ink-500);padding:12px 14px;border:1.5px dashed var(--line);border-radius:12px}
-.tp-none a{color:#6D28D9;font-weight:700}
+.tp-none a{color:var(--v-600);font-weight:700}
 .tp-names{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .tp-names li{display:flex;align-items:center;gap:14px;padding:11px 14px;font-size:13px;flex-wrap:wrap}
 .tp-names li + li{border-top:1px solid var(--line)}
@@ -106,29 +106,29 @@
 
 /* Можливості та ліміти */
 .cp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.cp-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#FAFBFE;min-width:0}
+.cp-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sf-1);min-width:0}
 .cp-i{flex:1;min-width:0}
-.cp-i b{display:block;font-size:13.5px;color:var(--ink-900)}
+.cp-i b{display:block;font-size:14px;color:var(--ink-900)}
 .cp-s{display:block;font-size:12px;color:var(--ink-500);margin-top:2px}
-.cp-s.on{color:#15803D}.cp-s.off{color:#B91C1C}
+.cp-s.on{color:var(--grn-700)}.cp-s.off{color:var(--red-700)}
 .cp-bar{display:block;height:5px;border-radius:3px;background:#E8ECF5;margin-top:7px;overflow:hidden}
-.cp-bar i{display:block;height:100%;background:#7C3AED;border-radius:3px}
+.cp-bar i{display:block;height:100%;background:var(--v-500);border-radius:3px}
 .cp-bar i.warn{background:#D97706}.cp-bar i.full{background:#DC2626}
-.cp-num{width:120px;flex:0 0 auto;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:600 13.5px "Geist Mono",monospace;color:var(--ink-900);outline:none}
+.cp-num{width:120px;flex:0 0 auto;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:600 14px "Geist Mono",monospace;color:var(--ink-900);outline:none}
 .cp-num::placeholder{font:600 12px "Manrope",sans-serif;color:var(--ink-400)}
-.cp-num:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
-.tri{display:inline-flex;padding:3px;border-radius:10px;background:#F1F4FA;gap:2px;flex:0 0 auto}
+.cp-num:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.tri{display:inline-flex;padding:3px;border-radius:10px;background:var(--sf-2);gap:2px;flex:0 0 auto}
 .tri button{border:0;background:transparent;padding:6px 9px;border-radius:8px;font:700 12px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer;white-space:nowrap}
 .tri button.on{background:#fff;color:var(--ink-900);box-shadow:0 1px 3px rgba(15,30,71,.12)}
-.tri button.on[data-v="1"]{color:#15803D}.tri button.on[data-v="0"]{color:#B91C1C}
+.tri button.on[data-v="1"]{color:var(--grn-700)}.tri button.on[data-v="0"]{color:var(--red-700)}
 .tri button:disabled,.cp-num:disabled{opacity:.55;cursor:not-allowed}
 @media (max-width:1280px){ .cp-grid{grid-template-columns:1fr} }
 @media (max-width:520px){ .cp-row{flex-wrap:wrap} .cp-num{width:100%} }
 
 /* AI: рядки з перемикачами */
 .tp-ai{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.tp-src{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#F1F4FA;color:var(--ink-500);margin-left:8px;vertical-align:2px}
-.tp-src.custom{background:#FEF3C7;color:#B45309}
+.tp-src{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--sf-2);color:var(--ink-500);margin-left:8px;vertical-align:2px}
+.tp-src.custom{background:var(--amb-100);color:var(--amb-700)}
 
 /* Порожні стани і скелетон */
 
@@ -141,7 +141,7 @@
 }
 @media (max-width:520px){
   .tp-hero .tc-ava{width:56px;height:56px;font-size:18px;border-radius:16px}
-  .tp-hi h2{font-size:19px}
+  .tp-hi h2{font-size:18px}
   .tp-acts .tb-btn{flex:1;justify-content:center}
 }
 
@@ -157,7 +157,7 @@
 .field input:focus,
 .field select:focus,
 .field-input:focus{
-  border-color:#7C3AED; box-shadow:0 0 0 3px rgba(124,58,237,.12);
+  border-color:var(--v-500); box-shadow:0 0 0 3px rgba(124,58,237,.12);
 }
 
 .role-check-list{
@@ -168,40 +168,40 @@
   display:flex; align-items:center; gap:9px; padding:6px 8px; border-radius:8px; cursor:pointer;
   transition:background .12s;
 }
-.role-check-row:hover{background:#FAFBFE}
-.role-check-row input{width:15px; height:15px; accent-color:#7C3AED; cursor:pointer; flex:0 0 auto}
+.role-check-row:hover{background:var(--sf-1)}
+.role-check-row input{width:15px; height:15px; accent-color:var(--v-500); cursor:pointer; flex:0 0 auto}
 .role-check-dot{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
 .role-check-row span.rn{font-size:13px; font-weight:600; color:var(--ink-900)}
-.role-check-empty{padding:10px 4px; font-size:12.5px; color:var(--ink-500)}
+.role-check-empty{padding:10px 4px; font-size:13px; color:var(--ink-500)}
 
 .pass-box{
-  background:linear-gradient(135deg, #F5F3FF, #EDE9FE);
-  border:1.5px solid #DDD6FE; border-radius:12px;
+  background:linear-gradient(135deg, var(--v-50), var(--v-100));
+  border:1.5px solid var(--v-200); border-radius:12px;
   padding:14px 16px; margin-top:12px;
 }
-.pass-lbl{font-size:11px; color:#6D28D9; text-transform:uppercase; letter-spacing:.07em; font-weight:700; margin-bottom:8px}
+.pass-lbl{font-size:11px; color:var(--v-600); text-transform:uppercase; letter-spacing:.07em; font-weight:700; margin-bottom:8px}
 .pass-val{
   font-family:"Geist Mono",monospace; font-size:18px; font-weight:700;
-  color:#0B1437; padding:10px 14px;
-  background:#fff; border:1px solid #DDD6FE; border-radius:8px;
+  color:var(--ink-900); padding:10px 14px;
+  background:#fff; border:1px solid var(--v-200); border-radius:8px;
   text-align:center; letter-spacing:.04em;
   word-break:break-all;
 }
-.pass-note{font-size:11.5px; color:var(--ink-500); margin-top:10px; line-height:1.5}
-.wl-row{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#FAFBFE}
-.wl-row b{display:block;font-size:13.5px;color:var(--ink-900)}
+.pass-note{font-size:12px; color:var(--ink-500); margin-top:10px; line-height:1.5}
+.wl-row{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sf-1)}
+.wl-row b{display:block;font-size:14px;color:var(--ink-900)}
 .wl-row span{font-size:12px;color:var(--ink-500);line-height:1.5}
-.wl-st{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;border-radius:10px;font-size:12.5px;font-weight:700;line-height:1.45}
+.wl-st{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;border-radius:10px;font-size:13px;font-weight:700;line-height:1.45}
 .wl-st span{flex:1;min-width:0;overflow-wrap:anywhere}
-.wl-st.ok{background:#F0FDF4;border:1px solid #BBF7D0;color:#15803D}
-.wl-st.err{background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C}
-.wl-st.wait{background:#F4F6FB;border:1px solid var(--line);color:var(--ink-500)}
+.wl-st.ok{background:#F0FDF4;border:1px solid var(--grn-200);color:var(--grn-700)}
+.wl-st.err{background:var(--red-50);border:1px solid var(--red-200);color:var(--red-700)}
+.wl-st.wait{background:var(--bg);border:1px solid var(--line);color:var(--ink-500)}
 
 .mod-err{
   background:rgba(220,38,38,.06);
   border:1px solid rgba(220,38,38,.18);
   border-radius:8px; padding:9px 12px;
-  color:#B91C1C; font-size:12.5px; font-weight:600;
+  color:var(--red-700); font-size:13px; font-weight:600;
   display:none;
 }
 .mod-err.show{display:block; animation:cardIn .2s ease}
@@ -210,15 +210,15 @@
 /* AI feature row */
 .feat-row{
   display:flex; align-items:center; justify-content:space-between;
-  padding:11px 14px; background:#FAFBFE; border:1px solid var(--line); border-radius:11px;
+  padding:11px 14px; background:var(--sf-1); border:1px solid var(--line); border-radius:11px;
 }
 .feat-row-l{display:flex; align-items:center; gap:11px; flex:1; min-width:0}
 .feat-icon{
   width:34px; height:34px; border-radius:10px; flex:0 0 auto;
   display:grid; place-items:center;
 }
-.feat-name{font-weight:700; font-size:13.5px; line-height:1.2}
-.feat-desc{font-size:11.5px; color:var(--ink-500); margin-top:2px}
+.feat-name{font-weight:700; font-size:14px; line-height:1.2}
+.feat-desc{font-size:12px; color:var(--ink-500); margin-top:2px}
 
 /* Toggle switch */
 .toggle-sw{position:relative; display:inline-block; width:38px; height:22px; flex:0 0 auto}
@@ -227,14 +227,14 @@
 .toggle-sw input:disabled + .toggle-sl{opacity:.6}
 .toggle-sl{
   position:absolute; inset:0; cursor:pointer;
-  background:#E3E8F2; border-radius:99px; transition:background .2s;
+  background:var(--line); border-radius:99px; transition:background .2s;
 }
 .toggle-sl::before{
   content:""; position:absolute; top:2px; left:2px;
   width:18px; height:18px; border-radius:50%; background:#fff;
   box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .2s;
 }
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg, #7C3AED, #4F46E5)}
+.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg, var(--v-500), var(--ind-600))}
 .toggle-sw input:checked + .toggle-sl::before{transform:translateX(16px)}
 
 /* AI source indicator */
@@ -242,7 +242,7 @@
   background:linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.04));
   border:1.5px solid rgba(245,158,11,.25);
   border-radius:11px; padding:10px 14px;
-  font-size:13px; color:#B45309;
+  font-size:13px; color:var(--amb-700);
   display:none; align-items:center; gap:8px;
 }
 .ai-source-info.show{display:flex}
@@ -253,12 +253,12 @@
   width:56px; height:56px; margin:0 auto 14px; border-radius:15px;
   display:grid; place-items:center;
 }
-.confirm-icon.violet{background:linear-gradient(135deg, #EDE9FE, #DDD6FE); color:#6D28D9; border:1.5px solid #C4B5FD}
-.confirm-icon.green{background:linear-gradient(135deg, #DCFCE7, #BBF7D0); color:#15803D; border:1.5px solid #86EFAC}
-.confirm-icon.red{background:linear-gradient(135deg, #FEE2E2, #FECACA); color:#B91C1C; border:1.5px solid #FCA5A5}
+.confirm-icon.violet{background:linear-gradient(135deg, var(--v-100), var(--v-200)); color:var(--v-600); border:1.5px solid var(--v-300)}
+.confirm-icon.green{background:linear-gradient(135deg, var(--grn-100), var(--grn-200)); color:var(--grn-700); border:1.5px solid #86EFAC}
+.confirm-icon.red{background:linear-gradient(135deg, var(--red-100), var(--red-200)); color:var(--red-700); border:1.5px solid #FCA5A5}
 
 .confirm-title{font-size:18px; font-weight:800; letter-spacing:-.01em; text-align:center}
-.confirm-desc{font-size:13.5px; color:var(--ink-500); text-align:center; margin:8px 0 22px; line-height:1.5}
+.confirm-desc{font-size:14px; color:var(--ink-500); text-align:center; margin:8px 0 22px; line-height:1.5}
 .confirm-desc strong{color:var(--ink-900)}
 
 .delete-warn{
@@ -269,10 +269,10 @@
 .delete-warn .head{font-size:13px; color:var(--ink-700); margin-bottom:4px}
 .delete-warn .head strong{color:var(--ink-900)}
 .delete-warn .head .login{font-family:"Geist Mono",monospace; color:var(--ink-500); font-size:12px}
-.delete-warn .list{font-size:12px; color:#B91C1C; margin-top:10px; line-height:1.6}
+.delete-warn .list{font-size:12px; color:var(--red-700); margin-top:10px; line-height:1.6}
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
 <style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
@@ -280,7 +280,7 @@
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-modals">
 
@@ -375,7 +375,7 @@
         <div class="pass-box" id="reset-box" style="display:none;text-align:left">
           <div style="display:flex;align-items:center;gap:10px">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
-            <span style="font-weight:700;color:#16A34A;font-size:13.5px">Лист надіслано!</span>
+            <span style="font-weight:700;color:#16A34A;font-size:14px">Лист надіслано!</span>
           </div>
           <div style="font-size:13px;color:var(--ink-500);margin-top:6px">Перевірте папку «Вхідні» та «Спам».</div>
         </div>
@@ -469,7 +469,7 @@
 
 <script type="module">
 import { resolveCaps, CAP_FLAGS, CAP_LIMITS, monthKey } from "./shared/caps.js?v=3";
-import { logAction, initAdminShell, loadAllTeachers, cachedTeachers, esc, formatTimeAgo, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, genPass, hideLoader, mailApi, mailWorkerUrl, filterSheet } from "./shared/admin-shell.js?v=19";
+import { logAction, initAdminShell, loadAllTeachers, cachedTeachers, esc, formatTimeAgo, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, genPass, hideLoader, mailApi, mailWorkerUrl, filterSheet } from "./shared/admin-shell.js?v=20";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const IC = {

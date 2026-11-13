@@ -13,7 +13,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 .lg-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .lg-bar .search-input{flex:1;min-width:220px;max-width:380px}
@@ -21,44 +21,44 @@
 .lg-bar select{min-width:200px}
 .lg-meta{margin-left:auto;font:600 12px "Geist Mono",monospace;color:var(--ink-400)}
 .lg-cats{display:flex;gap:6px;flex-wrap:wrap}
-.lg-cats button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;border:1px solid var(--line);background:#fff;font:700 12.5px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer}
+.lg-cats button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;border:1px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer}
 .lg-cats button i{width:7px;height:7px;border-radius:50%}
 .lg-cats button b{font-family:"Geist Mono",monospace;color:var(--ink-400)}
 .lg-cats button.on{background:var(--ink-900);border-color:var(--ink-900);color:#fff}
 .lg-cats button.on b{color:rgba(255,255,255,.7)}
 .lg-list{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.lg-day{padding:10px 20px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);background:#FAFBFE;border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
+.lg-day{padding:10px 20px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);background:var(--sf-1);border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
 .lg-day:first-child{border-top:0}
 .lg-row{display:flex;align-items:flex-start;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line)}
 .lg-row:last-child{border-bottom:0}
-.lg-ic{--c:#6D28D9;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--c)}
+.lg-ic{--c:var(--v-600);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--c)}
 .lg-ic svg{width:16px;height:16px}
 .lg-i{flex:1;min-width:0}
-.lg-t{font-size:13.5px;color:var(--ink-700);line-height:1.5}
+.lg-t{font-size:14px;color:var(--ink-700);line-height:1.5}
 .lg-t b{color:var(--ink-900);font-weight:800}
-.lg-t a{color:#6D28D9;font-weight:700;text-decoration:none}
+.lg-t a{color:var(--v-600);font-weight:700;text-decoration:none}
 .lg-t a:hover{text-decoration:underline}
-.lg-d{font-size:12.5px;color:var(--ink-500);margin-top:2px;overflow-wrap:anywhere}
+.lg-d{font-size:13px;color:var(--ink-500);margin-top:2px;overflow-wrap:anywhere}
 .lg-time{font:600 12px "Geist Mono",monospace;color:var(--ink-400);white-space:nowrap;padding-top:2px}
 .lg-empty{padding:48px 20px;text-align:center;color:var(--ink-500);font-size:13px}
-.lg-empty b{display:block;font-size:15px;color:var(--ink-900);margin-bottom:4px}
+.lg-empty b{display:block;font-size:16px;color:var(--ink-900);margin-bottom:4px}
 .lg-more{display:flex;justify-content:center;padding:14px}
 @media (max-width:640px){ .lg-row{padding:12px 14px;gap:10px} .lg-day{padding:10px 14px} .lg-bar select{min-width:0;flex:1} .lg-meta{margin-left:0} }
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { initAdminShell, db, ref, esc, hideLoader, toast, filterSheet } from "./shared/admin-shell.js?v=19";
+import { initAdminShell, db, ref, esc, hideLoader, toast, filterSheet } from "./shared/admin-shell.js?v=20";
 import { get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;

@@ -8,17 +8,17 @@
 <link rel="apple-touch-icon" href="/assets/icons/admin/apple-touch-icon.png?v=3">
 <link rel="manifest" href="/assets/icons/admin/site.webmanifest?v=4">
 <title>QuizFlow Admin · Проблеми</title>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 /* ═══ Плитки-фільтри ═══ */
 .pb-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 16px}
 .pb-tile{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);cursor:pointer;font:inherit;color:inherit;text-align:left;transition:border-color .15s,box-shadow .15s,transform .15s}
 .pb-tile:hover{border-color:var(--line-strong);transform:translateY(-1px)}
-.pb-tile.on{border-color:#A78BFA;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.pb-tile.on{border-color:var(--v-400);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 .pb-tile .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto}
 .pb-tile .ico svg{width:19px;height:19px}
-.pb-tile.red .ico{background:#FEE2E2;color:#B91C1C}.pb-tile.amber .ico{background:#FEF3C7;color:#B45309}
-.pb-tile.rose .ico{background:#FFE4E6;color:#BE123C}.pb-tile.green .ico{background:#DCFCE7;color:#15803D}
+.pb-tile.red .ico{background:var(--red-100);color:var(--red-700)}.pb-tile.amber .ico{background:var(--amb-100);color:var(--amb-700)}
+.pb-tile.rose .ico{background:#FFE4E6;color:#BE123C}.pb-tile.green .ico{background:var(--grn-100);color:var(--grn-700)}
 .pb-tile .v{display:block;font-family:"Geist Mono",monospace;font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1}
 .pb-tile .l{display:block;font-size:12px;color:var(--ink-500);font-weight:600;margin-top:4px}
 .pb-tile.rose.hot{border-color:#FDA4AF;background:#FFF7F8}
@@ -29,31 +29,31 @@
 .pb-search{position:relative;flex:0 1 300px;min-width:200px}
 .pb-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-400);pointer-events:none}
 .pb-search input{width:100%;height:38px;border:1px solid var(--line);border-radius:10px;padding:0 12px 0 34px;font:inherit;font-size:13px;color:var(--ink-900);outline:none;background:#fff;transition:border-color .15s,box-shadow .15s}
-.pb-search input:focus{border-color:#A78BFA;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.pb-search input:focus{border-color:var(--v-400);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 .seg{display:inline-flex;background:#EEEBF8;border-radius:10px;padding:3px;gap:2px}
-.seg button{height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--ink-500);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.seg button{height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--ink-500);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .seg button:hover:not(.on){color:var(--ink-900)}
 .seg button.on{background:#fff;color:var(--ink-900);box-shadow:0 1px 3px rgba(11,20,55,.1)}
 .seg button i{font-style:normal;font-family:"Geist Mono",monospace;font-size:11px;opacity:.6}
 .chip-t{height:38px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:13px;font-weight:700;color:var(--ink-700);cursor:pointer}
-.chip-t.on{background:#F5F3FF;border-color:#C4B5FD;color:#5B21B6}
+.chip-t.on{background:var(--v-50);border-color:var(--v-300);color:var(--v-700)}
 .pb-bar .grow{flex:1}
-.pb-reset{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:#6D28D9;cursor:pointer;padding:6px 8px;border-radius:8px}
-.pb-reset:hover{background:#F5F3FF}
+.pb-reset{border:0;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--v-600);cursor:pointer;padding:6px 8px;border-radius:8px}
+.pb-reset:hover{background:var(--v-50)}
 
 /* ═══ Kanban ═══ */
 .kb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start;padding-bottom:40px}
-.kb-col{border-radius:18px;background:#F7F8FC;border:1px solid var(--line);display:flex;flex-direction:column;min-width:0;transition:border-color .15s,background .15s}
-.kb-col.over{border-color:#A78BFA;background:#F5F3FF}
+.kb-col{border-radius:18px;background:var(--sf-3);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0;transition:border-color .15s,background .15s}
+.kb-col.over{border-color:var(--v-400);background:var(--v-50)}
 .kb-head{display:flex;align-items:center;gap:9px;padding:14px 16px 10px}
 .kb-head b{font-size:13px;font-weight:800;flex:1}
 .kb-head .pip{width:9px;height:9px;border-radius:50%;background:var(--c)}
-.kb-head .n{font-family:"Geist Mono",monospace;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink-500)}
+.kb-head .n{font-family:"Geist Mono",monospace;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink-500)}
 .kb-add{border:0;background:transparent;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--ink-400);cursor:pointer}
-.kb-add:hover{background:#fff;color:#6D28D9}
+.kb-add:hover{background:#fff;color:var(--v-600)}
 .kb-body{padding:4px 10px 12px;display:flex;flex-direction:column;gap:8px;min-height:90px}
-.kb-empty{padding:22px 12px;text-align:center;font-size:12.5px;color:var(--ink-400);border:1.5px dashed #DCE1EC;border-radius:12px}
-.kb-more{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:#6D28D9;cursor:pointer;padding:8px;border-radius:9px}
+.kb-empty{padding:22px 12px;text-align:center;font-size:13px;color:var(--ink-400);border:1.5px dashed #DCE1EC;border-radius:12px}
+.kb-more{border:0;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--v-600);cursor:pointer;padding:8px;border-radius:9px}
 .kb-more:hover{background:#fff}
 
 .pcard{position:relative;background:#fff;border:1px solid #E6EAF3;border-radius:14px;padding:12px 13px;cursor:pointer;box-shadow:0 1px 2px rgba(11,20,55,.04);transition:box-shadow .15s,border-color .15s,transform .15s;outline:none}
@@ -62,81 +62,81 @@
 .pcard.dragging{opacity:.4}
 .pcard.late{border-left:3px solid #E11D48}
 .c-top{display:flex;align-items:center;gap:6px;margin-bottom:7px;padding-right:26px}
-.badge{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px}
-.b-bug{background:#FEE2E2;color:#B91C1C}.b-idea{background:#DCFCE7;color:#15803D}.b-task{background:#EDE9FE;color:#6D28D9}
+.badge{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px}
+.b-bug{background:var(--red-100);color:var(--red-700)}.b-idea{background:var(--grn-100);color:var(--grn-700)}.b-task{background:var(--v-100);color:var(--v-600)}
 .prio{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-500)}
 .prio::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--p)}
 .c-menu{position:absolute;top:8px;right:8px;width:26px;height:26px;border:0;border-radius:7px;background:transparent;color:var(--ink-400);cursor:pointer;display:grid;place-items:center;opacity:0;transition:opacity .12s}
 .pcard:hover .c-menu,.pcard:focus-within .c-menu,.c-menu.open{opacity:1}
-.c-menu:hover{background:#F4F6FB;color:var(--ink-900)}
-.c-title{font-size:13.5px;font-weight:700;color:var(--ink-900);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
-.c-meta{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:8px;font-size:11.5px;color:var(--ink-400);font-weight:600}
+.c-menu:hover{background:var(--bg);color:var(--ink-900)}
+.c-title{font-size:14px;font-weight:700;color:var(--ink-900);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.c-meta{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:8px;font-size:12px;color:var(--ink-400);font-weight:600}
 .c-meta span{display:inline-flex;align-items:center;gap:4px;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c-meta svg{flex:0 0 auto}
 .c-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid #F1F3F9}
 .who{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink-500);min-width:0}
 .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:9.5px;font-weight:800;color:#fff;flex:0 0 auto}
+.av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex:0 0 auto}
 .av.none{background:#EEF1F7;color:var(--ink-400)}
 .dl{font-family:"Geist Mono",monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
-.dl.ok{background:#EEF1F7;color:var(--ink-500)}.dl.soon{background:#FEF3C7;color:#92400E}.dl.late{background:#FFE4E6;color:#BE123C}.dl.done{background:#DCFCE7;color:#15803D}
+.dl.ok{background:#EEF1F7;color:var(--ink-500)}.dl.soon{background:var(--amb-100);color:#92400E}.dl.late{background:#FFE4E6;color:#BE123C}.dl.done{background:var(--grn-100);color:var(--grn-700)}
 @media (max-width:1000px){.kb{grid-template-columns:1fr}}
 
 /* ═══ Меню картки ═══ */
 .pop{position:fixed;z-index:300;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:0 12px 32px rgba(11,20,55,.16);animation:popIn .12s ease}
 @keyframes popIn{from{opacity:0;transform:translateY(-4px)}}
-.pop-h{padding:6px 10px 4px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-400)}
+.pop-h{padding:6px 10px 4px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-400)}
 .pop button{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--ink-900);cursor:pointer;text-align:left}
-.pop button:hover,.pop button.kb{background:#F4F6FB}
+.pop button:hover,.pop button.kb{background:var(--bg)}
 .pop button:disabled{opacity:.4;cursor:default;background:transparent}
-.pop button.danger{color:#B91C1C}.pop button.danger:hover{background:#FEE2E2}
+.pop button.danger{color:var(--red-700)}.pop button.danger:hover{background:var(--red-100)}
 .pop hr{border:0;border-top:1px solid #F1F3F9;margin:4px 0}
 .pop .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
 
 /* ═══ Модалка деталей ═══ */
 .modal.wide{max-width:640px}
 .it-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.it-id{font-family:"Geist Mono",monospace;font-size:11.5px;color:var(--ink-400)}
-.it-msg{padding:12px 14px;border-radius:12px;background:#F7F8FC;border:1px solid var(--line);font-size:14px;line-height:1.6;color:var(--ink-900);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto}
+.it-id{font-family:"Geist Mono",monospace;font-size:12px;color:var(--ink-400)}
+.it-msg{padding:12px 14px;border-radius:12px;background:var(--sf-3);border:1px solid var(--line);font-size:14px;line-height:1.6;color:var(--ink-900);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto}
 .it-rep{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
 .it-rep .av{width:34px;height:34px;font-size:12px}
-.it-rep b{display:block;font-size:13.5px}
+.it-rep b{display:block;font-size:14px}
 .it-rep span{font-size:12px;color:var(--ink-500)}
-.it-rep .pg{margin-left:auto;font-family:"Geist Mono",monospace;font-size:11.5px;color:var(--ink-500);background:#F4F6FB;padding:3px 8px;border-radius:7px}
+.it-rep .pg{margin-left:auto;font-family:"Geist Mono",monospace;font-size:12px;color:var(--ink-500);background:var(--bg);padding:3px 8px;border-radius:7px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s;box-sizing:border-box}
-.field-input:focus{border-color:#A78BFA;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.field-input:focus{border-color:var(--v-400);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 textarea.field-input{resize:vertical;min-height:72px;line-height:1.5}
 .seg.full{display:flex}.seg.full button{flex:1;justify-content:center}
 .seg button .dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
-.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:#B91C1C;font-size:12.5px;font-weight:600}
+.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:var(--red-700);font-size:13px;font-weight:600}
 .mod-err:empty{display:none}
 .modal-f .spacer{flex:1}
-.modal-f .hint{font-size:11.5px;color:var(--ink-400);font-family:"Geist Mono",monospace;align-self:center}
+.modal-f .hint{font-size:12px;color:var(--ink-400);font-family:"Geist Mono",monospace;align-self:center}
 
 /* Дропдаун «Відповідальний» */
 .dd{position:relative}
 .dd-btn{width:100%;height:42px;display:flex;align-items:center;gap:9px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:14px;color:var(--ink-900);cursor:pointer;text-align:left}
-.dd-btn:hover,.dd-btn.open{border-color:#A78BFA}
+.dd-btn:hover,.dd-btn.open{border-color:var(--v-400)}
 .dd-btn .ph{color:var(--ink-400)}
 .dd-btn .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dd-btn svg{color:var(--ink-400);flex:0 0 auto}
 .dd-pop{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:5;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(11,20,55,.14);padding:5px}
 .dd-pop input{width:100%;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font:inherit;font-size:13px;outline:none;margin-bottom:4px;box-sizing:border-box}
-.dd-pop input:focus{border-color:#A78BFA}
+.dd-pop input:focus{border-color:var(--v-400)}
 .dd-list{max-height:210px;overflow:auto}
 .dd-it{width:100%;display:flex;align-items:center;gap:9px;padding:7px 9px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:left;color:var(--ink-900)}
-.dd-it:hover,.dd-it.on{background:#F5F3FF}
+.dd-it:hover,.dd-it.on{background:var(--v-50)}
 .dd-it small{display:block;font-size:11px;color:var(--ink-400);font-weight:500}
-.dd-empty{padding:12px;text-align:center;font-size:12.5px;color:var(--ink-400)}
+.dd-empty{padding:12px;text-align:center;font-size:13px;color:var(--ink-400)}
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 
 <!-- Деталі / редагування -->
@@ -165,7 +165,7 @@ textarea.field-input{resize:vertical;min-height:72px;line-height:1.5}
 </div>
 
 <script type="module">
-import { logAction, initAdminShell, esc, formatTimeAgo, toast, hideLoader, openModal, closeModal, db, ref, update, remove, onValue, get, filterSheet } from "./shared/admin-shell.js?v=19";
+import { logAction, initAdminShell, esc, formatTimeAgo, toast, hideLoader, openModal, closeModal, db, ref, update, remove, onValue, get, filterSheet } from "./shared/admin-shell.js?v=20";
 import { push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // ─── Довідники ─────────────────────────────────────────────────────────

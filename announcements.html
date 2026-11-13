@@ -13,38 +13,38 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 /* Плашка оголошення (такий самий вигляд, як у панелі викладача) */
-.qf-ann{--c:#1D4ED8;--bg:#EFF6FF;--ln:#BFDBFE;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln);color:#0B1437;font-family:"Manrope",system-ui,sans-serif;text-align:left}
-.qf-ann.success{--c:#15803D;--bg:#F0FDF4;--ln:#BBF7D0}
-.qf-ann.warning{--c:#B45309;--bg:#FFFBEB;--ln:#FDE68A}
-.qf-ann.critical{--c:#B91C1C;--bg:#FEF2F2;--ln:#FECACA}
+.qf-ann{--c:#1D4ED8;--bg:#EFF6FF;--ln:#BFDBFE;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln);color:var(--ink-900);font-family:"Manrope",system-ui,sans-serif;text-align:left}
+.qf-ann.success{--c:var(--grn-700);--bg:#F0FDF4;--ln:var(--grn-200)}
+.qf-ann.warning{--c:var(--amb-700);--bg:#FFFBEB;--ln:var(--amb-200)}
+.qf-ann.critical{--c:var(--red-700);--bg:var(--red-50);--ln:var(--red-200)}
 .qf-ann-ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;background:#fff;color:var(--c);box-shadow:inset 0 0 0 1px var(--ln)}
 .qf-ann-ic svg{width:17px;height:17px}
 .qf-ann-b{flex:1;min-width:0;padding-top:1px}
-.qf-ann-t{font-size:14px;font-weight:800;color:#0B1437;line-height:1.35}
-.qf-ann-x{font-size:13.5px;color:#34405E;line-height:1.5;margin-top:2px;white-space:pre-line;overflow-wrap:anywhere}
+.qf-ann-t{font-size:14px;font-weight:800;color:var(--ink-900);line-height:1.35}
+.qf-ann-x{font-size:14px;color:#34405E;line-height:1.5;margin-top:2px;white-space:pre-line;overflow-wrap:anywhere}
 .qf-ann-a{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;font-weight:700;color:var(--c);text-decoration:none}
 .qf-ann-a:hover{text-decoration:underline}
 .qf-ann-close{width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:#5B6A8F;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-.qf-ann-close:hover{background:rgba(11,20,55,.06);color:#0B1437}
+.qf-ann-close:hover{background:rgba(11,20,55,.06);color:var(--ink-900)}
 .qf-ann-close svg{width:14px;height:14px}
 .field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.field-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.field-l{font-size:12.5px;font-weight:700;color:var(--ink-700)}
-.field-h{font-size:11.5px;color:var(--ink-400)}
+.field-l{font-size:13px;font-weight:700;color:var(--ink-700)}
+.field-h{font-size:12px;color:var(--ink-400)}
 .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
 /* Перемикач */
 .toggle-sw{position:relative;display:inline-block;width:40px;height:23px;flex:0 0 auto}
 .toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
-.toggle-sl{position:absolute;inset:0;background:#E3E8F2;border-radius:99px;transition:background .2s}
+.toggle-sl{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:background .2s}
 .toggle-sl::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,#7C3AED,#4F46E5)}
-.toggle-sw.red input:checked + .toggle-sl{background:linear-gradient(135deg,#EF4444,#B91C1C)}
+.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,var(--v-500),var(--ind-600))}
+.toggle-sw.red input:checked + .toggle-sl{background:linear-gradient(135deg,#EF4444,var(--red-700))}
 .toggle-sw input:checked + .toggle-sl::before{transform:translateX(17px)}
 .toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
 .toggle-sw input:disabled + .toggle-sl{opacity:.6}
@@ -53,38 +53,38 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 .mt{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:18px}
 .mt.on{border-color:#FCA5A5;box-shadow:0 0 0 3px rgba(239,68,68,.08)}
 .mt-h{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
-.mt.on .mt-h{background:linear-gradient(180deg,#FEF2F2,#fff)}
-.mt-ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#F1F4FA;color:var(--ink-500);flex:0 0 auto}
-.mt.on .mt-ic{background:#FEE2E2;color:#B91C1C}
+.mt.on .mt-h{background:linear-gradient(180deg,var(--red-50),#fff)}
+.mt-ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--sf-2);color:var(--ink-500);flex:0 0 auto}
+.mt.on .mt-ic{background:var(--red-100);color:var(--red-700)}
 .mt-ic svg{width:22px;height:22px}
 .mt-h h2{font-size:16px;font-weight:800;margin:0}
-.mt-h p{font-size:12.5px;color:var(--ink-500);margin:3px 0 0}
-.mt-st{margin-left:auto;font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;background:#DCFCE7;color:#15803D;white-space:nowrap}
-.mt.on .mt-st{background:#FEE2E2;color:#B91C1C}
+.mt-h p{font-size:13px;color:var(--ink-500);margin:3px 0 0}
+.mt-st{margin-left:auto;font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;background:var(--grn-100);color:var(--grn-700);white-space:nowrap}
+.mt.on .mt-st{background:var(--red-100);color:var(--red-700)}
 .mt-b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;padding:18px 22px}
 .mt-sws{display:flex;flex-direction:column;gap:8px}
-.mt-sw{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#FAFBFE}
-.mt-sw.on{background:#FEF2F2;border-color:#FECACA}
+.mt-sw{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sf-1)}
+.mt-sw.on{background:var(--red-50);border-color:var(--red-200)}
 .mt-sw .i{flex:1;min-width:0}
-.mt-sw b{display:block;font-size:13.5px;color:var(--ink-900)}
+.mt-sw b{display:block;font-size:14px;color:var(--ink-900)}
 .mt-sw span{font-size:12px;color:var(--ink-500)}
 .mt-msg{display:flex;flex-direction:column;gap:8px}
 .mt-f{display:flex;justify-content:flex-end;gap:8px;padding:0 22px 18px}
 
 /* Список оголошень */
 .an-it{display:flex;align-items:flex-start;gap:11px;width:100%;padding:10px;border-radius:12px;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:background .12s}
-.an-it:hover{background:#F7F8FC}
-.an-it.on{background:#F5F3FF;box-shadow:inset 0 0 0 1px #DDD6FE}
+.an-it:hover{background:var(--sf-3)}
+.an-it.on{background:var(--v-50);box-shadow:inset 0 0 0 1px var(--v-200)}
 .an-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:0 0 auto;background:#3B82F6}
 .an-dot.success{background:#22C55E}.an-dot.warning{background:#F59E0B}.an-dot.critical{background:#EF4444}
 .an-i{flex:1;min-width:0}
-.an-t{font-size:13.5px;font-weight:800;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.an-t{font-size:14px;font-weight:800;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .an-m{font-size:12px;color:var(--ink-400);font-weight:600;margin-top:3px}
-.an-st{font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:6px;white-space:nowrap;flex:0 0 auto;margin-top:1px}
-.an-st.live{background:#DCFCE7;color:#15803D}
+.an-st{font-size:11px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:6px;white-space:nowrap;flex:0 0 auto;margin-top:1px}
+.an-st.live{background:var(--grn-100);color:var(--grn-700)}
 .an-st.plan{background:#E0E7FF;color:#4338CA}
-.an-st.past{background:#F1F4FA;color:var(--ink-400)}
-.an-st.off{background:#F1F4FA;color:var(--ink-400)}
+.an-st.past{background:var(--sf-2);color:var(--ink-400)}
+.an-st.off{background:var(--sf-2);color:var(--ink-400)}
 
 /* Редактор */
 .an-form{display:flex;flex-direction:column;gap:14px}
@@ -93,24 +93,24 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 .lv button i{width:9px;height:9px;border-radius:50%}
 .lv button.on{border-color:var(--ink-900);color:var(--ink-900);box-shadow:inset 0 0 0 1px var(--ink-900)}
 .aud-roles{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.aud-roles button{--rc:#7C3AED;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font:700 12.5px "Manrope",sans-serif;color:var(--ink-700);cursor:pointer}
+.aud-roles button{--rc:var(--v-500);display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-700);cursor:pointer}
 .aud-roles button i{width:8px;height:8px;border-radius:50%;background:var(--rc)}
 .aud-roles button.on{border-color:var(--rc);background:color-mix(in srgb,var(--rc) 10%,#fff);color:var(--ink-900)}
-.an-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#FAFBFE}
-.an-row b{display:block;font-size:13.5px;color:var(--ink-900)}
+.an-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sf-1)}
+.an-row b{display:block;font-size:14px;color:var(--ink-900)}
 .an-row span{font-size:12px;color:var(--ink-500)}
-.an-prev{background:#F4F6FB;border:1px dashed var(--line-strong);border-radius:14px;padding:14px}
-.an-prev-l{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:8px}
+.an-prev{background:var(--bg);border:1px dashed var(--line-strong);border-radius:14px;padding:14px}
+.an-prev-l{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:8px}
 .an-foot{display:flex;gap:8px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--line);background:#FCFCFE}
 .an-foot .sp{flex:1}
-.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:#B91C1C;font-size:12.5px;font-weight:600;display:none}
+.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:var(--red-700);font-size:13px;font-weight:600;display:none}
 .mod-err.show{display:block}
 
 @media (max-width:1180px){ .mt-b{grid-template-columns:1fr} }
 @media (max-width:640px){ .f-grid{grid-template-columns:1fr} .mt-h{flex-wrap:wrap} .mt-st{margin-left:0} .an-foot{flex-wrap:wrap} .an-foot .tb-btn{flex:1;justify-content:center} .an-foot .sp{display:none} }
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
@@ -119,7 +119,7 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -129,7 +129,7 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
       <h3>Видалити оголошення?</h3>
       <button class="close" type="button" onclick="closeModal('m-del')" aria-label="Закрити"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div class="modal-b"><div style="font-size:13.5px;color:var(--ink-500);line-height:1.5">Оголошення «<b id="del-t" style="color:var(--ink-900)"></b>» зникне в усіх викладачів. Цю дію не можна скасувати.</div></div>
+    <div class="modal-b"><div style="font-size:14px;color:var(--ink-500);line-height:1.5">Оголошення «<b id="del-t" style="color:var(--ink-900)"></b>» зникне в усіх викладачів. Цю дію не можна скасувати.</div></div>
     <div class="modal-f">
       <button class="tb-btn" type="button" onclick="closeModal('m-del')">Скасувати</button>
       <button class="tb-btn danger" type="button" id="del-ok">Видалити</button>
@@ -138,7 +138,7 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 </div>
 
 <script type="module">
-import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=19";
+import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=20";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const sm = (svg, w = 14) => svg.replace("<svg", `<svg width="${w}" height="${w}"`);
@@ -257,8 +257,8 @@ function render(){
   if (!ids.length && _selId !== "new"){
     root.innerHTML = `<div class="rl-start" style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:40px 24px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 14px;border-radius:16px;background:#EDE9FE;color:#6D28D9;display:grid;place-items:center">${sm(IC.ann, 26)}</div>
-      <h2 style="font-size:19px;font-weight:800;margin:0 0 6px">Оголошень ще немає</h2>
-      <p style="font-size:13.5px;color:var(--ink-500);margin:0 auto 18px;max-width:480px;line-height:1.55">Плашка з'являється вгорі панелі у викладачів: про оновлення, нову функцію чи планові роботи. Можна задати дати показу й обрати, для яких ролей.</p>
+      <h2 style="font-size:18px;font-weight:800;margin:0 0 6px">Оголошень ще немає</h2>
+      <p style="font-size:14px;color:var(--ink-500);margin:0 auto 18px;max-width:480px;line-height:1.55">Плашка з'являється вгорі панелі у викладачів: про оновлення, нову функцію чи планові роботи. Можна задати дати показу й обрати, для яких ролей.</p>
       <button class="tb-btn primary" type="button" data-new>${sm(IC.plus)} Створити оголошення</button></div>`;
     return;
   }

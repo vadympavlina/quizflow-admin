@@ -13,32 +13,32 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 .row-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .row-mix{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px}
 @media (max-width:1280px){.row-mix{grid-template-columns:1fr}}
 @media (max-width:1000px){.row-2{grid-template-columns:1fr}}
 .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
-.seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--ink-500);padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
-.seg button.on{background:#F3EEFF;color:#6D28D9}
+.seg button{border:0;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--ink-500);padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:#F3EEFF;color:var(--v-600)}
 .st-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.st-bar .hint{font-size:12.5px;color:var(--ink-500)}
+.st-bar .hint{font-size:13px;color:var(--ink-500)}
 .kpi-grid.five{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media (max-width:1280px){.kpi-grid.five{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:1023px){.kpi-grid.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi .kpi-v{font-size:28px}
 .kpi-l i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
-.delta{font-family:"Geist Mono",monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:#EEF2FB;color:var(--ink-500);white-space:nowrap}
-.delta.up{background:#DCFCE7;color:#15803D}.delta.down{background:#FEE2E2;color:#B91C1C}
+.delta{font-family:"Geist Mono",monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--sf-4);color:var(--ink-500);white-space:nowrap}
+.delta.up{background:var(--grn-100);color:var(--grn-700)}.delta.down{background:var(--red-100);color:var(--red-700)}
 .card-h{flex-wrap:wrap;gap:8px}
 /* Теплова карта: день × година */
 .heat{display:grid;grid-template-columns:28px repeat(24,minmax(0,1fr));gap:3px;align-items:center}
 .heat .d{font:600 11px "Geist Mono",monospace;color:var(--ink-400)}
-.heat .h{font:600 9.5px "Geist Mono",monospace;color:var(--ink-400);text-align:center}
-.heat .c{height:22px;border-radius:4px;background:#F1F4FA;outline:none}
-.heat .c:hover,.heat .c:focus-visible{box-shadow:0 0 0 2px #fff,0 0 0 3.5px #7C3AED}
-.heat-legend{display:flex;align-items:center;justify-content:flex-end;gap:7px;margin-top:12px;font-size:11.5px;color:var(--ink-500)}
+.heat .h{font:600 11px "Geist Mono",monospace;color:var(--ink-400);text-align:center}
+.heat .c{height:22px;border-radius:4px;background:var(--sf-2);outline:none}
+.heat .c:hover,.heat .c:focus-visible{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--v-500)}
+.heat-legend{display:flex;align-items:center;justify-content:flex-end;gap:7px;margin-top:12px;font-size:12px;color:var(--ink-500)}
 .heat-legend span.cells{display:flex;gap:3px}
 .heat-legend span.cells i{width:14px;height:14px;border-radius:4px}
 .heat-scroll{overflow-x:auto}
@@ -59,7 +59,7 @@
 .empty-mini{padding:40px 20px;text-align:center;color:var(--ink-500);font-size:13px}
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
@@ -68,14 +68,14 @@
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-modals"></div>
 <div id="admin-toast" class="toast"></div>
 
 <script type="module">
-import { initAdminShell, loadAllTeachers, cachedTeachers, esc, hideLoader, formatTimeAgo } from "./shared/admin-shell.js?v=19";
-import { bars, rank, bindTips, C } from "./shared/admin-charts.js?v=1";
+import { initAdminShell, loadAllTeachers, cachedTeachers, esc, hideLoader, formatTimeAgo } from "./shared/admin-shell.js?v=20";
+import { bars, rank, bindTips, C } from "./shared/admin-charts.js?v=2";
 
 const DAY = 864e5;
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b === 1 ? f[0] : b >= 2 && b <= 4 ? f[1] : f[2]; };
