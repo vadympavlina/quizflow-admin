@@ -111,7 +111,7 @@ textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 @media (max-width:640px){ .card-h,.card-b{padding-left:14px;padding-right:14px} .card-f{padding:0 14px 14px} .card-f .tb-btn{flex:1;justify-content:center} .ml-btn{grid-template-columns:1fr} .hi{grid-template-columns:1fr;padding:12px 14px} .hi .r{justify-content:flex-start} }
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=20">
+<link rel="modulepreload" href="shared/admin-shell.js?v=21">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
@@ -135,7 +135,7 @@ textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 </div>
 
 <script type="module">
-import { logAction, initAdminShell, dbGet, dbSet, db, ref, push, set, openModal, closeModal, toast, esc, hideLoader, mailApi, mailWorkerUrl, setMailWorkerUrl } from "./shared/admin-shell.js?v=20";
+import { logAction, initAdminShell, dbGet, dbSet, db, ref, push, set, openModal, closeModal, toast, esc, hideLoader, mailApi, mailWorkerUrl, setMailWorkerUrl } from "./shared/admin-shell.js?v=21";
 import { callAIRaw } from "./shared/ai-call.js?v=1";
 import { trackAI, tokensOf } from "./shared/ai-usage.js?v=3";
 

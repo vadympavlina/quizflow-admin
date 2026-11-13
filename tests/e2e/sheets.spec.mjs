@@ -57,3 +57,32 @@ test("модалка на телефоні закривається змахом
   expect(await page.evaluate(() => document.documentElement.classList.contains("qf-lock"))).toBe(false);
   expect(errors).toEqual([]);
 });
+
+// Видима прозорість модалки = добуток прозорості її самої й усіх батьків; вона не має падати нижче 1
+const alphaOf = (page, sel) => page.evaluate(s => { let a = 1; for (let n = document.querySelector(s); n; n = n.parentElement) a *= +getComputedStyle(n).opacity; return a; }, sel);
+
+test("модалка не стає прозорою, коли її згортаєш змахом", async ({ page, errors }) => {
+  await seed(page, admSeed(Date.now()), "t5");
+  await page.goto("/teachers"); await page.waitForTimeout(1400);
+  await page.evaluate(() => window.openModal("m-create")); await page.waitForTimeout(600);
+  const cdp = await page.context().newCDPSession(page);
+  const b = await page.locator("#m-create .modal-h").boundingBox();
+  const x = 120, y = b.y + 20;
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y, id: 1 }] });
+  for (let i = 1; i <= 8; i++) { await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + i * 25, id: 1 }] }); await page.waitForTimeout(16); }
+  expect(await alphaOf(page, "#m-create .modal"), "під час тяги").toBe(1);
+  for (let i = 9; i <= 16; i++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + i * 25, id: 1 }] });   // далі — до порогу закриття
+  const bg = await page.evaluate(() => +getComputedStyle(document.getElementById("m-create")).backgroundColor.match(/[\d.]+/g)[3]);
+  expect(bg, "затемнення фону слабшає").toBeLessThan(0.5);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  const seen = [];
+  for (let i = 0; i < 6; i++) { seen.push(await alphaOf(page, "#m-create .modal")); await page.waitForTimeout(25); }
+  expect(Math.min(...seen), "після змаху").toBe(1);
+  await expect(page.locator("#m-create")).not.toHaveClass(/on/);
+  // наступне відкриття — з чистого стану (ні прозорості, ні зсуву)
+  await page.waitForTimeout(400);
+  await page.evaluate(() => window.openModal("m-create")); await page.waitForTimeout(600);
+  const st = await page.evaluate(() => { const m = document.querySelector("#m-create .modal"); return { tr: getComputedStyle(m).transform, bg: document.getElementById("m-create").style.backgroundColor, ty: new DOMMatrix(getComputedStyle(m).transform).m42 }; });
+  expect(st.bg).toBe(""); expect(Math.abs(st.ty)).toBeLessThan(2);
+  expect(errors).toEqual([]);
+});
