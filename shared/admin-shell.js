@@ -82,20 +82,23 @@ export { db, ref, get, set, update, remove, onValue, push };
 // Поки модалка відкрита: сторінка під нею не прокручується, Tab ходить по колу.
 const _modalOpeners = new Map();
 const _modalStack = [];
+const _lockHeld = new Set();
 let _scrollLocked = false;
 const _FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 function _lockGuard(e){
   // Дозволяємо прокрутку лише всередині самої модалки та її списків
   for (let n = e.target; n && n !== document.body && n.nodeType === 1; n = n.parentNode){
-    if (!n.closest || !n.closest(".modal-bd")) break;
+    if (!n.closest || !n.closest(".modal-bd,.ad-fs")) break;
     const cs = getComputedStyle(n);
     if (n.scrollHeight > n.clientHeight + 1 && /auto|scroll/.test(cs.overflowY)) return;
     if (n.scrollWidth > n.clientWidth + 1 && /auto|scroll/.test(cs.overflowX)) return;
   }
   if (e.cancelable) e.preventDefault();
 }
-function _setLock(on){
+function _setLock(want, key = "modal"){
+  if (want) _lockHeld.add(key); else _lockHeld.delete(key);
+  const on = _lockHeld.size > 0;
   if (on === _scrollLocked) return;
   _scrollLocked = on;
   const de = document.documentElement;
@@ -126,6 +129,154 @@ function _modalKeys(e){
 }
 document.addEventListener("keydown", _modalKeys);
 
+window.qfDismiss = function (el, o) {
+  if (!el || el._qfDismiss) return;
+  el._qfDismiss = true;
+  const dir = o.dir || "down";                                      // down | up | left | right
+  const vert = dir === "down" || dir === "up", sgn = dir === "down" || dir === "right" ? 1 : -1;
+  const reduce = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SKIP = "input,textarea,select,[contenteditable='true'],.ad-pop,[data-no-swipe]";
+  let st = null;
+  const ovl = () => (typeof o.overlay === "function" ? o.overlay() : o.overlay) || null;
+  const size = () => (vert ? el.offsetHeight : el.offsetWidth) || 300;
+  // Чи є всередині вміст, який ще можна прокрутити проти жесту (тоді це прокрутка, а не закриття)
+  function scrolledInside(target) {
+    for (let n = target; n && n !== el.parentNode; n = n.parentNode) {
+      if (n.nodeType !== 1) continue;
+      if (vert ? n.scrollHeight > n.clientHeight + 1 : n.scrollWidth > n.clientWidth + 1) {
+        const pos = vert ? n.scrollTop : n.scrollLeft;
+        const ov = getComputedStyle(n)[vert ? "overflowY" : "overflowX"];
+        if (/auto|scroll/.test(ov) && (sgn > 0 ? pos > 0 : pos < (vert ? n.scrollHeight - n.clientHeight : n.scrollWidth - n.clientWidth) - 1)) return true;
+      }
+      if (n === el) break;
+    }
+    return false;
+  }
+  function paint(d) {
+    const m = d > 0 ? d : d * 0.15;                                 // проти жесту — опір, а не жорсткий стоп
+    el.style.transform = vert ? `translate3d(0,${m * sgn}px,0)` : `translate3d(${m * sgn}px,0,0)`;
+    const v = ovl(); if (v) v.style.opacity = String(Math.max(0, 1 - Math.max(0, d) / (size() * 1.1)));
+  }
+  function reset() {
+    el.style.transition = ""; el.style.transform = ""; el.style.willChange = "";
+    const v = ovl(); if (v) { v.style.transition = ""; v.style.opacity = ""; }
+  }
+  function cleanup() {
+    el.removeEventListener("touchmove", move); el.removeEventListener("touchend", end); el.removeEventListener("touchcancel", end);
+    st = null;
+  }
+  function move(e) {
+    if (!st) return;
+    const t = e.touches[0]; if (!t) return;
+    const dx = t.clientX - st.x, dy = t.clientY - st.y;
+    const d = (vert ? dy : dx) * sgn, c = vert ? dx : dy;
+    if (!st.drag) {
+      if (Math.abs(c) > 10 && Math.abs(c) > Math.abs(d)) { cleanup(); return; }   // це інший жест (прокрутка вбік)
+      if (d < -10) { cleanup(); return; }                                         // тягнуть у протилежний бік
+      if (d < 12) return;                                                          // поріг активації
+      st.drag = true; st.off = d;
+      el.style.transition = "none"; el.style.willChange = "transform";
+      const v = ovl(); if (v) v.style.transition = "none";
+    }
+    if (e.cancelable) e.preventDefault();                                          // тепер це наш жест, сторінка не прокручується
+    const dist = d - st.off, dt = e.timeStamp - st.lt;
+    if (dt > 0) st.v = 0.7 * ((d - st.ld) / dt) + 0.3 * st.v;                       // згладжена швидкість
+    st.ld = d; st.lt = e.timeStamp; st.dist = dist;
+    if (!st.tick && dist > size() * 0.3) { st.tick = true; try { navigator.vibrate && navigator.vibrate(8); } catch {} }
+    if (st.tick && dist < size() * 0.3) st.tick = false;
+    paint(dist);
+  }
+  function end() {
+    if (!st) return;
+    const s = st; cleanup();
+    if (!s.drag) return;
+    const far = s.dist > size() * 0.3 || (s.v > 0.5 && s.dist > 24);
+    const v = ovl();
+    if (reduce()) { reset(); if (far) o.close(); return; }
+    if (far) {
+      el.style.transition = "transform .22s cubic-bezier(.4,0,1,1)";
+      if (v) { v.style.transition = "opacity .22s ease"; v.style.opacity = "0"; }
+      el.style.transform = vert ? `translate3d(0,${sgn * 100}%,0)` : `translate3d(${sgn * 100}%,0,0)`;
+      setTimeout(() => { o.close(); setTimeout(reset, 60); }, 190);
+    } else {
+      el.style.transition = "transform .3s cubic-bezier(.2,.8,.2,1)";
+      if (v) { v.style.transition = "opacity .3s ease"; v.style.opacity = ""; }
+      el.style.transform = "";
+      setTimeout(reset, 320);
+    }
+  }
+  el.addEventListener("touchstart", e => {
+    if (st || e.touches.length !== 1 || (o.enabled && !o.enabled())) return;
+    if (e.target.closest && e.target.closest(SKIP)) return;
+    if (scrolledInside(e.target)) return;
+    const t = e.touches[0];
+    st = { x: t.clientX, y: t.clientY, lt: e.timeStamp, ld: 0, v: 0, dist: 0, off: 0, drag: false, tick: false };
+    el.addEventListener("touchmove", move, { passive: false });
+    el.addEventListener("touchend", end); el.addEventListener("touchcancel", end);
+  }, { passive: true });
+};
+
+// ─── Нижня шторка фільтрів (телефон) ────────────────────────────────────
+// У рядку лишаються пошук і вкладки, а списки та перемикачі йдуть у шторку за кнопкою «Фільтри»
+// з лічильником активних. Елементи переносяться (не копіюються), на широкому екрані повертаються.
+const _FS_MQ = matchMedia("(max-width:640px)");
+const _FS_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>';
+export function filterSheet(cfg){
+  const items = (cfg.items || []).map(s => document.querySelector(s)).filter(Boolean);
+  const anchor = document.querySelector(cfg.anchor);
+  if (!items.length || !anchor) return null;
+  const marks = items.map(el => { const m = document.createComment("fs"); el.parentNode.insertBefore(m, el); return m; });
+  const btn = document.createElement("button");
+  btn.type = "button"; btn.className = "ad-fbtn"; btn.setAttribute("aria-label", "Фільтри"); btn.setAttribute("aria-expanded", "false");
+  btn.innerHTML = _FS_ICON + '<span class="ad-fb-n" hidden>0</span>';
+  // Пошук і кнопка стоять в одному рядку
+  const row = document.createElement("div"); row.className = "ad-frow";
+  anchor.parentNode.insertBefore(row, anchor); row.append(anchor, btn);
+  const ov = document.createElement("div"); ov.className = "ad-fs-ov";
+  const sh = document.createElement("div"); sh.className = "ad-fs"; sh.setAttribute("role", "dialog"); sh.setAttribute("aria-label", cfg.title || "Фільтри");
+  sh.innerHTML = '<div class="ad-fs-h"><b></b><button type="button" class="ad-fs-x">Готово</button></div><div class="ad-fs-b"></div>';
+  sh.querySelector("b").textContent = cfg.title || "Фільтри";
+  const body = sh.querySelector(".ad-fs-b");
+  document.body.append(ov, sh);
+  let moved = false, isOpen = false;
+  const count = () => {
+    const n = cfg.count ? cfg.count() : 0;
+    const b = btn.querySelector(".ad-fb-n"); b.textContent = String(n); b.hidden = !n;
+    btn.classList.toggle("set", n > 0);
+  };
+  function place(narrow){
+    if (narrow && !moved){ items.forEach(el => body.appendChild(el)); moved = true; }
+    else if (!narrow && moved){ items.forEach((el, i) => marks[i].parentNode.insertBefore(el, marks[i].nextSibling)); moved = false; if (isOpen) close(); }
+    btn.hidden = !narrow; count();
+  }
+  function open(){
+    if (isOpen) return; isOpen = true;
+    sh.style.display = "flex"; ov.style.display = "block"; void sh.offsetWidth;
+    sh.classList.add("on"); ov.classList.add("on");
+    btn.setAttribute("aria-expanded", "true");
+    _setLock(true, "filters");
+    setTimeout(() => sh.querySelector(".ad-fs-x").focus({ preventScroll: true }), 80);
+  }
+  function close(){
+    if (!isOpen) return; isOpen = false;
+    sh.classList.remove("on"); ov.classList.remove("on");
+    btn.setAttribute("aria-expanded", "false");
+    _setLock(false, "filters"); count();
+    setTimeout(() => { if (!isOpen){ sh.style.display = "none"; ov.style.display = "none"; sh.style.transform = ""; sh.style.transition = ""; ov.style.opacity = ""; ov.style.transition = ""; } }, 300);
+    try { btn.focus({ preventScroll: true }); } catch {}
+  }
+  btn.addEventListener("click", () => (isOpen ? close() : open()));
+  sh.querySelector(".ad-fs-x").addEventListener("click", close);
+  ov.addEventListener("click", close);
+  addEventListener("keydown", e => { if (e.key === "Escape" && isOpen && !document.querySelector('.ad-pop[data-open="1"]')){ e.stopPropagation(); close(); } }, true);
+  window.qfDismiss(sh, { dir: "down", overlay: ov, close, enabled: () => isOpen });
+  body.addEventListener("change", () => setTimeout(count, 0));
+  body.addEventListener("click", () => setTimeout(count, 0));
+  _FS_MQ.addEventListener("change", e => place(e.matches));
+  place(_FS_MQ.matches);
+  return { open, close, refresh: count };
+}
+
 export function openModal(id){
   const el = document.getElementById(id);
   if (!el) return;
@@ -139,6 +290,9 @@ export function openModal(id){
   if (h){ if (!h.id) h.id = id + "-t"; el.setAttribute("aria-labelledby", h.id); }
   el.querySelectorAll(".close:not([aria-label])").forEach(b => b.setAttribute("aria-label", "Закрити"));
   el.classList.add("on");
+  // Телефон: модалка — нижня шторка, її можна змахнути вниз
+  const box = el.querySelector(".modal");
+  if (box) window.qfDismiss(box, { dir: "down", overlay: el, close: () => closeModal(id), enabled: () => matchMedia("(max-width:640px)").matches });
   _setLock(true);
   setTimeout(() => {
     if (!el.classList.contains("on") || el.contains(document.activeElement)) return;

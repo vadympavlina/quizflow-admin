@@ -1091,3 +1091,28 @@ html.qf-lock{overflow:hidden;overscroll-behavior:none}
   .ov-search,.tc-search,.st-search,.pb-q,.nt-q,.tg-q,.lg-q,.iv-q,.st-url,.fx-num,.how-hide{ min-height:44px; }
   .asb-item{ height:44px; }
 }
+
+/* Нижня шторка фільтрів на телефоні (див. filterSheet у admin-shell.js) */
+.ad-frow{ display:flex; align-items:stretch; gap:8px; min-width:0; }
+.ad-frow > :first-child{ flex:1; min-width:0; }
+.ad-fbtn{ position:relative; flex:0 0 auto; width:44px; min-height:44px; border-radius:12px; border:1px solid var(--line); background:#fff; color:var(--ink-700); display:inline-grid; place-items:center; cursor:pointer; padding:0; }
+.ad-fbtn[hidden]{ display:none; }
+.ad-fbtn.set{ border-color:#C4B5FD; background:#F5F3FF; color:#5B21B6; }
+.ad-fb-n{ position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:#7C3AED; color:#fff; font:800 11px "Geist Mono",monospace; display:grid; place-items:center; }
+.ad-fb-n[hidden]{ display:none; }
+.ad-fs-ov{ position:fixed; inset:0; z-index:300; display:none; background:rgba(11,20,55,.46); opacity:0; transition:opacity .2s ease; touch-action:none; }
+.ad-fs-ov.on{ opacity:1; }
+.ad-fs{ position:fixed; left:0; right:0; bottom:0; z-index:301; display:none; flex-direction:column; max-height:min(86dvh,640px); background:#fff; border-radius:22px 22px 0 0; box-shadow:0 -20px 60px -20px rgba(11,20,55,.45); transform:translate3d(0,100%,0); transition:transform .34s cubic-bezier(.2,.8,.2,1); padding-bottom:env(safe-area-inset-bottom,0px); overscroll-behavior:contain; touch-action:pan-y; }
+.ad-fs.on{ transform:none; }
+.ad-fs:not(.on){ transition-duration:.2s; transition-timing-function:cubic-bezier(.4,0,1,1); }
+.ad-fs::before{ content:""; position:absolute; top:7px; left:50%; width:38px; height:4px; margin-left:-19px; border-radius:2px; background:#CBD3E6; }
+.ad-fs-h{ display:flex; align-items:center; justify-content:space-between; padding:22px 20px 8px; }
+.ad-fs-h b{ font:800 18px "Manrope",system-ui,sans-serif; color:var(--ink-900); letter-spacing:-.01em; }
+.ad-fs-x{ min-height:44px; padding:0 14px; border:0; background:none; color:#6D28D9; font:800 14px "Manrope",system-ui,sans-serif; cursor:pointer; }
+.ad-fs-b{ display:flex; flex-direction:column; gap:10px; padding:6px 20px 20px; overflow-y:auto; }
+.ad-fs-b > *{ width:100%; }
+.ad-fs-b .ad-sel{ width:100%; max-width:none; height:48px; justify-content:space-between; }
+.ad-fs-b .tp-sel{ display:flex; flex-direction:column; gap:10px; }
+.ad-fs-b button.pb-reset,.ad-fs-b .chip-t{ align-self:flex-start; width:auto; min-height:44px; }
+@media (min-width:641px){ .ad-fbtn,.ad-fs,.ad-fs-ov{ display:none !important; } }
+@media (prefers-reduced-motion:reduce){ .ad-fs,.ad-fs-ov{ transition:none !important; } }
