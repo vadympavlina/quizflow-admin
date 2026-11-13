@@ -13,7 +13,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=16">
+<link rel="stylesheet" href="shared/admin-shell.css?v=17">
 <style>
 /* ─── Викладачі: список зліва + картка викладача справа ─── */
 
@@ -222,9 +222,6 @@
 
 /* Toggle switch */
 .toggle-sw{position:relative; display:inline-block; width:38px; height:22px; flex:0 0 auto}
-.toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
-.toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
-.toggle-sw input:disabled + .toggle-sl{opacity:.6}
 .toggle-sl{
   position:absolute; inset:0; cursor:pointer;
   background:var(--line); border-radius:99px; transition:background .2s;
@@ -275,7 +272,6 @@
 <link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
-<style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 

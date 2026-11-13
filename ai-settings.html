@@ -13,7 +13,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=16">
+<link rel="stylesheet" href="shared/admin-shell.css?v=17">
 <style>
 .ai-sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 0 -4px}
 .ai-sec-h h2{margin:0;font-size:16px;font-weight:800;letter-spacing:-.01em}
@@ -112,12 +112,9 @@
 .feat-model{font-size:12px;color:var(--ink-400)}
 .feat-model b{font-family:"Geist Mono",monospace;color:var(--ink-700);font-weight:600}
 
-.toggle-sw{position:relative;display:inline-block;width:40px;height:23px;flex:0 0 auto}
 .toggle-sw input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}
 .toggle-sl{position:absolute;inset:0;background:#DDE3EE;border-radius:99px;transition:background .2s}
 .toggle-sl::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,var(--v-500),var(--ind-600))}
-.toggle-sw input:checked + .toggle-sl::before{transform:translateX(17px)}
 .toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.25)}
 
 /* Індивідуальні перевизначення */
@@ -135,13 +132,7 @@
 
 /* Панель незбережених змін */
 .save-bar{position:sticky;bottom:16px;z-index:20;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;border-radius:14px;background:#1A1040;color:#fff;box-shadow:0 18px 40px -12px rgba(20,11,58,.55);transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.32,.72,0,1),opacity .2s}
-.save-bar.on{transform:none;opacity:1;pointer-events:auto}
-.save-bar .t{flex:1;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.save-bar .t::before{content:"";width:8px;height:8px;border-radius:50%;background:#FBBF24}
 .save-bar .k{font-size:12px;opacity:.6;font-family:"Geist Mono",monospace}
-.save-bar .tb-btn{height:36px}
-.save-bar .tb-btn.ghost{color:#E9E4FF}
-.save-bar .tb-btn.ghost:hover{background:rgba(255,255,255,.1);color:#fff}
 /* Телефон */
 @media (max-width:640px){
   .prov{padding:16px;gap:14px}
@@ -163,7 +154,6 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
-<style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 

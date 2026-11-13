@@ -13,7 +13,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=16">
+<link rel="stylesheet" href="shared/admin-shell.css?v=17">
 <style>
 /* Плашка оголошення (такий самий вигляд, як у панелі викладача) */
 .qf-ann{--c:#1D4ED8;--bg:#EFF6FF;--ln:#BFDBFE;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln);color:var(--ink-900);font-family:"Manrope",system-ui,sans-serif;text-align:left}
@@ -30,8 +30,6 @@
 .qf-ann-close{width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:#5B6A8F;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
 .qf-ann-close:hover{background:rgba(11,20,55,.06);color:var(--ink-900)}
 .qf-ann-close svg{width:14px;height:14px}
-.field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field-l{font-size:13px;font-weight:700;color:var(--ink-700)}
@@ -39,15 +37,7 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
 /* Перемикач */
-.toggle-sw{position:relative;display:inline-block;width:40px;height:23px;flex:0 0 auto}
-.toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
-.toggle-sl{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:background .2s}
-.toggle-sl::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,var(--v-500),var(--ind-600))}
 .toggle-sw.red input:checked + .toggle-sl{background:linear-gradient(135deg,#EF4444,var(--red-700))}
-.toggle-sw input:checked + .toggle-sl::before{transform:translateX(17px)}
-.toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
-.toggle-sw input:disabled + .toggle-sl{opacity:.6}
 
 /* Техроботи */
 .mt{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:18px}
@@ -103,7 +93,6 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 .an-prev-l{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:8px}
 .an-foot{display:flex;gap:8px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--line);background:#FCFCFE}
 .an-foot .sp{flex:1}
-.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:var(--red-700);font-size:13px;font-weight:600;display:none}
 .mod-err.show{display:block}
 
 @media (max-width:1180px){ .mt-b{grid-template-columns:1fr} }
@@ -114,7 +103,6 @@ textarea.field-input{resize:vertical;min-height:96px;line-height:1.5}
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
-<style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 

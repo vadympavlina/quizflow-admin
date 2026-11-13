@@ -13,10 +13,8 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=16">
+<link rel="stylesheet" href="shared/admin-shell.css?v=17">
 <style>
-.field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field-l{font-size:13px;font-weight:700;color:var(--ink-700)}
@@ -66,13 +64,6 @@ textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 .pk-empty{padding:22px;text-align:center;font-size:13px;color:var(--ink-500)}
 .ml-row{display:flex;align-items:center;gap:10px}
 .ml-btn{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:10px}
-.toggle-sw{position:relative;display:inline-block;width:40px;height:23px;flex:0 0 auto}
-.toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
-.toggle-sl{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:background .2s}
-.toggle-sl::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,var(--v-500),var(--ind-600))}
-.toggle-sw input:checked + .toggle-sl::before{transform:translateX(17px)}
-.toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
 .ai{border:1px solid #D9E3FF;background:linear-gradient(180deg,#F5F8FF,#fff);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .ai-h{display:flex;align-items:center;gap:10px}
 .ai-h .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#E6EDFF;color:#2D5BE3;flex:0 0 auto}
@@ -124,7 +115,6 @@ textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
-<style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 
