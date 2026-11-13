@@ -13,15 +13,8 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=16">
+<link rel="stylesheet" href="shared/admin-shell.css?v=17">
 <style>
-.toggle-sw{position:relative;display:inline-block;width:40px;height:23px;flex:0 0 auto}
-.toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
-.toggle-sl{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:background .2s}
-.toggle-sl::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,var(--v-500),var(--ind-600))}
-.toggle-sw input:checked + .toggle-sl::before{transform:translateX(17px)}
-.toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
 
 .fx-card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .fx-h{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
@@ -68,12 +61,6 @@
 .fx-how b{color:var(--ink-900)}
 
 .save-bar{position:sticky;bottom:16px;z-index:20;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;border-radius:14px;background:#1A1040;color:#fff;box-shadow:0 18px 40px -12px rgba(20,11,58,.55);transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.32,.72,0,1),opacity .2s}
-.save-bar.on{transform:none;opacity:1;pointer-events:auto}
-.save-bar .t{flex:1;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.save-bar .t::before{content:"";width:8px;height:8px;border-radius:50%;background:#FBBF24}
-.save-bar .tb-btn{height:36px}
-.save-bar .tb-btn.ghost{color:#E9E4FF}
-.save-bar .tb-btn.ghost:hover{background:rgba(255,255,255,.1);color:#fff}
 
 @media (max-width:1180px){ .fx-b{grid-template-columns:1fr} .fx-role{grid-template-columns:1fr;gap:12px} }
 @media (max-width:760px){ .fx-rc{grid-template-columns:1fr} .fx-row{flex-wrap:wrap} .fx-num{width:100%;text-align:left} .fx-num::placeholder{text-align:left} .fx-h{padding:16px} .fx-b{padding:16px} .fx-role{padding:16px} }
@@ -83,7 +70,6 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
-<style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 

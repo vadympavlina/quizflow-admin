@@ -13,11 +13,8 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=16">
+<link rel="stylesheet" href="shared/admin-shell.css?v=17">
 <style>
-.field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
-.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:var(--red-700);font-size:13px;font-weight:600;display:none}
 .mod-err.show{display:block}
 
 /* Плитки-фільтри */
@@ -145,7 +142,6 @@
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
 <link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
-<style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
 <body>
 
