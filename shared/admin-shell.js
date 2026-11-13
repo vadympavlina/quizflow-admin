@@ -152,14 +152,22 @@ window.qfDismiss = function (el, o) {
     }
     return false;
   }
+  // Затемнення: o.dim — гасимо лише колір фону підкладки, а не всю підкладку (разом із шторкою всередині,
+  // яка інакше теж ставала б прозорою). Без o.dim підкладка окремий елемент, гасимо її прозорість.
+  const bgOf = v => {
+    if (!v._qfBg) { const m = getComputedStyle(v).backgroundColor.match(/[\d.]+/g) || [0, 0, 0, 0.5]; v._qfBg = { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? +m[3] : 1 }; }
+    return v._qfBg;
+  };
+  const dimTo = (v, k) => { if (o.dim) { const c = bgOf(v); v.style.backgroundColor = `rgba(${c.r},${c.g},${c.b},${c.a * k})`; } else v.style.opacity = String(k); };
+  const dimTrans = () => (o.dim ? "background-color" : "opacity");
   function paint(d) {
     const m = d > 0 ? d : d * 0.15;                                 // проти жесту — опір, а не жорсткий стоп
     el.style.transform = vert ? `translate3d(0,${m * sgn}px,0)` : `translate3d(${m * sgn}px,0,0)`;
-    const v = ovl(); if (v) v.style.opacity = String(Math.max(0, 1 - Math.max(0, d) / (size() * 1.1)));
+    const v = ovl(); if (v) dimTo(v, Math.max(0, 1 - Math.max(0, d) / (size() * 1.1)));
   }
   function reset() {
     el.style.transition = ""; el.style.transform = ""; el.style.willChange = "";
-    const v = ovl(); if (v) { v.style.transition = ""; v.style.opacity = ""; }
+    const v = ovl(); if (v) { v.style.transition = ""; v.style.opacity = ""; v.style.backgroundColor = ""; v._qfBg = null; }
   }
   function cleanup() {
     el.removeEventListener("touchmove", move); el.removeEventListener("touchend", end); el.removeEventListener("touchcancel", end);
@@ -176,7 +184,7 @@ window.qfDismiss = function (el, o) {
       if (d < 12) return;                                                          // поріг активації
       st.drag = true; st.off = d;
       el.style.transition = "none"; el.style.willChange = "transform";
-      const v = ovl(); if (v) v.style.transition = "none";
+      const v = ovl(); if (v) { bgOf(v); v.style.transition = "none"; }
     }
     if (e.cancelable) e.preventDefault();                                          // тепер це наш жест, сторінка не прокручується
     const dist = d - st.off, dt = e.timeStamp - st.lt;
@@ -195,12 +203,12 @@ window.qfDismiss = function (el, o) {
     if (reduce()) { reset(); if (far) o.close(); return; }
     if (far) {
       el.style.transition = "transform .22s cubic-bezier(.4,0,1,1)";
-      if (v) { v.style.transition = "opacity .22s ease"; v.style.opacity = "0"; }
+      if (v) { v.style.transition = dimTrans() + " .22s ease"; dimTo(v, 0); }
       el.style.transform = vert ? `translate3d(0,${sgn * 100}%,0)` : `translate3d(${sgn * 100}%,0,0)`;
       setTimeout(() => { o.close(); setTimeout(reset, 60); }, 190);
     } else {
       el.style.transition = "transform .3s cubic-bezier(.2,.8,.2,1)";
-      if (v) { v.style.transition = "opacity .3s ease"; v.style.opacity = ""; }
+      if (v) { v.style.transition = dimTrans() + " .3s ease"; if (o.dim) dimTo(v, 1); else v.style.opacity = ""; }
       el.style.transform = "";
       setTimeout(reset, 320);
     }
@@ -292,7 +300,7 @@ export function openModal(id){
   el.classList.add("on");
   // Телефон: модалка — нижня шторка, її можна змахнути вниз
   const box = el.querySelector(".modal");
-  if (box) window.qfDismiss(box, { dir: "down", overlay: el, close: () => closeModal(id), enabled: () => matchMedia("(max-width:640px)").matches });
+  if (box) window.qfDismiss(box, { dir: "down", overlay: el, dim: true, close: () => closeModal(id), enabled: () => matchMedia("(max-width:640px)").matches });
   _setLock(true);
   setTimeout(() => {
     if (!el.classList.contains("on") || el.contains(document.activeElement)) return;
