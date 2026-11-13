@@ -65,13 +65,13 @@ html.asb-boot .asb, html.asb-boot .asb *, html.asb-boot .app{ transition:none !i
 .asb-tag{ align-self:flex-start; display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#EDE9FE; background:rgba(139,92,246,.28); border:1px solid rgba(196,181,253,.3); padding:2px 7px; border-radius:6px; }
 .asb-tag::before{ content:""; width:5px; height:5px; border-radius:50%; background:#C4B5FD; box-shadow:0 0 6px rgba(196,181,253,.9); }
 .asb.collapsed .asb-head{ justify-content:center; padding:0; }
-.asb.collapsed .asb-mark{ width:32px; height:32px; margin-right:6px; }
+.asb.collapsed .asb-mark{ width:32px; height:32px; margin:0; }
 .asb.collapsed .asb-brand{ display:none; }
 
 .asb-toggle{
   position:absolute; top:26px; right:-13px; z-index:3; width:26px; height:26px; border-radius:50%;
   display:grid; place-items:center; cursor:pointer; color:#4C3A8A; background:#fff;
-  border:1px solid rgba(20,11,58,.08); box-shadow:0 4px 12px -2px rgba(20,11,58,.28), 0 0 0 4px var(--bg,#F4F6FB);
+  border:0; box-shadow:0 4px 12px -2px rgba(20,11,58,.3);
   transition:transform .2s var(--asb-ease), color .15s, background .15s;
 }
 .asb-toggle:hover{ color:#fff; background:var(--acc-2); transform:scale(1.08); }
@@ -647,7 +647,7 @@ th.sortable.active .ord{opacity:1; color:#7C3AED}
    ======================================================================== */
 :root{ --frame:#EEF2FB; --qtb-h:64px; --card-gap:12px; }
 html, body{ background:var(--frame); }
-.asb-toggle{ box-shadow:0 4px 12px -2px rgba(20,11,58,.28), 0 0 0 4px var(--frame); }
+.asb-toggle{ box-shadow:0 4px 12px -2px rgba(20,11,58,.3); }
 #admin-loader{ background:var(--frame); isolation:isolate; }
 
 /* Меню */
