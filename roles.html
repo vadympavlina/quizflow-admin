@@ -13,32 +13,32 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 .field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s}
-.field-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.field-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 .field-cnt{font-size:11px;color:var(--ink-400);text-align:right;margin-top:-2px;font-family:"Geist Mono",monospace}
 
 /* Список ролей */
 .rl-new-btn{width:100%;justify-content:center}
-.rl-it{--rc:#7C3AED;display:flex;align-items:center;gap:11px;width:100%;padding:10px;border-radius:12px;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:background .12s}
-.rl-it:hover{background:#F7F8FC}
+.rl-it{--rc:var(--v-500);display:flex;align-items:center;gap:11px;width:100%;padding:10px;border-radius:12px;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:background .12s}
+.rl-it:hover{background:var(--sf-3)}
 .rl-it.on{background:color-mix(in srgb,var(--rc) 9%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 35%,#fff)}
-.rl-it:focus-visible{outline:2px solid #7C3AED;outline-offset:-2px}
+.rl-it:focus-visible{outline:2px solid var(--v-500);outline-offset:-2px}
 .rl-ic{width:38px;height:38px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;color:#fff;background:var(--rc);box-shadow:0 6px 14px -8px var(--rc)}
 .rl-ic svg{width:18px;height:18px}
 .rl-it-i{flex:1;min-width:0}
-.rl-it-n{font-weight:800;font-size:13.5px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl-it-n{font-weight:800;font-size:14px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl-it-m{font-size:12px;color:var(--ink-400);font-weight:600;margin-top:2px}
 .rl-it-m b{color:var(--ink-500);font-family:"Geist Mono",monospace}
 
 /* Картка ролі */
-.rl-hero{--rc:#7C3AED;display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 9%,#fff),#fff)}
+.rl-hero{--rc:var(--v-500);display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 9%,#fff),#fff)}
 .rl-hero .rl-ic{width:60px;height:60px;border-radius:18px}
 .rl-hero .rl-ic svg{width:28px;height:28px}
 .rl-hi{flex:1;min-width:0}
-.rl-hi h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;overflow-wrap:anywhere}
+.rl-hi h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:0;overflow-wrap:anywhere}
 .rl-hi p{font-size:13px;color:var(--ink-500);margin:4px 0 0;line-height:1.5}
 .rl-hi p.empty{color:var(--ink-300);font-style:italic}
 .rl-acts{display:flex;gap:8px;flex:0 0 auto}
@@ -49,49 +49,49 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 .rl-add .search-input .input{width:100%;padding-top:10px;padding-bottom:10px}
 .rl-sug{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 22px 50px -18px rgba(15,30,71,.35);padding:6px;max-height:280px;overflow-y:auto}
 .rl-sug button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:10px;cursor:pointer;text-align:left;font:inherit}
-.rl-sug button:hover,.rl-sug button.on{background:#F5F3FF}
+.rl-sug button:hover,.rl-sug button.on{background:var(--v-50)}
 .rl-sug .none{padding:14px;text-align:center;font-size:13px;color:var(--ink-400)}
-.rl-sug .pl{margin-left:auto;font-size:12px;font-weight:700;color:#6D28D9;white-space:nowrap}
-.mb-ava{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:11.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#A78BFA,#7C3AED);flex:0 0 auto}
+.rl-sug .pl{margin-left:auto;font-size:12px;font-weight:700;color:var(--v-600);white-space:nowrap}
+.mb-ava{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--v-400),var(--v-500));flex:0 0 auto}
 .mb-i{flex:1;min-width:0}
-.mb-n{font-size:13.5px;font-weight:700;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mb-e{font-size:11.5px;color:var(--ink-400);font-family:"Geist Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-n{font-size:14px;font-weight:700;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-e{font-size:12px;color:var(--ink-400);font-family:"Geist Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mb-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .mb-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
-.mb-row.blocked .mb-n::after{content:" · заблоковано";font-weight:600;color:#B91C1C;font-size:11px}
+.mb-row.blocked .mb-n::after{content:" · заблоковано";font-weight:600;color:var(--red-700);font-size:11px}
 .mb-row a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.mb-row a:hover .mb-n{color:#6D28D9}
+.mb-row a:hover .mb-n{color:var(--v-600)}
 .mb-x{width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:none;color:var(--ink-400);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-.mb-x:hover{background:#FEF2F2;border-color:#FECACA;color:#B91C1C}
+.mb-x:hover{background:var(--red-50);border-color:var(--red-200);color:var(--red-700)}
 .mb-x svg{width:14px;height:14px}
 .rl-none{font-size:13px;color:var(--ink-500);padding:14px;border:1.5px dashed var(--line);border-radius:12px;text-align:center}
 
 /* Доступ до сторінок */
 .pg-sec{margin-top:14px}
 .pg-sec:first-child{margin-top:0}
-.pg-sec-l{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:6px}
+.pg-sec-l{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:6px}
 .pg-list{border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .pg-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line)}
 .pg-row:first-child{border-top:0}
-.pg-row.on{background:color-mix(in srgb,var(--rc,#7C3AED) 6%,#fff)}
+.pg-row.on{background:color-mix(in srgb,var(--rc,var(--v-500)) 6%,#fff)}
 .pg-row .pg-i{flex:1;min-width:0}
-.pg-row .pg-n{font-size:13.5px;font-weight:700;color:var(--ink-900)}
+.pg-row .pg-n{font-size:14px;font-weight:700;color:var(--ink-900)}
 .pg-row .pg-s{font-size:12px;color:var(--ink-400);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .pg-row .pg-s i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .pg-row.off .pg-n{color:var(--ink-400)}
-.pg-lock{font-size:11.5px;font-weight:700;color:var(--ink-400);white-space:nowrap}
-.rl-hint{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--ink-500);line-height:1.5;background:#F7F8FC;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
-.rl-hint svg{flex:0 0 auto;width:16px;height:16px;color:#6D28D9;margin-top:1px}
+.pg-lock{font-size:12px;font-weight:700;color:var(--ink-400);white-space:nowrap}
+.rl-hint{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink-500);line-height:1.5;background:var(--sf-3);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.rl-hint svg{flex:0 0 auto;width:16px;height:16px;color:var(--v-600);margin-top:1px}
 
 /* Порожній стан сторінки */
 .rl-start{background:#fff;border:1px solid var(--line);border-radius:18px;padding:40px 28px;text-align:center}
-.rl-start .ei{width:60px;height:60px;margin:0 auto 14px;border-radius:18px;background:#EDE9FE;color:#6D28D9;display:grid;place-items:center}
+.rl-start .ei{width:60px;height:60px;margin:0 auto 14px;border-radius:18px;background:var(--v-100);color:var(--v-600);display:grid;place-items:center}
 .rl-start h2{font-size:20px;font-weight:800;margin:0 0 6px}
-.rl-start > p{font-size:13.5px;color:var(--ink-500);margin:0 auto 22px;max-width:520px;line-height:1.55}
+.rl-start > p{font-size:14px;color:var(--ink-500);margin:0 auto 22px;max-width:520px;line-height:1.55}
 .rl-how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;text-align:left;margin:0 auto 22px;max-width:860px}
-.rl-step{display:flex;gap:11px;align-items:flex-start;padding:12px;border-radius:14px;background:#FAF8FF;border:1px solid #EDE9FE}
-.rl-step .n{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:800;font-size:12.5px;color:#fff;background:linear-gradient(135deg,#8B5CF6,#6D28D9)}
-.rl-step b{display:block;font-size:13.5px;color:var(--ink-900)}
+.rl-step{display:flex;gap:11px;align-items:flex-start;padding:12px;border-radius:14px;background:#FAF8FF;border:1px solid var(--v-100)}
+.rl-step .n{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,#8B5CF6,var(--v-600))}
+.rl-step b{display:block;font-size:14px;color:var(--ink-900)}
 .rl-step span{font-size:12px;color:var(--ink-500);line-height:1.45}
 
 /* Модалка ролі */
@@ -99,16 +99,16 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 .rl-sw{width:28px;height:28px;border-radius:9px;cursor:pointer;border:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);transition:transform .12s}
 .rl-sw:hover{transform:scale(1.08)}
 .rl-sw[aria-checked="true"]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink-900)}
-.rl-sw:focus-visible{outline:2px solid #7C3AED;outline-offset:3px}
+.rl-sw:focus-visible{outline:2px solid var(--v-500);outline-offset:3px}
 .rl-custom{position:relative;width:28px;height:28px;border-radius:9px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line-strong);background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);cursor:pointer}
 .rl-custom input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.rl-preview{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#FAFBFE;border:1px solid var(--line)}
-.rl-preview .tc-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:6px;color:#fff}
+.rl-preview{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--sf-1);border:1px solid var(--line)}
+.rl-preview .tc-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:6px;color:#fff}
 .rl-preview span.l{font-size:12px;color:var(--ink-500)}
 
-.rl-del-warn{background:#FFF7ED;border:1px solid #FDE4BC;color:#9A3412;border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.55}
+.rl-del-warn{background:#FFF7ED;border:1px solid #FDE4BC;color:#9A3412;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.55}
 .rl-del-warn ul{margin:6px 0 0;padding-left:18px}
-.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:#B91C1C;font-size:12.5px;font-weight:600;display:none}
+.mod-err{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:9px 12px;color:var(--red-700);font-size:13px;font-weight:600;display:none}
 .mod-err.show{display:block;animation:rlErrIn .2s ease}
 @keyframes rlErrIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
@@ -127,19 +127,19 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 .toggle-sw input:disabled + .toggle-sl{opacity:.6}
 .toggle-sl{
   position:absolute; inset:0; cursor:pointer;
-  background:#E3E8F2; border-radius:99px; transition:background .2s;
+  background:var(--line); border-radius:99px; transition:background .2s;
 }
 .toggle-sl::before{
   content:""; position:absolute; top:2px; left:2px;
   width:18px; height:18px; border-radius:50%; background:#fff;
   box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .2s;
 }
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg, #7C3AED, #4F46E5)}
+.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg, var(--v-500), var(--ind-600))}
 .toggle-sw input:checked + .toggle-sl::before{transform:translateX(16px)}
 
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
@@ -148,7 +148,7 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -203,7 +203,7 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 </div>
 
 <script type="module">
-import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=19";
+import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=20";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const IC = {

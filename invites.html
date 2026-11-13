@@ -13,15 +13,15 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 .field-input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-family:"Manrope",sans-serif;font-size:14px;color:var(--ink-900);outline:none}
-.field-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.field-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 .iv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .iv-bar .search-input{flex:1;min-width:220px;max-width:360px}
 .iv-bar .search-input .input{width:100%;padding-top:10px;padding-bottom:10px}
 .iv-chips{display:flex;gap:6px;flex-wrap:wrap}
-.iv-chips button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;border:1px solid var(--line);background:#fff;font:700 12.5px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer}
+.iv-chips button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;border:1px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer}
 .iv-chips button i{width:7px;height:7px;border-radius:50%}
 .iv-chips button b{font-family:"Geist Mono",monospace;color:var(--ink-400)}
 .iv-chips button.on{background:var(--ink-900);border-color:var(--ink-900);color:#fff}
@@ -33,38 +33,38 @@
 .iv-row.dim .iv-n,.iv-row.dim .iv-c{opacity:.7}
 .iv-n{min-width:0}
 .iv-n b{display:block;font-size:14px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.iv-n code{font:500 11.5px "Geist Mono",monospace;color:var(--ink-400)}
-.iv-st{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;margin-top:6px}
+.iv-n code{font:500 12px "Geist Mono",monospace;color:var(--ink-400)}
+.iv-st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;margin-top:6px}
 .iv-st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.iv-st.active{background:#DCFCE7;color:#15803D}
+.iv-st.active{background:var(--grn-100);color:var(--grn-700)}
 .iv-st.used{background:#E0E7FF;color:#4338CA}
-.iv-st.expired{background:#F1F4FA;color:var(--ink-500)}
-.iv-c{font-size:12.5px;color:var(--ink-500);line-height:1.5;min-width:0}
+.iv-st.expired{background:var(--sf-2);color:var(--ink-500)}
+.iv-c{font-size:13px;color:var(--ink-500);line-height:1.5;min-width:0}
 .iv-c b{color:var(--ink-900);font-weight:700}
-.iv-c a{color:#6D28D9;font-weight:700;text-decoration:none}
+.iv-c a{color:var(--v-600);font-weight:700;text-decoration:none}
 .iv-c a:hover{text-decoration:underline}
 .iv-acts{display:flex;gap:6px;justify-content:flex-end}
 .iv-empty{padding:48px 20px;text-align:center;color:var(--ink-500);font-size:13px}
-.iv-empty b{display:block;font-size:15px;color:var(--ink-900);margin-bottom:4px}
+.iv-empty b{display:block;font-size:16px;color:var(--ink-900);margin-bottom:4px}
 .exp{display:flex;gap:6px;flex-wrap:wrap}
 .exp button{padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-700);cursor:pointer}
 .exp button.on{border-color:var(--ink-900);box-shadow:inset 0 0 0 1px var(--ink-900);color:var(--ink-900)}
 .iv-link{display:flex;gap:8px}
-.iv-link input{flex:1;font:500 12.5px "Geist Mono",monospace;background:#F4F6FB}
-.iv-sent{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:12px;color:#15803D;font-weight:700}
+.iv-link input{flex:1;font:500 13px "Geist Mono",monospace;background:var(--bg)}
+.iv-sent{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:12px;color:var(--grn-700);font-weight:700}
 .iv-mail{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:700;margin-top:12px}
-.iv-mail.ok{background:#F0FDF4;border:1px solid #BBF7D0;color:#15803D}
-.iv-mail.err{background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C}
-.iv-mail.wait{background:#F4F6FB;border:1px solid var(--line);color:var(--ink-500)}
+.iv-mail.ok{background:#F0FDF4;border:1px solid var(--grn-200);color:var(--grn-700)}
+.iv-mail.err{background:var(--red-50);border:1px solid var(--red-200);color:var(--red-700)}
+.iv-mail.wait{background:var(--bg);border:1px solid var(--line);color:var(--ink-500)}
 .iv-mail span{flex:1;min-width:0;overflow-wrap:anywhere}
 .field-hint{font-size:12px;color:var(--ink-500);margin-top:6px;line-height:1.5}
-.field-hint a{color:#6D28D9;font-weight:700}
-.iv-ok{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:#F0FDF4;border:1px solid #BBF7D0;color:#15803D;font-size:13px;font-weight:700;margin-bottom:12px}
+.field-hint a{color:var(--v-600);font-weight:700}
+.iv-ok{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:#F0FDF4;border:1px solid var(--grn-200);color:var(--grn-700);font-size:13px;font-weight:700;margin-bottom:12px}
 @media (max-width:1023px){ .iv-row{grid-template-columns:1fr 1fr;gap:10px 16px} .iv-acts{grid-column:1/-1;justify-content:flex-start} }
 @media (max-width:640px){ .iv-row{grid-template-columns:1fr;padding:14px} }
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
@@ -73,7 +73,7 @@
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -125,13 +125,13 @@
       <h3 id="rev-h">Відкликати запрошення?</h3>
       <button class="close" type="button" onclick="closeModal('m-rev')" aria-label="Закрити"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div class="modal-b"><div style="font-size:13.5px;color:var(--ink-500);line-height:1.55" id="rev-t"></div></div>
+    <div class="modal-b"><div style="font-size:14px;color:var(--ink-500);line-height:1.55" id="rev-t"></div></div>
     <div class="modal-f"><button class="tb-btn" type="button" onclick="closeModal('m-rev')">Скасувати</button><button class="tb-btn danger" type="button" id="rev-ok">Відкликати</button></div>
   </div>
 </div>
 
 <script type="module">
-import { logAction, initAdminShell, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, esc, hideLoader, mailApi, mailWorkerUrl } from "./shared/admin-shell.js?v=19";
+import { logAction, initAdminShell, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, esc, hideLoader, mailApi, mailWorkerUrl } from "./shared/admin-shell.js?v=20";
 
 const SVG = p => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const IC = { copy: SVG('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>'), ban: SVG('<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'), trash: SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>'), send: SVG('<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>'), plus: SVG('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>') };

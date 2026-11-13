@@ -13,63 +13,63 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=15">
+<link rel="stylesheet" href="shared/admin-shell.css?v=16">
 <style>
 .toggle-sw{position:relative;display:inline-block;width:40px;height:23px;flex:0 0 auto}
 .toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
-.toggle-sl{position:absolute;inset:0;background:#E3E8F2;border-radius:99px;transition:background .2s}
+.toggle-sl{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:background .2s}
 .toggle-sl::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
-.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,#7C3AED,#4F46E5)}
+.toggle-sw input:checked + .toggle-sl{background:linear-gradient(135deg,var(--v-500),var(--ind-600))}
 .toggle-sw input:checked + .toggle-sl::before{transform:translateX(17px)}
 .toggle-sw input:focus-visible + .toggle-sl{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
 
 .fx-card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .fx-h{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
-.fx-h .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#EDE9FE;color:#6D28D9;flex:0 0 auto}
+.fx-h .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--v-100);color:var(--v-600);flex:0 0 auto}
 .fx-h .ic svg{width:20px;height:20px}
 .fx-h h2{font-size:16px;font-weight:800;margin:0}
-.fx-h p{font-size:12.5px;color:var(--ink-500);margin:3px 0 0}
+.fx-h p{font-size:13px;color:var(--ink-500);margin:3px 0 0}
 .fx-b{padding:18px 22px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
-.fx-sub{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:8px}
+.fx-sub{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin-bottom:8px}
 .fx-list{display:flex;flex-direction:column;gap:8px}
-.fx-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#FAFBFE;min-height:58px}
+.fx-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sf-1);min-height:58px}
 .fx-row .i{flex:1;min-width:0}
-.fx-row b{display:block;font-size:13.5px;color:var(--ink-900)}
+.fx-row b{display:block;font-size:14px;color:var(--ink-900)}
 .fx-row span.d{font-size:12px;color:var(--ink-500)}
 .fx-num{width:130px;flex:0 0 auto;padding:9px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:600 14px "Geist Mono",monospace;color:var(--ink-900);outline:none;text-align:right}
-.fx-num::placeholder{font:600 12.5px "Manrope",sans-serif;color:var(--ink-400);text-align:right}
-.fx-num:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.fx-num::placeholder{font:600 13px "Manrope",sans-serif;color:var(--ink-400);text-align:right}
+.fx-num:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
 .fx-num::-webkit-inner-spin-button{opacity:.5}
 
 /* Ролі */
 .fx-roles{display:flex;flex-direction:column}
-.fx-role{--rc:#7C3AED;display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:16px 22px;border-top:1px solid var(--line)}
+.fx-role{--rc:var(--v-500);display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:16px 22px;border-top:1px solid var(--line)}
 .fx-role:first-child{border-top:0}
 .fx-rn{display:flex;align-items:flex-start;gap:10px;min-width:0}
 .fx-rn i{width:12px;height:12px;border-radius:4px;background:var(--rc);margin-top:4px;flex:0 0 auto}
 .fx-rn b{display:block;font-size:14px;color:var(--ink-900);overflow:hidden;text-overflow:ellipsis}
 .fx-rn span{font-size:12px;color:var(--ink-400);font-weight:600}
-.fx-rn .mod{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#FEF3C7;color:#B45309}
+.fx-rn .mod{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:var(--amb-100);color:var(--amb-700)}
 .fx-rc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .fx-cell{display:flex;flex-direction:column;gap:6px;min-width:0}
 .fx-cell label,.fx-cell .l{font-size:12px;font-weight:700;color:var(--ink-700)}
-.tri{display:inline-flex;padding:3px;border-radius:10px;background:#F1F4FA;gap:2px}
+.tri{display:inline-flex;padding:3px;border-radius:10px;background:var(--sf-2);gap:2px}
 .tri button{border:0;background:transparent;padding:6px 9px;border-radius:8px;font:700 12px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer;white-space:nowrap}
 .tri button.on{background:#fff;color:var(--ink-900);box-shadow:0 1px 3px rgba(15,30,71,.12)}
-.tri button.on[data-v="1"]{color:#15803D}
-.tri button.on[data-v="0"]{color:#B91C1C}
+.tri button.on[data-v="1"]{color:var(--grn-700)}
+.tri button.on[data-v="0"]{color:var(--red-700)}
 .fx-cell .fx-num{width:100%;text-align:left}
 .fx-cell .fx-num::placeholder{text-align:left}
 .fx-empty{padding:26px 22px;text-align:center;font-size:13px;color:var(--ink-500)}
-.fx-empty a{color:#6D28D9;font-weight:700}
+.fx-empty a{color:var(--v-600);font-weight:700}
 
-.fx-how{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,#F5F3FF,#EEF2FF);border:1px solid #E0DAFE;border-radius:16px;padding:14px 16px;font-size:13px;color:var(--ink-700);line-height:1.55}
-.fx-how svg{flex:0 0 auto;width:18px;height:18px;color:#6D28D9;margin-top:1px}
+.fx-how{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,var(--v-50),#EEF2FF);border:1px solid #E0DAFE;border-radius:16px;padding:14px 16px;font-size:13px;color:var(--ink-700);line-height:1.55}
+.fx-how svg{flex:0 0 auto;width:18px;height:18px;color:var(--v-600);margin-top:1px}
 .fx-how b{color:var(--ink-900)}
 
 .save-bar{position:sticky;bottom:16px;z-index:20;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;border-radius:14px;background:#1A1040;color:#fff;box-shadow:0 18px 40px -12px rgba(20,11,58,.55);transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.32,.72,0,1),opacity .2s}
 .save-bar.on{transform:none;opacity:1;pointer-events:auto}
-.save-bar .t{flex:1;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.save-bar .t{flex:1;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
 .save-bar .t::before{content:"";width:8px;height:8px;border-radius:50%;background:#FBBF24}
 .save-bar .tb-btn{height:36px}
 .save-bar .tb-btn.ghost{color:#E9E4FF}
@@ -79,7 +79,7 @@
 @media (max-width:760px){ .fx-rc{grid-template-columns:1fr} .fx-row{flex-wrap:wrap} .fx-num{width:100%;text-align:left} .fx-num::placeholder{text-align:left} .fx-h{padding:16px} .fx-b{padding:16px} .fx-role{padding:16px} }
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=19">
+<link rel="modulepreload" href="shared/admin-shell.js?v=20">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js">
@@ -88,12 +88,12 @@
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=10"></script>
+<script src="shared/admin-nav.js?v=11"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { logAction, initAdminShell, db, ref, update, dbGet, toast, esc, hideLoader } from "./shared/admin-shell.js?v=19";
+import { logAction, initAdminShell, db, ref, update, dbGet, toast, esc, hideLoader } from "./shared/admin-shell.js?v=20";
 import { CAP_FLAGS, CAP_LIMITS } from "./shared/caps.js?v=3";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
