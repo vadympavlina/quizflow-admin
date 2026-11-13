@@ -78,15 +78,68 @@ export { db, ref, get, set, update, remove, onValue, push };
 
 // ─── Modal / Toast (DOM utilities) ──────────────────────────────────────────
 
-// Фокус переходить у модалку й повертається на кнопку, що її відкрила
+// Фокус переходить у модалку й повертається на кнопку, що її відкрила.
+// Поки модалка відкрита: сторінка під нею не прокручується, Tab ходить по колу.
 const _modalOpeners = new Map();
+const _modalStack = [];
+let _scrollLocked = false;
+const _FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+function _lockGuard(e){
+  // Дозволяємо прокрутку лише всередині самої модалки та її списків
+  for (let n = e.target; n && n !== document.body && n.nodeType === 1; n = n.parentNode){
+    if (!n.closest || !n.closest(".modal-bd")) break;
+    const cs = getComputedStyle(n);
+    if (n.scrollHeight > n.clientHeight + 1 && /auto|scroll/.test(cs.overflowY)) return;
+    if (n.scrollWidth > n.clientWidth + 1 && /auto|scroll/.test(cs.overflowX)) return;
+  }
+  if (e.cancelable) e.preventDefault();
+}
+function _setLock(on){
+  if (on === _scrollLocked) return;
+  _scrollLocked = on;
+  const de = document.documentElement;
+  if (on){
+    const sbw = window.innerWidth - de.clientWidth;
+    de.classList.add("qf-lock");
+    if (sbw > 0) de.style.paddingRight = sbw + "px";
+    document.addEventListener("touchmove", _lockGuard, { passive: false });
+  } else {
+    de.classList.remove("qf-lock");
+    de.style.paddingRight = "";
+    document.removeEventListener("touchmove", _lockGuard, { passive: false });
+  }
+}
+function _modalKeys(e){
+  const id = _modalStack[_modalStack.length - 1];
+  const el = id && document.getElementById(id);
+  if (!el) return;
+  // Esc обробляє кожна сторінка сама (деякі модалки не можна закрити, поки триває відправка)
+  if (e.key === "Tab"){
+    const items = [...el.querySelectorAll(_FOCUSABLE)].filter(x => x.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (!el.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+}
+document.addEventListener("keydown", _modalKeys);
+
 export function openModal(id){
   const el = document.getElementById(id);
   if (!el) return;
-  _modalOpeners.set(id, document.activeElement);
+  if (!_modalStack.includes(id)){
+    _modalOpeners.set(id, document.activeElement);
+    _modalStack.push(id);
+  }
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
+  const h = el.querySelector(".modal-h h3");
+  if (h){ if (!h.id) h.id = id + "-t"; el.setAttribute("aria-labelledby", h.id); }
+  el.querySelectorAll(".close:not([aria-label])").forEach(b => b.setAttribute("aria-label", "Закрити"));
   el.classList.add("on");
+  _setLock(true);
   setTimeout(() => {
     if (!el.classList.contains("on") || el.contains(document.activeElement)) return;
     const f = el.querySelector("[autofocus]:not([disabled])")
@@ -99,6 +152,10 @@ export function closeModal(id){
   const el = document.getElementById(id);
   if (!el) return;
   el.classList.remove("on");
+  const i = _modalStack.indexOf(id);
+  if (i >= 0) _modalStack.splice(i, 1);
+  // Модалка могла бути прихована й без closeModal — відпускаємо лише коли жодної не лишилось
+  if (!_modalStack.length || !document.querySelector(".modal-bd.on")) { _modalStack.length = 0; _setLock(false); }
   const op = _modalOpeners.get(id);
   _modalOpeners.delete(id);
   try { if (op && document.contains(op)) op.focus({ preventScroll: true }); } catch {}
@@ -107,8 +164,13 @@ let _toastT;
 export function toast(msg, type){
   const el = document.getElementById("admin-toast");
   if (!el) return;
+  const err = type === "err";
+  // Роль задаємо до тексту — скрінрідер озвучує зміну вмісту
+  el.setAttribute("role", err ? "alert" : "status");
+  el.setAttribute("aria-live", err ? "assertive" : "polite");
+  el.setAttribute("aria-atomic", "true");
   el.textContent = msg;
-  el.classList.toggle("err", type === "err");
+  el.classList.toggle("err", err);
   el.classList.add("show");
   clearTimeout(_toastT);
   _toastT = setTimeout(() => el.classList.remove("show"), 3000);

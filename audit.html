@@ -13,7 +13,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=13">
+<link rel="stylesheet" href="shared/admin-shell.css?v=14">
 <style>
 .lg-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .lg-bar .search-input{flex:1;min-width:220px;max-width:380px}
@@ -46,7 +46,7 @@
 @media (max-width:640px){ .lg-row{padding:12px 14px;gap:10px} .lg-day{padding:10px 14px} .lg-bar select{min-width:0;flex:1} .lg-meta{margin-left:0} }
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
-<link rel="modulepreload" href="shared/admin-shell.js?v=17">
+<link rel="modulepreload" href="shared/admin-shell.js?v=18">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
 <style id="no-zoom">/* iOS збільшує сторінку, якщо в полі вводу шрифт менше 16px; тут цього не буває */@media (pointer:coarse){input,textarea,select,[contenteditable="true"],[contenteditable=""]{font-size:16px!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%}}</style>
 </head>
@@ -58,7 +58,7 @@
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { initAdminShell, db, ref, esc, hideLoader, toast } from "./shared/admin-shell.js?v=17";
+import { initAdminShell, db, ref, esc, hideLoader, toast } from "./shared/admin-shell.js?v=18";
 import { get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
