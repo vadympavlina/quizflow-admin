@@ -162,6 +162,19 @@
   .save-bar{flex-wrap:wrap;bottom:10px}
   .save-bar .k{display:none}
 }
+.wk{margin:0 0 16px;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.wk-h{display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+.wk-h b{font-size:16px;color:var(--ink-900)}
+.wk-h p{margin:4px 0 0;font-size:13px;color:var(--ink-500);line-height:1.55;max-width:70ch}
+.wk-h code{font:600 12px "Geist Mono",monospace;background:var(--sf-3);padding:1px 5px;border-radius:5px}
+.wk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:12px}
+.wk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:10px;background:var(--sf-1);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink-700)}
+.wk-st{font-size:12px;font-weight:800;padding:3px 8px;border-radius:7px}
+.wk-st.yes{background:var(--grn-50,#E9F8EF);color:var(--grn-700)}.wk-st.no{background:var(--amb-100);color:var(--amb-700)}
+.wk-acts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.wk-msg{font-size:13px;color:var(--ink-500)}.wk-msg.ok{color:var(--grn-700)}.wk-msg.bad{color:var(--red-700)}
+.wk-err{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--red-50);color:var(--red-700);font-size:13px;line-height:1.5}
+.wk-note{margin-top:8px;font-size:12px;color:var(--ink-400)}
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
 <link rel="modulepreload" href="shared/admin-shell.js?v=21">
@@ -178,7 +191,7 @@
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { logAction, initAdminShell, dbGet, dbUpd, toast, esc, hideLoader } from "./shared/admin-shell.js?v=21";
+import { logAction, initAdminShell, dbGet, dbUpd, toast, esc, hideLoader, mailApi, mailWorkerUrl } from "./shared/admin-shell.js?v=21";
 
 const SVG = (p, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const IC = {
@@ -301,6 +314,7 @@ const DEF = { groqKey: "", geminiKey: "", groqModel: "llama-3.3-70b-versatile", 
   flags: { comments: true, analysis: true, generation: true, textcheck: true, mail: true },
   prov: { comments: "groq", analysis: "groq", generation: "groq", textcheck: "groq", mail: "groq" } };
 let saved = structuredClone(DEF), cur = structuredClone(DEF);
+const wk = { viaWorker: false, status: null, err: "", url: "" };   // ключі у воркері
 const fetched = { groq: null, gemini: null };  // моделі, отримані при перевірці ключа
 const tested = { groq: null, gemini: null };   // true / false / null
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -499,14 +513,14 @@ function fromDb(s){
 async function save(){
   const anyOn = Object.values(cur.flags).some(Boolean);
   const gk = keyOf("groq"), mk = keyOf("gemini");
-  if (anyOn && !gk && !mk){ toast("Додайте хоча б один API-ключ або вимкніть усі функції", "err"); return; }
+  if (!wk.viaWorker && anyOn && !gk && !mk){ toast("Додайте хоча б один API-ключ або вимкніть усі функції", "err"); return; }
   for (const p of ["groq", "gemini"]) if (!cur[p + "Model"].trim()){ toast(`Вкажіть модель ${PROVIDERS[p].name}`, "err"); return; }
   const btns = [document.getElementById("btn-save-ai"), document.getElementById("btn-save-bar")];
   btns.forEach(b => b.disabled = true);
   try {
     await dbUpd("settings/ai", {
       // Ключі змінює лише власник (правила бази теж це перевіряють)
-      ...(isOwner ? { groqApiKey: gk, geminiApiKey: mk, apiKey: gk || mk, provider: gk ? "groq" : "gemini" } : {}),
+      ...(isOwner && !wk.viaWorker ? { groqApiKey: gk, geminiApiKey: mk, apiKey: gk || mk, provider: gk ? "groq" : "gemini" } : {}),
       groqModel: cur.groqModel.trim(), geminiModel: cur.geminiModel.trim(),
       // Сумісність зі старими читачами налаштувань
       model: gk ? cur.groqModel.trim() : cur.geminiModel.trim(),
@@ -553,6 +567,7 @@ function renderOverrides(users){
 try {
   const [s, users] = await Promise.all([dbGet("settings/ai"), dbGet("users").catch(() => null)]);
   saved = fromDb(s); cur = structuredClone(saved);
+  wk.viaWorker = s?.viaWorker === true;
   renderAll();
   renderOverrides(users);
 } catch (e) {
@@ -561,6 +576,75 @@ try {
   toast("Не вдалося завантажити налаштування: " + e.message, "err");
 }
 hideLoader();
+
+// ─── Ключі у воркері ────────────────────────────────────────────────────────
+// Ключі Groq і Gemini лежать у секретах Cloudflare, а не в базі. Власник вмикає перехід, коли воркер їх бачить.
+{
+  const host = document.createElement("section");
+  host.id = "wk-panel"; host.className = "wk";
+  host.setAttribute("aria-label", "Ключі у воркері");
+  document.getElementById("admin-content").prepend(host);
+  const ok = (v, yes, no) => `<span class="wk-st ${v ? "yes" : "no"}">${v ? yes : no}</span>`;
+  let armed = false;
+  async function loadStatus(){
+    wk.err = ""; wk.status = null;
+    try { wk.url = await mailWorkerUrl(); wk.status = await mailApi("/ai/status"); }
+    catch (e){ wk.err = e.message; }
+    renderWk();
+  }
+  function renderWk(){
+    const st = wk.status, anyKey = !!(st && (st.configured.groq || st.configured.gemini));
+    const legacy = !!(st && (st.legacyKeysInDb.groq || st.legacyKeysInDb.gemini));
+    host.innerHTML = `
+      <div class="wk-h"><div><b>Ключі у воркері</b><p>Ключі Groq і Gemini зберігаються в секретах Cloudflare, а не в базі. Воркер сам перевіряє дозвіл, ліміт і веде облік. Налаштування: <code>docs/ai-setup.md</code>.</p></div>
+        <label class="toggle-sw" title="${anyKey ? "" : "Спершу додайте ключі у воркер"}"><input type="checkbox" id="wk-on" ${wk.viaWorker ? "checked" : ""} ${isOwner && (anyKey || wk.viaWorker) ? "" : "disabled"} aria-label="Використовувати воркер"><span class="toggle-sl"></span></label></div>
+      ${wk.err ? `<div class="wk-err" role="alert">${esc(wk.err)}</div>` : !st ? `<div class="wk-row">Перевіряємо воркер…</div>` : `
+        <div class="wk-grid">
+          <div class="wk-row"><span>Groq у воркері</span>${ok(st.configured.groq, "є ключ", "немає")}</div>
+          <div class="wk-row"><span>Gemini у воркері</span>${ok(st.configured.gemini, "є ключ", "немає")}</div>
+          <div class="wk-row"><span>Старі ключі в базі</span>${ok(!legacy, "немає", "лишились")}</div>
+        </div>
+        <div class="wk-acts">
+          <button type="button" class="tb-btn" id="wk-test" ${anyKey ? "" : "disabled"}>Перевірити відповідь</button>
+          ${isOwner && wk.viaWorker && legacy ? `<button type="button" class="tb-btn danger" id="wk-del">${armed ? "Так, видалити ключі з бази" : "Видалити ключі з бази"}</button>` : ""}
+          <span class="wk-msg" id="wk-msg" role="status"></span>
+        </div>
+        ${!isOwner ? `<div class="wk-note">Перехід і видалення ключів: лише власник.</div>` : ""}`}`;
+  }
+  host.addEventListener("change", async e => {
+    if (e.target.id !== "wk-on") return;
+    const on = e.target.checked; e.target.disabled = true;
+    try {
+      await dbUpd("settings/ai", { viaWorker: on, updatedAt: Date.now() });
+      wk.viaWorker = on; logAction("ai.worker", { type: "service", label: "AI через воркер" }, on ? "увімкнено" : "вимкнено");
+      toast(on ? "Тепер AI працює через воркер" : "AI знову працює напряму з ключів у базі");
+    } catch (err){ toast("Помилка: " + err.message, "err"); wk.viaWorker = !on; }
+    renderWk();
+  });
+  host.addEventListener("click", async e => {
+    const msg = () => document.getElementById("wk-msg");
+    if (e.target.closest("#wk-test")){
+      const b = e.target.closest("#wk-test"); b.disabled = true; msg().textContent = "Питаємо AI…"; msg().className = "wk-msg";
+      const t0 = performance.now();
+      try {
+        const r = await mailApi("/ai", { feature: "mail", messages: [{ role: "user", content: "Відповідай одним словом: так" }], maxTokens: 10 });
+        msg().textContent = `Відповів ${r.provider === "gemini" ? "Gemini" : "Groq"} за ${Math.round(performance.now() - t0)} мс`; msg().className = "wk-msg ok";
+      } catch (err){ msg().textContent = err.message; msg().className = "wk-msg bad"; }
+      b.disabled = false;
+    } else if (e.target.closest("#wk-del")){
+      if (!armed){ armed = true; renderWk(); setTimeout(() => { armed = false; if (document.getElementById("wk-del")) renderWk(); }, 6000); return; }
+      armed = false;
+      try {
+        await dbUpd("settings/ai", { groqApiKey: null, geminiApiKey: null, apiKey: null, updatedAt: Date.now() });
+        saved.groqKey = saved.geminiKey = cur.groqKey = cur.geminiKey = "";
+        logAction("ai.keys.remove", { type: "service", label: "Ключі AI в базі" }, null);
+        toast("Ключі з бази видалено"); renderAll();
+      } catch (err){ toast("Помилка: " + err.message, "err"); }
+      loadStatus();
+    }
+  });
+  renderWk(); loadStatus();
+}
 
 // ─── Використання AI (aiUsage/{yyyymm}/{uid}/{feature}) ─────────────────────
 {

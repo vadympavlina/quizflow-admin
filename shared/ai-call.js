@@ -5,10 +5,44 @@
 // береться інший. Повертає { text, data } (data — сира відповідь, для токенів).
 // ═══════════════════════════════════════════════════════════════════════
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ─── AI через воркер ────────────────────────────────────────────────────────
+// Коли власник у адмінці → AI налаштування ввімкнув «Ключі у воркері» (settings/ai/viaWorker), браузер
+// ключів не бачить: запит іде у воркер, який сам перевіряє дозвіл, ліміт і веде облік (worker/src/ai.js).
+let _workerUrl;
+async function workerUrl(db) {
+  if (_workerUrl === undefined) {
+    _workerUrl = (async () => {
+      try {
+        const [on, url] = await Promise.all([get(ref(db, "settings/ai/viaWorker")), get(ref(db, "settings/mail/workerUrl"))]);
+        const u = String(url.val() || "").replace(/\/+$/, "");
+        return on.val() === true && u ? u : "";
+      } catch { return ""; }
+    })();
+  }
+  return _workerUrl;
+}
+export async function workerAI(url, messages, { maxTokens, temp, feature = "analysis", system, json = false, as } = {}) {
+  const headers = { "Content-Type": "application/json" };
+  const user = getApps().length ? getAuth(getApps()[0]).currentUser : null;
+  if (user) headers.Authorization = "Bearer " + await user.getIdToken();
+  let res;
+  try {
+    res = await fetch(url + "/ai", { method: "POST", headers, body: JSON.stringify({ feature, messages, maxTokens, temp, json, ...(system ? { system } : {}), ...(as ? { as } : {}) }) });
+  } catch { throw Object.assign(new Error("Не вдалося зв'язатися з сервером AI. Перевірте інтернет."), { viaWorker: false }); }
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok || d.ok === false) throw Object.assign(new Error(d.error || `AI: помилка ${res.status}`), { code: d.code, viaWorker: true });
+  // data — у тому ж вигляді, що в провайдера, тож tokensOf() працює однаково; _worker: облік уже веде воркер
+  return { text: d.text || "", data: { usage: { total_tokens: d.tokens || 0 }, _worker: true } };
+}
 
 const UA = "Ти — розумний асистент викладача. ОБОВ'ЯЗКОВО відповідай ВИКЛЮЧНО українською мовою. Жодних інших мов. Якщо щось не знаєш українською — все одно пиши по-українськи.";
 
 export async function callAIRaw(db, messages, { maxTokens = 800, temp = 0.5, feature = "analysis", system = UA, json = false } = {}) {
+  const wurl = await workerUrl(db);
+  if (wurl) return workerAI(wurl, messages, { maxTokens, temp, feature, system: system === UA ? undefined : system, json });
   const snap = await get(ref(db, "settings/ai"));
   const s = snap.exists() ? snap.val() : {};
   const geminiKey = s.geminiApiKey || (s.provider === "gemini" ? s.apiKey : "") || "";
