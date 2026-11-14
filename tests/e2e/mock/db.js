@@ -17,7 +17,7 @@ function fire(){for(const l of listeners){const v=l.path.startsWith('.info')?(l.
 window.addEventListener('storage',e=>{if(e.key===KEY){tree=load();fire()}});
 function snap(v){v=v==null?null:JSON.parse(JSON.stringify(v));return{val:()=>v,exists:()=>v!==null}}
 export function getDatabase(){return{}}
-export function ref(db,path=''){const p=String(path);return{path:p,key:p.split('/').filter(Boolean).pop()||null}}
+export function ref(db,path){if(path==='')throw new Error('Firebase: path argument was an invalid path = "". Paths must be non-empty strings');const p=String(path??'');return{path:p,key:p.split('/').filter(Boolean).pop()||null}}
 const _log=(k,p)=>{(globalThis.__dblog=globalThis.__dblog||[]).push(k+':'+p)};
 export async function get(r){_log('get',r.path);await 0;tree=load();return snap(readQ(r))}
 export async function set(r,v){ if(localStorage.getItem('mockFailSet')===r.path.split('/')[0]) throw Object.assign(new Error('PERMISSION_DENIED'),{code:'PERMISSION_DENIED'}); tree=load();setAt(r.path,v);commit()}

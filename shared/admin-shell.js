@@ -67,13 +67,15 @@ export function formatTimeAgo(ts){
 
 // ─── Firebase helpers (export) ──────────────────────────────────────────────
 
+// Порожній шлях = корінь бази (ref(db, "") у Firebase кидає «invalid path»)
+const at = path => path ? ref(db, path) : ref(db);
 export async function dbGet(path){
-  const snap = await get(ref(db, path));
+  const snap = await get(at(path));
   return snap.exists() ? snap.val() : null;
 }
-export async function dbSet(path, value){ await set(ref(db, path), value); }
-export async function dbUpd(path, value){ await update(ref(db, path), value); }
-export async function dbRemove(path){ await remove(ref(db, path)); }
+export async function dbSet(path, value){ await set(at(path), value); }
+export async function dbUpd(path, value){ await update(at(path), value); }
+export async function dbRemove(path){ await remove(at(path)); }
 export { db, ref, get, set, update, remove, onValue, push };
 
 // ─── Modal / Toast (DOM utilities) ──────────────────────────────────────────
