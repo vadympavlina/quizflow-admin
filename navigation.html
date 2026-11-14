@@ -214,7 +214,7 @@
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=11"></script>
+<script src="shared/admin-nav.js?v=12"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -226,17 +226,6 @@
   </div>
 </div>
 
-<div class="modal-bd" id="m-roles">
-  <div class="modal" style="max-width:380px">
-    <div class="modal-h"><span class="mh-ico blue" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20c0-2.6 2-4.8 4.5-5"/></svg></span><h3>Хто бачить «<span id="rp-name"></span>»?</h3>
-      <button class="close" type="button" onclick="closeModal('m-roles')" aria-label="Закрити"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-b">
-      <div id="rp-list"></div>
-      <div class="hint-box">Не обрано жодної ролі — пункт бачать усі викладачі. Адміністратори бачать усі пункти завжди.</div>
-    </div>
-    <div class="modal-f"><button class="tb-btn primary" type="button" onclick="closeModal('m-roles')">Готово</button></div>
-  </div>
-</div>
 
 <div class="modal-bd" id="m-confirm">
   <div class="modal" style="max-width:400px">
@@ -249,6 +238,8 @@
 
 <script type="module">
 import { logAction, initAdminShell, dbGet, db, ref, update, esc, toast, openModal, closeModal, hideLoader } from "./shared/admin-shell.js?v=21";
+import { PERMS, PAGE_PERMS, normalizeCfg, resolvePerms } from "./shared/perms.js?v=1";
+import { toStoreCfg } from "./shared/perms-store.js?v=1";
 
 // ─── ІКОНКИ (40 штук, 5 категорій) ────────────────────────────────────────
 const ICON_CATS = {
@@ -367,7 +358,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const uid = p => p + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 // ─── Стан ─────────────────────────────────────────────────────────────────
-let nav = [], saved = [], roles = {};
+let nav = [], saved = [], roles = {}, featRaw = {}, featOrig = {}, navOrig = null;
 let folded = new Set();
 let pvRole = "__all", pvCollapsed = false;
 const dirty = () => JSON.stringify(nav) !== JSON.stringify(saved);
@@ -381,7 +372,6 @@ function normalize(data){
       const x = { id: it.id || uid("item"), label: it.label || "", file: it.file || "", icon: it.icon || "file", enabled: it.enabled !== false };
       if (it.protected) x.protected = true;
       if (it.badge) x.badge = it.badge;
-      x.roleIds = Array.isArray(it.roleIds) ? it.roleIds.filter(r => roles[r]) : [];
       return x;
     }),
   }));
@@ -420,12 +410,11 @@ function pageField(it){
     ${custom ? `<input data-f="file" value="${esc(it.file)}" placeholder="сторінка або https://…" spellcheck="false" aria-label="Адреса">` : ""}
   </div>`;
 }
+// Доступ до сторінок задають дозволи ролей, а не меню: тут лише підказка-посилання
 function rolesBtn(it){
-  if (it.protected) return `<button type="button" class="i-roles" disabled title="Головну бачать усі">${ic("users", 13)} Усі</button>`;
-  const r = (it.roleIds || []).filter(id => roles[id]);
-  return r.length
-    ? `<button type="button" class="i-roles restricted" data-act="roles" title="${esc(r.map(id => roles[id].name).join(", "))}"><span class="dots">${r.slice(0, 4).map(id => `<i style="background:${esc(roles[id].color || "#7C3AED")}"></i>`).join("")}</span>${r.length === 1 ? esc(roles[r[0]].name) : r.length + " ролі"}</button>`
-    : `<button type="button" class="i-roles" data-act="roles" title="Обмежити за ролями">${ic("users", 13)} Усі</button>`;
+  const perm = PAGE_PERMS[it.id];
+  if (it.protected || !perm) return `<button type="button" class="i-roles" disabled title="${it.protected ? "Головну бачать усі" : "Сторінку бачать усі"}">${ic("users", 13)} Усі</button>`;
+  return `<a class="i-roles" href="roles" title="Доступ до цієї сторінки налаштовується в ролях (дозвіл «${esc(PERMS[perm].label)}»)">${ic("users", 13)} Ролі</a>`;
 }
 
 function renderEditor(flashId){
@@ -473,8 +462,11 @@ function renderMissing(){
 // ─── Попередній перегляд (як справжній sidebar) ─────────────────────────────
 // Як бачить меню обраний у перегляді користувач (та сама логіка, що й у shared/nav.js)
 function visibleFor(it){
-  if (!it.roleIds?.length || pvRole === "__admin") return true;
-  return pvRole !== "__all" && it.roleIds.includes(pvRole);
+  if (pvRole === "__admin" || it.protected) return true;
+  const perm = PAGE_PERMS[it.id];
+  if (!perm) return true;
+  const prof = { role: "teacher", customRoleIds: pvRole === "__all" ? {} : { [pvRole]: true } };
+  return resolvePerms(featRaw, prof).perms[perm] !== false;
 }
 function renderPreview(){
   const sel = document.getElementById("pv-role");
@@ -523,8 +515,8 @@ function moveItem(si, ii, dSi, dIi){
 }
 function addItem(si, page){
   const it = page
-    ? { id: page.id, label: page.label, file: page.file, icon: page.icon, enabled: true, roleIds: [] }
-    : { id: uid("item"), label: "", file: "", icon: "file", enabled: true, roleIds: [] };
+    ? { id: page.id, label: page.label, file: page.file, icon: page.icon, enabled: true }
+    : { id: uid("item"), label: "", file: "", icon: "file", enabled: true };
   if (nav.flatMap(s => s.items).some(x => x.id === it.id)) it.id = uid(it.id);
   nav[si].items.push(it);
   folded.delete(nav[si].id);
@@ -570,7 +562,6 @@ function bindEditor(){
     if (act === "sec-del") return delSection(si);
     if (act === "add") return addItem(si);
     if (act === "icon") return openIcons(si, ii);
-    if (act === "roles") return openRoles(si, ii);
     if (act === "it-menu") return openItemMenu(b, si, ii);
   });
   root.addEventListener("keydown", e => {
@@ -713,24 +704,6 @@ document.getElementById("icon-grid").addEventListener("click", e => {
   closeModal("m-icon"); render(id);
 });
 
-// ─── Ролі ─────────────────────────────────────────────────────────────────
-let roleTarget = null;
-function openRoles(si, ii){
-  roleTarget = nav[si].items[ii];
-  document.getElementById("rp-name").textContent = roleTarget.label || "Пункт";
-  const ids = Object.keys(roles).sort((a, b) => (roles[a].name || "").localeCompare(roles[b].name || "", "uk"));
-  document.getElementById("rp-list").innerHTML = ids.length ? ids.map(id => `<label class="role-row"><input type="checkbox" value="${esc(id)}" ${roleTarget.roleIds?.includes(id) ? "checked" : ""}><span class="role-dot" style="background:${esc(roles[id].color || "#7C3AED")}"></span>${esc(roles[id].name || "—")}</label>`).join("")
-    : `<div class="hint-box" style="text-align:center">Ще немає ролей. <a href="roles" style="color:#7C3AED;font-weight:700">Створити на сторінці «Ролі»</a></div>`;
-  openModal("m-roles");
-}
-document.getElementById("rp-list").addEventListener("change", e => {
-  if (!roleTarget || e.target.type !== "checkbox") return;
-  const set = new Set(roleTarget.roleIds || []);
-  e.target.checked ? set.add(e.target.value) : set.delete(e.target.value);
-  roleTarget.roleIds = [...set];
-  render();
-});
-
 // ─── Збереження ───────────────────────────────────────────────────────────
 async function save(){
   const { errs, secErr } = validate();
@@ -741,7 +714,10 @@ async function save(){
   try {
     const data = nav.map((s, i) => ({ ...s, label: s.label.trim(), order: i, items: s.items.map(it => ({ ...it, label: it.label.trim(), file: it.file.trim() })) }));
     // Навігація та мітка часу — одним записом: викладачі підхоплять зміни при наступному відкритті сторінки
-    await update(ref(db), { "settings/navigation": data, "settings/navigation_ts": Date.now() });
+    const upd = { "settings/navigation": data, "settings/navigation_ts": Date.now() };
+    // Обмеження сторінок за ролями більше не живуть у меню: старі переходять у дозволи, щоб нічого не загубилось
+    if (featOrig.v !== 2) { featOrig = toStoreCfg(normalizeCfg(featOrig, navOrig), id => !!roles[id]); upd["settings/features"] = featOrig; }
+    await update(ref(db), upd);
     nav = clone(data); saved = clone(data);
     logAction("nav.update", { type: "service", label: "Навігація" }, `${data.length} розділів, ${data.reduce((n, s) => n + s.items.length, 0)} пунктів`);
     render();
@@ -752,7 +728,7 @@ async function save(){
 
 // ─── Каркас сторінки ──────────────────────────────────────────────────────
 const content = `
-  <div class="page-head"><div><h1>Редактор меню</h1><p>Меню панелі викладача: секції, пункти, іконки та доступ за ролями</p></div></div>
+  <div class="page-head"><div><h1>Редактор меню</h1><p>Меню панелі викладача: секції, пункти й іконки. Хто яку сторінку бачить, задається в ролях</p></div></div>
   <div class="nav-layout">
     <div>
       <div class="missing" id="nav-missing" hidden></div>
@@ -822,8 +798,10 @@ document.querySelectorAll(".modal-bd").forEach(m => m.addEventListener("click", 
 addEventListener("beforeunload", e => { if (dirty()){ e.preventDefault(); e.returnValue = ""; } });
 
 try {
-  const [r, n] = await Promise.all([dbGet("roles").catch(() => null), dbGet("settings/navigation")]);
+  const [r, n, f] = await Promise.all([dbGet("roles").catch(() => null), dbGet("settings/navigation"), dbGet("settings/features").catch(() => null)]);
   roles = r || {};
+  featOrig = f || {}; navOrig = n || null;
+  featRaw = normalizeCfg(featOrig, n);
   const data = normalize(n && (Array.isArray(n) ? n.length : Object.keys(n).length) ? n : clone(DEFAULT_NAV));
   nav = data; saved = clone(data);
   render();
