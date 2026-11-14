@@ -482,6 +482,7 @@
 <script type="module">
 import { resolveCaps, CAP_LIMITS, monthKey } from "./shared/caps.js?v=4";
 import { PERMS, GROUPS, layerPerms } from "./shared/perms.js?v=1";
+import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
 import { logAction, initAdminShell, loadAllTeachers, cachedTeachers, esc, formatTimeAgo, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, genPass, hideLoader, mailApi, mailWorkerUrl, filterSheet } from "./shared/admin-shell.js?v=21";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -764,7 +765,8 @@ async function saveCaps(u, patch){
   patch(f);
   ["perms", "limits"].forEach(g => { if (f[g] && !Object.keys(f[g]).length) delete f[g]; });
   try {
-    await dbUpd(`users/${u.id}`, { features: Object.keys(f).length ? f : null });
+    await dbUpd("", { [`users/${u.id}/features`]: Object.keys(f).length ? f : null,
+      ...accessNotice([u.id], `perm_${hourKey()}`, "Адміністратор змінив ваші особисті дозволи або ліміти: доступ до деяких сторінок і дій міг змінитися.") });
     if (Object.keys(f).length) u.features = f; else delete u.features;
     logAction("teacher.caps", { type: "teacher", id: u.id, label: fullName(u) }, capsSummary(f));
     toast("Доступ оновлено");
@@ -773,7 +775,8 @@ async function saveCaps(u, patch){
 }
 async function setReadOnly(u, on){
   try {
-    await dbUpd(`users/${u.id}`, { readOnly: on ? true : null });
+    await dbUpd("", { [`users/${u.id}/readOnly`]: on ? true : null,
+      ...accessNotice([u.id], `ro_${Date.now()}`, on ? "Ваш акаунт переведено в режим перегляду: ви бачите дані, але змінювати їх не можна." : "Режим перегляду вимкнено: акаунт знову працює у звичайному режимі.") });
     if (on) u.readOnly = true; else delete u.readOnly;
     logAction("teacher.readonly", { type: "teacher", id: u.id, label: fullName(u) }, on ? "лише перегляд: увімкнено" : "лише перегляд: вимкнено");
     toast(on ? "Режим «лише перегляд» увімкнено" : "Режим «лише перегляд» вимкнено");
@@ -897,7 +900,11 @@ async function toggleRole(u, rid, btn){
     upd.customRoleId = null;
   }
   try {
-    await dbUpd(`users/${u.id}`, upd);
+    const rname = (window._roles[rid] || {}).name || "";
+    await dbUpd("", {
+      ...Object.fromEntries(Object.entries(upd).map(([k, v]) => [`users/${u.id}/${k}`, v])),
+      ...accessNotice([u.id], `role_${rid}_${Date.now()}`, on ? `Вам додано роль «${rname}». Доступ до сторінок і дій міг змінитися.` : `З вас знято роль «${rname}». Доступ до сторінок і дій міг змінитися.`),
+    });
     if (!u.customRoleIds || typeof u.customRoleIds !== "object") u.customRoleIds = {};
     Object.entries(upd).forEach(([k, v]) => { if (k === "customRoleId") delete u.customRoleId; else { const id = k.split("/")[1]; v ? u.customRoleIds[id] = true : delete u.customRoleIds[id]; } });
     toast(on ? `Роль «${(window._roles[rid] || {}).name}» додано` : "Роль знято");

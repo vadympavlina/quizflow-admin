@@ -152,3 +152,32 @@ test("редактор меню: доступ за ролями береться
   expect((await items()).join("|")).toContain("Тести");
   expect(errors).toEqual([]);
 });
+
+test("зміни доступу залишають викладачу сповіщення", async ({ page, errors }) => {
+  const d = legacyDb();
+  await seed(page, d, "t5");
+  // роль додано з картки ролі
+  await page.goto("/roles?id=authors&tab=members");
+  await page.locator("#mb-add").fill("Олена");
+  await page.locator("#mb-sug [data-add]").first().click();
+  await page.waitForTimeout(400);
+  let n = Object.values((await readDb(page)).teachers.t1.notifications || {}).filter(x => x.type === "access");
+  expect(n.length).toBe(1);
+  expect(n[0].msg).toContain("Автори");
+  expect(n[0].read).toBe(false);
+  // налаштування ролі: одне сповіщення на годину, скільки б кліків не було
+  await page.locator("#rp-t-access").click();
+  const r = name => page.locator(".rp-row", { hasText: name }).first();
+  await r("Експорт результатів").locator('[data-pk][data-v="1"]').click(); await page.waitForTimeout(250);
+  await r("AI-функції").locator('[data-pk][data-v="0"]').click(); await page.waitForTimeout(250);
+  n = Object.values((await readDb(page)).teachers.t1.notifications).filter(x => x.type === "access");
+  expect(n.length).toBe(2);                               // додавання + одне про налаштування ролі
+  // «лише перегляд» з картки викладача
+  await page.goto("/teachers?id=t1");
+  await page.locator('[data-act="readonly"]').evaluate(el => el.click());
+  await page.waitForTimeout(400);
+  n = Object.values((await readDb(page)).teachers.t1.notifications).filter(x => x.type === "access");
+  expect(n.length).toBe(3);
+  expect(n.some(x => /режим перегляду/.test(x.msg))).toBe(true);
+  expect(errors).toEqual([]);
+});
