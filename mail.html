@@ -150,7 +150,7 @@ textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 
 <script type="module">
 import { logAction, initAdminShell, dbGet, dbSet, db, ref, push, set, openModal, closeModal, toast, esc, hideLoader, mailApi, mailWorkerUrl, setMailWorkerUrl } from "./shared/admin-shell.js?v=21";
-import { callAIRaw } from "./shared/ai-call.js?v=1";
+import { callAIRaw } from "./shared/ai-call.js?v=2";
 import { trackAI, tokensOf } from "./shared/ai-usage.js?v=3";
 
 const SVG = (p, s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -388,14 +388,14 @@ async function aiWrite(mode){
   const user = `Тон: ${TONE_TXT[draft.aiTone] || TONE_TXT.friendly}.\n${req ? `Що має бути в листі:\n${req}` : ""}${cur}`;
   try {
     const { text, data } = await callAIRaw(db, [{ role: "user", content: user }], { maxTokens: 1400, temp: 0.6, feature: "mail", system: AI_SYSTEM, json: true });
-    trackAI(db, _user.id, "mail", { tokens: tokensOf(data) });
+    if (!data?._worker) trackAI(db, _user.id, "mail", { tokens: tokensOf(data) });   // через воркер облік веде він
     const m = parseAI(text);
     aiUndo = { subject: draft.subject, body: draft.body, btnOn: draft.btnOn, btnLabel: draft.btnLabel, btnUrl: draft.btnUrl };
     Object.assign(draft, { subject: m.subject, body: m.body, btnOn: !!m.button, ...(m.button ? { btnLabel: m.button.label, btnUrl: m.button.url } : {}) });
     lsSet(DRAFT_KEY, draft);
     aiMsg = { kind: "ok", text: "Готово. Перевірте текст і посилання — за потреби поправте вручну або попросіть AI доопрацювати." };
   } catch (e){
-    if (!/незрозумілому|не написав/.test(e.message)) trackAI(db, _user.id, "mail", { ok: false });
+    if (!e?.viaWorker && !/незрозумілому|не написав/.test(e.message)) trackAI(db, _user.id, "mail", { ok: false });
     aiMsg = { kind: "err", text: e.message };
   } finally { aiBusy = false; render(); }
 }
