@@ -282,7 +282,7 @@ const content = `
   </div>
 `;
 
-await initAdminShell({ activeId: "telegram", crumbs: ["Telegram"], content });
+const { isOwner } = await initAdminShell({ activeId: "telegram", crumbs: ["Telegram"], content });
 
 // ─── Стан ─────────────────────────────────────────────────────────────────
 const AV = ["#3B82F6","#10B981","#EF4444","#8B5CF6","#F59E0B","#EC4899","#06B6D4","#84CC16"];
@@ -385,7 +385,14 @@ async function validateToken(){
   catch (e){ m.className = "t-msg bad"; m.textContent = e.code === 401 || e.code === 404 ? "Telegram не приймає цей токен" : "Помилка: " + e.message; return false; }
 }
 document.getElementById("tg-check-btn").addEventListener("click", validateToken);
+if (!isOwner){
+  // Токен бота змінює лише власник сервісу
+  const inp = document.getElementById("tg-token-inp"), sv = document.getElementById("tg-save-btn");
+  inp.readOnly = true; inp.title = "Токен змінює лише власник сервісу"; inp.placeholder = "Токен змінює лише власник";
+  sv.disabled = true; sv.title = "Токен змінює лише власник сервісу";
+}
 document.getElementById("tg-save-btn").addEventListener("click", async e => {
+  if (!isOwner) return;
   const btn = e.currentTarget, t = document.getElementById("tg-token-inp").value.trim();
   btn.disabled = true;
   try {

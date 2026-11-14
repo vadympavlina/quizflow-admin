@@ -114,7 +114,15 @@ const content = `
   <div class="cl-grid" id="cl-grid">${'<div class="cl-sk"></div>'.repeat(4)}</div>
 `;
 const topbarRight = `<button class="tb-btn" type="button" id="btn-scan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.7 5.7L4 16"/><path d="M4 20v-4h4"/></svg> Перевірити знову</button>`;
-await initAdminShell({ activeId: "cleanup", crumbs: ["Обслуговування"], content, topbarRight });
+const { isOwner } = await initAdminShell({ activeId: "cleanup", crumbs: ["Обслуговування"], content, topbarRight });
+if (!isOwner) {
+  document.getElementById("admin-content").innerHTML = `<div style="max-width:420px;margin:60px auto;text-align:center">
+    <div style="width:56px;height:56px;margin:0 auto 16px;border-radius:16px;display:grid;place-items:center;background:var(--sf-3);color:var(--ink-500)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    <h2 style="font-size:20px;font-weight:800;margin:0 0 8px">Лише для власника</h2>
+    <p style="font-size:14px;line-height:1.6;color:var(--ink-500);margin:0">Обслуговування видаляє дані без можливості повернення, тому доступне лише власнику сервісу.</p></div>`;
+  hideLoader();
+  throw new Error("owner-only");
+}
 
 let found = {}, errs = {}, pending = null;
 

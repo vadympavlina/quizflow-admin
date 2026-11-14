@@ -1,7 +1,7 @@
 // Кожна сторінка відкривається без помилок JS і без 404 на свої файли
 import { test, expect, seed } from "./fixtures.mjs";
 
-const db = { users: { t1: { role: "admin", name: "A" } }, teachers: { t1: { tests: { T1: { title: "x", questions: [] } } } } };
+const db = { settings: { ownerUid: "t1" }, users: { t1: { role: "admin", name: "A" } }, teachers: { t1: { tests: { T1: { title: "x", questions: [] } } } } };
 const GROUPS = { admin: ["/", "teachers", "stats", "problems", "roles", "news", "navigation", "ai-settings", "telegram", "announcements", "mail", "features", "audit", "invites", "cleanup"] };
 const EXPECTED = [];
 

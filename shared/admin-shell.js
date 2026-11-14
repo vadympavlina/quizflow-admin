@@ -613,7 +613,40 @@ export async function initAdminShell({ activeId, crumbs, content, topbarRight })
   }, () => {});
   document.getElementById("tb-bell")?.addEventListener("click", e => { e.stopPropagation(); toggleBellPop(); });
 
-  return { _user };
+  const owner = await loadOwner(_user);
+  renderOwnerUi(owner);
+  return { _user, isOwner: owner.isOwner, owner };
+}
+
+// ─── Власник і адміністратор ──────────────────────────────────────────────
+// Власник (settings/ownerUid) один: лише він керує адміністраторами, ключами AI, токеном Telegram
+// і запускає «Обслуговування». Решта адміністраторів працює з викладачами, ролями, контентом тощо.
+// Правила бази перевіряють те саме, тож приховані тут кнопки не обійти з консолі.
+export async function loadOwner(user = getCurrentUser()){
+  let uid = null;
+  try { uid = (await get(ref(db, "settings/ownerUid"))).val() || null; } catch {}
+  window.QF_OWNER = { uid, isOwner: !!uid && uid === user?.id, unset: !uid };
+  return window.QF_OWNER;
+}
+function renderOwnerUi(owner){
+  const role = document.querySelector("#asb-uname + .asb-urole, .asb-urole");
+  if (role && owner.isOwner) role.textContent = "Власник";
+  const content = document.getElementById("admin-content");
+  if (!content || !owner.unset || document.getElementById("owner-claim")) return;
+  const b = document.createElement("div");
+  b.id = "owner-claim"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Власник сервісу");
+  b.style.cssText = "display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 16px;padding:13px 16px;border-radius:14px;background:#FFF7ED;border:1px solid #FDE4BC;color:#7A3A06;font-size:13.5px;line-height:1.5";
+  b.innerHTML = `<span style="flex:1;min-width:220px"><b>Власника ще не призначено.</b> Лише власник керує адміністраторами, ключами AI, токеном Telegram і обслуговуванням. Поки його немає, ці дії заблоковані для всіх.</span>
+    <button type="button" class="tb-btn primary" id="owner-claim-btn">Стати власником</button>`;
+  content.prepend(b);
+  document.getElementById("owner-claim-btn").addEventListener("click", async e => {
+    e.currentTarget.disabled = true;
+    try {
+      await set(ref(db, "settings/ownerUid"), getCurrentUser().id);
+      logAction("owner.claim", { type: "service", label: "Власник сервісу" }, null);
+      location.reload();
+    } catch (err) { toast("Не вдалося: " + err.message, "err"); e.currentTarget.disabled = false; }
+  });
 }
 
 // ─── Loader control ─────────────────────────────────────────────────────────

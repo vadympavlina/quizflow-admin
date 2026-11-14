@@ -294,7 +294,7 @@ const topbarRight = `
     Зберегти
   </button>`;
 
-await initAdminShell({ activeId: "ai", crumbs: ["AI-налаштування"], content, topbarRight });
+const { isOwner } = await initAdminShell({ activeId: "ai", crumbs: ["AI-налаштування"], content, topbarRight });
 
 // ─── Стан ────────────────────────────────────────────────────────────────
 const DEF = { groqKey: "", geminiKey: "", groqModel: "llama-3.3-70b-versatile", geminiModel: "gemini-2.5-flash",
@@ -377,7 +377,9 @@ function renderDirty(){
 
 function renderAll(){
   ["groq", "gemini"].forEach(p => {
-    document.getElementById("key-" + p).value = cur[p + "Key"];
+    const ki = document.getElementById("key-" + p);
+    ki.value = cur[p + "Key"];
+    if (!isOwner){ ki.readOnly = true; ki.placeholder = "Ключ змінює лише власник"; ki.title = "Ключ змінює лише власник сервісу"; }
     renderModels(p); renderProvState(p); keyHint(p);
   });
   renderFeatures(); renderDirty();
@@ -503,10 +505,11 @@ async function save(){
   btns.forEach(b => b.disabled = true);
   try {
     await dbUpd("settings/ai", {
-      groqApiKey: gk, geminiApiKey: mk,
+      // Ключі змінює лише власник (правила бази теж це перевіряють)
+      ...(isOwner ? { groqApiKey: gk, geminiApiKey: mk, apiKey: gk || mk, provider: gk ? "groq" : "gemini" } : {}),
       groqModel: cur.groqModel.trim(), geminiModel: cur.geminiModel.trim(),
       // Сумісність зі старими читачами налаштувань
-      apiKey: gk || mk, model: gk ? cur.groqModel.trim() : cur.geminiModel.trim(), provider: gk ? "groq" : "gemini",
+      model: gk ? cur.groqModel.trim() : cur.geminiModel.trim(),
       aiComments: cur.flags.comments, aiAnalysis: cur.flags.analysis, aiGeneration: cur.flags.generation, aiTextCheck: cur.flags.textcheck, aiMail: cur.flags.mail,
       featProviders: { ...cur.prov }, updatedAt: Date.now(),
     });
