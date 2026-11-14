@@ -34,9 +34,9 @@ test("матриця дозволів: зберігається одразу, п
   // Перше збереження перевело налаштування у новий формат і зняло обмеження з меню
   const db = await readDb(page);
   expect(db.settings.features.v).toBe(2);
-  expect(db.settings.features.roles.games.perms).toMatchObject({ "games.run": true, export: false });
-  expect(db.settings.features.roles.authors.perms["tests.view"]).toBe(true);     // автори, як і було
-  expect(db.settings.features.perms["tests.view"]).toBe(false);                  // для всіх закрито, як і було
+  expect(db.settings.features.roles.games.perms).toMatchObject({ games_run: true, export: false });
+  expect(db.settings.features.roles.authors.perms.tests_view).toBe(true);     // автори, як і було
+  expect(db.settings.features.perms.tests_view).toBe(false);                  // для всіх закрито, як і було
   expect(JSON.stringify(db.settings.navigation)).not.toContain("roleIds");
   expect(db.settings.features.roles.authors.limits.maxTests).toBe(50);           // ліміти не загубились
   expect(db.settings.features.limits.maxTests).toBe(20);
@@ -102,7 +102,7 @@ test("«Для всіх»: вимкнути дозвіл і ліміт, збер
   expect(f.v).toBe(2);
   expect(f.perms.ai).toBe(false);
   expect(f.perms.export).toBeUndefined();
-  expect(f.perms["tests.view"]).toBe(false);
+  expect(f.perms.tests_view).toBe(false);
   expect(f.limits).toMatchObject({ maxTests: 20, maxActiveLinks: 15 });
   expect(f.roles.authors.limits.maxTests).toBe(50);
   expect(errors).toEqual([]);
@@ -110,7 +110,7 @@ test("«Для всіх»: вимкнути дозвіл і ліміт, збер
 
 test("картка викладача: особисті дозволи, джерело, «лише перегляд»", async ({ page, errors }) => {
   const d = legacyDb();
-  d.settings.features = { v: 2, perms: { ai: false }, roles: { games: { perms: { "games.run": false } } } };
+  d.settings.features = { v: 2, perms: { ai: false }, roles: { games: { perms: { games_run: false } } } };
   d.users.t1.customRoleIds = { games: true };
   await seed(page, d, "t5");
   await page.goto("/teachers?id=t1");
@@ -124,7 +124,7 @@ test("картка викладача: особисті дозволи, джер
   await expect(row("Проводити ігри")).toContainText("особисто");
   await expect(row("Проводити ігри")).toContainText("Доступно");
   let u = (await readDb(page)).users.t1;
-  expect(u.features.perms["games.run"]).toBe(true);
+  expect(u.features.perms.games_run).toBe(true);
   // «лише перегляд» зберігається й вимикає зміни у підсумку
   await page.locator('[data-act="readonly"]').evaluate(el => el.click());
   await page.waitForTimeout(400);
@@ -233,5 +233,26 @@ test("видалення без передачі тестів працює як 
   const db = await readDb(page);
   expect(db.users.t3).toBeUndefined();
   expect(Object.keys(db.teachers.t1.tests).some(id => id.startsWith("xf_"))).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+function noDots(o, path = "db") { const bad = []; (function walk(v, p) { if (v && typeof v === "object") for (const k of Object.keys(v)) { if (/[.$#\[\]]/.test(k)) bad.push(p + "/" + k); walk(v[k], p + "/" + k); } })(o, path); return bad; }
+test("усі збереження дозволів лягають у базу з коректними ключами (без крапки)", async ({ page, errors }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.goto("/roles?id=games");
+  const r = name => page.locator(".rp-row", { hasText: name }).first();
+  await r("Проводити ігри").locator('[data-pk][data-v="1"]').click(); await page.waitForTimeout(250);
+  await r("Імпорт з Excel і CSV").locator('[data-pk][data-v="0"]').click(); await page.waitForTimeout(250);
+  await page.goto("/teachers?id=t1"); await page.waitForTimeout(700);
+  await page.locator('.cp-row', { hasText: "Створювати посилання" }).locator('[data-k="links.manage"][data-v="0"]').click(); await page.waitForTimeout(300);
+  await page.goto("/features"); await page.waitForTimeout(700);
+  await page.locator('[data-pk="games.history"]').evaluate(el => el.click());
+  await page.locator("#btn-save").click(); await page.waitForTimeout(400);
+  const db = await readDb(page);
+  expect(noDots(db.settings.features, "settings/features")).toEqual([]);
+  expect(noDots(db.users.t1, "users/t1")).toEqual([]);
+  expect(db.settings.features.roles.games.perms.tests_import).toBe(false);
+  expect(db.users.t1.features.perms.links_manage).toBe(false);
+  expect(db.settings.features.perms.games_history).toBe(false);
   expect(errors).toEqual([]);
 });
