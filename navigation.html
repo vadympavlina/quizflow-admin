@@ -238,7 +238,7 @@
 
 <script type="module">
 import { logAction, initAdminShell, dbGet, db, ref, update, esc, toast, openModal, closeModal, hideLoader } from "./shared/admin-shell.js?v=21";
-import { PERMS, PAGE_PERMS, normalizeCfg, resolvePerms } from "./shared/perms.js?v=2";
+import { PERMS, PAGE_PERMS, pagePerm, normalizeCfg, resolvePerms } from "./shared/perms.js?v=2";
 import { toStoreCfg } from "./shared/perms-store.js?v=1";
 import { syncPerms } from "./shared/perms-sync.js?v=1";
 
@@ -413,7 +413,7 @@ function pageField(it){
 }
 // Доступ до сторінок задають дозволи ролей, а не меню: тут лише підказка-посилання
 function rolesBtn(it){
-  const perm = PAGE_PERMS[it.id];
+  const perm = pagePerm(it);
   if (it.protected || !perm) return `<button type="button" class="i-roles" disabled title="${it.protected ? "Головну бачать усі" : "Сторінку бачать усі"}">${ic("users", 13)} Усі</button>`;
   return `<a class="i-roles" href="roles" title="Доступ до цієї сторінки налаштовується в ролях (дозвіл «${esc(PERMS[perm].label)}»)">${ic("users", 13)} Ролі</a>`;
 }
@@ -464,7 +464,7 @@ function renderMissing(){
 // Як бачить меню обраний у перегляді користувач (та сама логіка, що й у shared/nav.js)
 function visibleFor(it){
   if (pvRole === "__admin" || it.protected) return true;
-  const perm = PAGE_PERMS[it.id];
+  const perm = pagePerm(it);
   if (!perm) return true;
   const prof = { role: "teacher", customRoleIds: pvRole === "__all" ? {} : { [pvRole]: true } };
   return resolvePerms(featRaw, prof).perms[perm] !== false;

@@ -237,7 +237,7 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 
 <script type="module">
 import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=21";
-import { PERMS, GROUPS, PAGE_PERMS, IMPLIES, normalizeCfg, resolvePerms, conflicts } from "./shared/perms.js?v=2";
+import { PERMS, GROUPS, PAGE_PERMS, pagePerm, IMPLIES, normalizeCfg, resolvePerms, conflicts } from "./shared/perms.js?v=2";
 import { buildSave } from "./shared/perms-store.js?v=1";
 import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
 import { syncPerms } from "./shared/perms-sync.js?v=1";
@@ -412,7 +412,7 @@ function accessTab(rid){
       </div>`; }).join("")}</div></div>`; }).join("");
   // Що побачить викладач лише з цією роллю
   const pages = []; nav.forEach(sec => asArr(sec?.items).forEach(it => { if (it && it.enabled !== false) pages.push(it); }));
-  const vis = pages.filter(it => it.protected || !PAGE_PERMS[it.id] || eff[PAGE_PERMS[it.id]] !== false);
+  const vis = pages.filter(it => it.protected || !pagePerm(it) || eff[pagePerm(it)] !== false);
   const hid = pages.filter(it => !vis.includes(it));
   const warn = conflicts(eff);
   return `<div class="rl-hint">${IC.info}<span>Кожен пункт: <b>Як для всіх</b> (роль нічого не змінює), <b>Так</b> або <b>Ні</b>. Якщо в викладача кілька ролей, достатньо, щоб одна дозволяла. Особисті налаштування в картці викладача сильніші за роль. Зміни зберігаються одразу.</span></div>
