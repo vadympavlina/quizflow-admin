@@ -5,7 +5,7 @@
 // перетворюється на новий (v:2) одним записом, тож нічого не губиться. Після цього пункти меню
 // більше не обмежуються через roleIds: доступ до сторінок задають дозволи ролей.
 // ═══════════════════════════════════════════════════════════════════════
-import { PERMS, normalizeCfg } from "./perms.js?v=1";
+import { PERMS, normalizeCfg, storeKey } from "./perms.js?v=2";
 
 const bool = v => typeof v === "boolean";
 const posInt = v => { const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.floor(n) : null; };
@@ -15,7 +15,7 @@ const anyInt = v => { if (v === "" || v === null || v === undefined) return null
 export function toStoreCfg(c, roleExists = () => true) {
   const out = { v: 2 };
   const gp = {};
-  Object.entries(c.perms || {}).forEach(([k, v]) => { if (PERMS[k] && v === false) gp[k] = false; });
+  Object.entries(c.perms || {}).forEach(([k, v]) => { if (PERMS[k] && v === false) gp[storeKey(k)] = false; });
   if (Object.keys(gp).length) out.perms = gp;
   const gl = {};
   Object.entries(c.limits || {}).forEach(([k, v]) => { const n = posInt(v); if (n !== null) gl[k] = n; });
@@ -24,7 +24,7 @@ export function toStoreCfg(c, roleExists = () => true) {
   Object.entries(c.roles || {}).forEach(([rid, r]) => {
     if (!roleExists(rid)) return;
     const p = {}, l = {};
-    Object.entries(r?.perms || {}).forEach(([k, v]) => { if (PERMS[k] && bool(v)) p[k] = v; });
+    Object.entries(r?.perms || {}).forEach(([k, v]) => { if (PERMS[k] && bool(v)) p[storeKey(k)] = v; });
     Object.entries(r?.limits || {}).forEach(([k, v]) => { const n = anyInt(v); if (n !== null) l[k] = n; });
     const x = {};
     if (Object.keys(p).length) x.perms = p;

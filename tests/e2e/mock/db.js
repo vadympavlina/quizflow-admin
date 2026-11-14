@@ -6,7 +6,10 @@ const parts=p=>String(p||'').split('/').filter(Boolean);
 function getAt(t,path){let n=t;for(const k of parts(path)){if(n==null||typeof n!=='object')return null;n=n[k];}return n===undefined?null:n}
 function prune(n){if(n&&typeof n==='object'){for(const k of Object.keys(n)){n[k]=prune(n[k]);if(n[k]===null||n[k]===undefined)delete n[k];}if(Object.keys(n).length===0)return null}return n}
 function resolveSv(v){if(v&&typeof v==='object'){if(v['.sv']==='timestamp')return Date.now();const o=Array.isArray(v)?[]:{};for(const k in v)o[k]=resolveSv(v[k]);return o}return v}
-function setAt(path,val){const ps=parts(path);if(val&&typeof val==='object'&&'.inc' in val)val=(Number(getAt(tree,path))||0)+val['.inc'];val=resolveSv(val===undefined?null:JSON.parse(JSON.stringify(val??null)));if(!ps.length){tree=val||{};return}
+// Як у справжній базі: ключ не може містити . $ # [ ] / (інакше запис кидає помилку)
+const BAD_KEY=/[.$#\[\]]/;
+function checkKeys(v,path){if(v&&typeof v==='object'){if('.sv' in v||'.inc' in v)return;for(const k of Object.keys(v)){if(BAD_KEY.test(k)||k.includes('/'))throw new Error('Firebase: invalid key «'+k+'» in '+path+' (ключ не може містити . $ # [ ] /)');checkKeys(v[k],path+'/'+k)}}}
+function setAt(path,val){const ps=parts(path);ps.forEach(k=>{if(BAD_KEY.test(k))throw new Error('Firebase: invalid path segment «'+k+'» in '+path)});checkKeys(val,path);if(val&&typeof val==='object'&&'.inc' in val)val=(Number(getAt(tree,path))||0)+val['.inc'];val=resolveSv(val===undefined?null:JSON.parse(JSON.stringify(val??null)));if(!ps.length){tree=val||{};return}
  let n=tree;for(let i=0;i<ps.length-1;i++){if(n[ps[i]]==null||typeof n[ps[i]]!=='object')n[ps[i]]={};n=n[ps[i]]}n[ps.at(-1)]=val;}
 function commit(){tree=prune(tree)||{};localStorage.setItem(KEY,JSON.stringify(tree));fire()}
 function readQ(r){let v=getAt(tree,r.path);if(r.ltl&&v&&typeof v==='object'){const ks=Object.keys(v).sort().slice(-r.ltl);const o={};ks.forEach(k=>o[k]=v[k]);v=o}return v}

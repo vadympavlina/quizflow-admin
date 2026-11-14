@@ -496,7 +496,7 @@
 
 <script type="module">
 import { resolveCaps, CAP_LIMITS, monthKey } from "./shared/caps.js?v=4";
-import { PERMS, GROUPS, layerPerms } from "./shared/perms.js?v=1";
+import { PERMS, GROUPS, layerPerms, encodePerms } from "./shared/perms.js?v=2";
 import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
 import { logAction, initAdminShell, loadAllTeachers, cachedTeachers, esc, formatTimeAgo, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, genPass, hideLoader, mailApi, mailWorkerUrl, filterSheet } from "./shared/admin-shell.js?v=21";
 
@@ -779,6 +779,7 @@ async function saveCaps(u, patch){
   // Старі особисті прапорці (flags) переходять у дозволи: ключі games/import/export стають games.run/tests.import/export
   const f = { perms: layerPerms(u.features || {}), limits: { ...((u.features || {}).limits || {}) } };
   patch(f);
+  f.perms = encodePerms(f.perms);   // у базі ключі без крапки
   ["perms", "limits"].forEach(g => { if (f[g] && !Object.keys(f[g]).length) delete f[g]; });
   try {
     await dbUpd("", { [`users/${u.id}/features`]: Object.keys(f).length ? f : null,
