@@ -119,6 +119,13 @@
 @media (max-width:640px){ .tn-when{flex-basis:100%} }
 
 /* Можливості та ліміти */
+.xf-wrap{position:relative}
+.xf-sug{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 22px 50px -18px rgba(15,30,71,.35);padding:6px;max-height:240px;overflow-y:auto}
+.xf-sug button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;padding:8px 10px;border:0;background:none;border-radius:10px;cursor:pointer;text-align:left;font:inherit;min-height:44px}
+.xf-sug button:hover,.xf-sug button.on{background:var(--v-50)}
+.xf-sug b{font-size:14px;color:var(--ink-900)}.xf-sug span{font-size:12px;color:var(--ink-400)}
+.xf-pick{display:flex;align-items:center;gap:10px;margin-top:8px;padding:9px 12px;border-radius:12px;background:var(--v-50);border:1px solid var(--v-200,#DDD6FE);font-size:14px;font-weight:700}
+.xf-pick button{margin-left:auto;border:0;background:none;cursor:pointer;color:var(--ink-500);font-size:13px;font-weight:700;min-height:36px;padding:0 8px}
 .cp-gl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);margin:16px 0 8px}
 .cp-ro{margin-bottom:4px}.cp-ro.on{background:#FFF7ED;border-color:#FDE4BC}
 .cp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -447,6 +454,13 @@
         </div>
         <div class="confirm-desc">Ця дія <strong>незворотна</strong></div>
 
+        <div class="field" id="del-xfer" style="margin:0 0 14px;text-align:left">
+          <label class="field-l" for="del-xfer-inp">Передати тести колезі (необов'язково)</label>
+          <div class="xf-wrap"><input class="field-input" id="del-xfer-inp" type="search" placeholder="Ім'я або email колеги…" autocomplete="off" aria-controls="del-xfer-sug" aria-autocomplete="list">
+            <div class="xf-sug" id="del-xfer-sug" role="listbox" hidden></div></div>
+          <div class="xf-pick" id="del-xfer-pick" hidden></div>
+          <div class="field-hint">Усі тести скопіюються колезі. Посилання, спроби й студенти видаляються разом з акаунтом.</div>
+        </div>
         <div class="delete-warn">
           <div class="head">
             Буде остаточно видалено акаунт <strong id="del-name"></strong>
@@ -455,7 +469,7 @@
           <div class="list">
             <strong>Буде видалено:</strong><br>
             • Акаунт користувача<br>
-            • Всі тести цього викладача<br>
+            • Всі тести цього викладача (якщо не передати колезі)<br>
             • Всі спроби, студенти, посилання, папки<br>
             • Індивідуальні AI налаштування
           </div>
@@ -600,7 +614,8 @@ async function refreshData(){
 // У викладача може бути КІЛЬКА ролей одночасно: мапа { roleId: true, ... }.
 // Старе одиничне поле customRoleId продовжуємо розуміти при читанні.
 async function loadRoles(){
-  const [r, f, ai, n] = await Promise.all([dbGet("roles"), dbGet("settings/features").catch(() => null), dbGet(`aiUsage/${monthKey()}`).catch(() => null), dbGet("settings/navigation").catch(() => null)]);
+  const [r, f, ai, n, dr] = await Promise.all([dbGet("roles"), dbGet("settings/features").catch(() => null), dbGet(`aiUsage/${monthKey()}`).catch(() => null), dbGet("settings/navigation").catch(() => null), dbGet("settings/defaultRoleIds").catch(() => null)]);
+  window._defaultRoleIds = Object.keys(dr || {}).filter(k => dr[k] && (r || {})[k]);
   window._roles = r || {}; _featCfg = f || {}; _aiMonth = ai || {}; _navRaw = n || null;
 }
 let _featCfg = {}, _aiMonth = {}, _navRaw = null;
@@ -1063,7 +1078,7 @@ window.openCreateModal = () => {
   document.getElementById("new-email").value = "";
   document.getElementById("new-pass").value = genPass();
   document.getElementById("new-role").value = "teacher";
-  renderRoleCheckboxes("new-custom-roles", []);
+  renderRoleCheckboxes("new-custom-roles", window._defaultRoleIds || []);
   document.getElementById("created-box").style.display = "none";
   document.getElementById("created-mail").hidden = true;
   document.getElementById("new-welcome").checked = true;
@@ -1236,7 +1251,8 @@ window.doToggleBlock = async () => {
 
 // ─── DELETE TEACHER ───────────────────────────────────────────────────────
 window.openDeleteTeacher = (uid, name, email) => {
-  _delUid = uid; _delLogin = (email || "").toLowerCase();
+  _delUid = uid; _delLogin = (email || "").toLowerCase(); _xferTo = null;
+  document.getElementById("del-xfer-inp").value = ""; renderXfer();
   document.getElementById("del-name").textContent = name;
   document.getElementById("del-login").textContent = email || uid;
   document.getElementById("del-login-confirm").textContent = email || uid;
@@ -1255,6 +1271,57 @@ window.checkDeleteConfirm = () => {
   btn.disabled = val.toLowerCase() !== _delLogin;
 };
 
+// ─── Передача тестів колезі ───────────────────────────────────────────────
+let _xferTo = null, _xferIdx = 0;
+const xferCandidates = q => {
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  return (window._users || []).filter(u => u.id !== _delUid && u.role !== "admin" && u.blocked !== true)
+    .filter(u => { const hay = (fullName(u) + " " + (u.email || "")).toLowerCase(); return words.every(w => hay.includes(w)); })
+    .sort((a, b) => fullName(a).localeCompare(fullName(b), "uk")).slice(0, 6);
+};
+function renderXfer(){
+  const box = document.getElementById("del-xfer-sug"), pick = document.getElementById("del-xfer-pick"), inp = document.getElementById("del-xfer-inp");
+  const u = _xferTo && byId(_xferTo);
+  pick.hidden = !u; inp.hidden = !!u;
+  if (u){ pick.innerHTML = `<span>${esc(fullName(u))}</span><span style="font-weight:600;color:var(--ink-400)">${esc(u.email || "")}</span><button type="button" data-xf="clear">Змінити</button>`; box.hidden = true; return; }
+  const q = inp.value.trim();
+  if (!q){ box.hidden = true; return; }
+  const list = xferCandidates(q);
+  _xferIdx = Math.min(_xferIdx, Math.max(0, list.length - 1));
+  box.innerHTML = list.length ? list.map((x, i) => `<button type="button" role="option" class="${i === _xferIdx ? "on" : ""}" data-xf="${esc(x.id)}"><b>${esc(fullName(x))}</b><span>${esc(x.email || "")}</span></button>`).join("") : `<div style="padding:12px;font-size:13px;color:var(--ink-400);text-align:center">Нікого не знайдено</div>`;
+  box.hidden = false;
+}
+document.getElementById("del-xfer-inp").addEventListener("input", () => { _xferIdx = 0; renderXfer(); });
+document.getElementById("del-xfer-inp").addEventListener("keydown", e => {
+  const opts = [...document.querySelectorAll("#del-xfer-sug [data-xf]")];
+  if (e.key === "ArrowDown" || e.key === "ArrowUp"){ if (!opts.length) return; e.preventDefault(); _xferIdx = (_xferIdx + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length; renderXfer(); }
+  else if (e.key === "Enter"){ e.preventDefault(); opts[_xferIdx]?.click(); }
+  else if (e.key === "Escape" && !document.getElementById("del-xfer-sug").hidden){ e.stopPropagation(); document.getElementById("del-xfer-sug").hidden = true; }
+});
+document.getElementById("del-xfer").addEventListener("click", e => {
+  const b = e.target.closest("[data-xf]"); if (!b) return;
+  _xferTo = b.dataset.xf === "clear" ? null : b.dataset.xf;
+  document.getElementById("del-xfer-inp").value = "";
+  renderXfer();
+  if (!_xferTo) document.getElementById("del-xfer-inp").focus();
+});
+// Копії тестів іде колезі як є (без папок); власник у записі зберігаємо в transferredFrom
+async function transferTests(fromId, toId){
+  const tests = (await dbGet(`teachers/${fromId}/tests`)) || {};
+  const entries = Object.entries(tests).filter(([, t]) => t && typeof t === "object");
+  const from = fullName(byId(fromId) || { email: _delLogin }), now = Date.now();
+  for (let i = 0; i < entries.length; i += 20) {
+    const upd = {};
+    entries.slice(i, i + 20).forEach(([id, t], j) => { upd[`teachers/${toId}/tests/xf_${now.toString(36)}_${i + j}`] = { ...t, folderId: null, transferredFrom: from, transferredAt: now }; });
+    await dbUpd("", upd);
+  }
+  if (entries.length) {
+    const n = entries.length;
+    await dbUpd("", { [`teachers/${toId}/notifications/xfer_${now}`]: { title: "Вам передано тести", msg: `Адміністратор передав вам ${n} ${n % 10 === 1 && n % 100 !== 11 ? "тест" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? "тести" : "тестів"} від колеги ${from}. Вони лежать у вашій бібліотеці.`, color: "#2d5be3", read: false, ts: now } });
+  }
+  return entries.length;
+}
+
 window.confirmDeleteTeacher = async () => {
   if (!_delUid) return;
   const btn = document.getElementById("del-confirm-btn");
@@ -1262,6 +1329,8 @@ window.confirmDeleteTeacher = async () => {
   btn.disabled = true; btn.textContent = "Видалення...";
 
   try {
+    let moved = null;
+    if (_xferTo) moved = await transferTests(_delUid, _xferTo);   // якщо не вдалося, нічого не видаляємо
     await Promise.all([
       dbRemove(`users/${_delUid}`),
       dbRemove(`teachers/${_delUid}`),
@@ -1269,12 +1338,12 @@ window.confirmDeleteTeacher = async () => {
       ...["attemptLog", "gameLog", "teacherStats"].map(n => dbRemove(`${n}/${_delUid}`).catch(() => {})),
     ]);
     closeModal("m-delete");
-    logAction("teacher.delete", { type: "teacher", id: _delUid, label: fullName(byId(_delUid) || { email: _delLogin }) }, _delLogin);
+    logAction("teacher.delete", { type: "teacher", id: _delUid, label: fullName(byId(_delUid) || { email: _delLogin }) }, _delLogin + (moved !== null ? ` · тестів передано: ${moved} (${fullName(byId(_xferTo) || {})})` : ""));
     window._users = (window._users || []).filter(u => u.id !== _delUid);
     delete (window._stats || {})[_delUid];
-    _delUid = ""; _delLogin = "";
+    _delUid = ""; _delLogin = ""; _xferTo = null;
     afterChange();
-    toast("Викладача та всі його дані видалено");
+    toast(moved !== null ? `Викладача видалено, ${moved} тестів передано колезі` : "Викладача та всі його дані видалено");
   } catch (e) {
     errEl.textContent = "Помилка: " + e.message; errEl.classList.add("show");
     btn.disabled = false; btn.textContent = "Видалити назавжди";

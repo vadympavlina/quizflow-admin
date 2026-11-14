@@ -74,6 +74,14 @@
 .iv-ok{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:#F0FDF4;border:1px solid var(--grn-200);color:var(--grn-700);font-size:13px;font-weight:700;margin-bottom:12px}
 @media (max-width:1023px){ .iv-row{grid-template-columns:1fr 1fr;gap:10px 16px} .iv-acts{grid-column:1/-1;justify-content:flex-start} }
 @media (max-width:640px){ .iv-row{grid-template-columns:1fr;padding:14px} }
+.iv-roles{display:flex;flex-wrap:wrap;gap:8px}
+.iv-role{--rc:var(--v-500);display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#fff}
+.iv-role input{position:absolute;opacity:0;pointer-events:none}
+.iv-role i{width:10px;height:10px;border-radius:50%;background:var(--rc)}
+.iv-role:has(input:checked){border-color:var(--rc);background:color-mix(in srgb,var(--rc) 9%,#fff)}
+.iv-role:has(input:focus-visible){outline:2px solid var(--v-500);outline-offset:2px}
+.iv-def{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--ink-500);cursor:pointer}
+.iv-rl{font-size:12px;color:var(--ink-500)}
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
 <link rel="modulepreload" href="shared/admin-shell.js?v=21">
@@ -99,6 +107,9 @@
       <div class="field"><label class="field-l" for="nw-note">Для кого (необов'язково)</label><input class="field-input" id="nw-note" maxlength="80" placeholder="Наприклад: Іваненко О., кафедра математики"></div>
       <div class="field"><label class="field-l" for="nw-email">Email викладача (необов'язково)</label><input class="field-input" id="nw-email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="200" placeholder="name@example.com">
         <div class="field-hint" id="nw-email-hint">Надішлемо лист із посиланням на реєстрацію.</div></div>
+      <div class="field" id="nw-roles-f" hidden><span class="field-l">Ролі нового викладача</span><div class="iv-roles" id="nw-roles" role="group" aria-label="Ролі нового викладача"></div>
+        <label class="iv-def"><input type="checkbox" id="nw-def"> Робити такими за замовчуванням для нових запрошень</label>
+        <div class="field-hint">Викладач отримає ці ролі одразу після реєстрації. Без ролей діє налаштування «Для всіх».</div></div>
       <div class="field"><span class="field-l">Діє</span><div class="exp" id="nw-exp" role="radiogroup">
         <button type="button" role="radio" data-d="1">1 день</button><button type="button" role="radio" data-d="7" class="on">7 днів</button><button type="button" role="radio" data-d="30">30 днів</button><button type="button" role="radio" data-d="0">Без терміну</button></div></div>
     </div>
@@ -163,7 +174,7 @@ const content = `
 const topbarRight = `<button class="tb-btn primary" type="button" id="btn-new">${IC.plus} Нове запрошення</button>`;
 const { _user } = await initAdminShell({ activeId: "invites", crumbs: ["Запрошення"], content, topbarRight });
 
-let items = {}, users = {}, filter = "all", days = 7, revId = null, sendId = null, lastNew = null;
+let roles = {}, defaultRoles = {}, items = {}, users = {}, filter = "all", days = 7, revId = null, sendId = null, lastNew = null;
 const mailOn = !!(await mailWorkerUrl());
 const EMAIL_RE = /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]{2,}$/;
 const statusOf = t => t.used === true ? "used" : t.expiresAt && t.expiresAt < Date.now() ? "expired" : "active";
@@ -185,7 +196,7 @@ function render(){
     const who = t.usedBy ? nameOf(t.usedBy) : null;
     return `<div class="iv-row${t.st === "active" ? "" : " dim"}" data-id="${esc(t.id)}">
       <div class="iv-n"><b>${esc(t.note || "Без позначки")}</b><code>…${esc(t.id.slice(-8))}</code><br><span class="iv-st ${t.st}">${ST[t.st][0]}</span>${t.sentTo ? `<br><span class="iv-sent" title="${esc(fmt(t.sentAt))}">${IC.send} ${esc(t.sentTo)}</span>` : ""}</div>
-      <div class="iv-c">Створено ${esc(fmt(t.createdAt))}${t.createdByName ? `<br>${esc(t.createdByName)}` : ""}</div>
+      <div class="iv-c">Створено ${esc(fmt(t.createdAt))}${t.createdByName ? `<br>${esc(t.createdByName)}` : ""}${Object.keys(t.roleIds || {}).length ? `<br><span class="iv-rl">Ролі: ${Object.keys(t.roleIds).map(id => esc(roles[id]?.name || "видалена роль")).join(", ")}</span>` : ""}</div>
       <div class="iv-c">${t.st === "used" ? `Зареєструвався: ${who ? `<a href="teachers?id=${encodeURIComponent(t.usedBy)}">${esc(who)}</a>` : "<b>акаунт видалено</b>"}<br>${esc(fmt(t.usedAt))}`
         : t.st === "expired" ? `Термін минув ${esc(fmt(t.expiresAt))}`
         : t.expiresAt ? `Діє ще <b>${left} ${plural(left, ["день", "дні", "днів"])}</b><br>до ${esc(fmt(t.expiresAt))}` : "<b>Без терміну</b>"}</div>
@@ -200,6 +211,10 @@ function openNew(){
   days = 7;
   document.getElementById("nw-note").value = "";
   document.getElementById("nw-email").value = "";
+  const rids = Object.keys(roles).sort((a, b) => (roles[a].name || "").localeCompare(roles[b].name || "", "uk"));
+  document.getElementById("nw-roles-f").hidden = !rids.length;
+  document.getElementById("nw-def").checked = false;
+  document.getElementById("nw-roles").innerHTML = rids.map(id => `<label class="iv-role" style="--rc:${esc(roles[id].color || "#7C3AED")}"><input type="checkbox" value="${esc(id)}" ${defaultRoles[id] ? "checked" : ""}><i></i>${esc(roles[id].name || id)}</label>`).join("");
   document.getElementById("nw-mail").hidden = true;
   document.querySelectorAll("#nw-exp button").forEach(b => b.classList.toggle("on", b.dataset.d === "7"));
   document.getElementById("nw-form").hidden = false; document.getElementById("nw-done").hidden = true;
@@ -216,9 +231,11 @@ document.getElementById("nw-create").addEventListener("click", async e => {
     const email = mailOn ? document.getElementById("nw-email").value.trim().toLowerCase() : "";
     if (email && !EMAIL_RE.test(email)){ toast("Перевірте адресу email", "err"); document.getElementById("nw-email").focus(); return; }
     const me = [_user.name, _user.surname].filter(Boolean).join(" ") || _user.email || "";
-    const data = { createdAt: Date.now(), used: false, note: note || null, expiresAt: days ? Date.now() + days * DAY : null, createdBy: _user.id, createdByName: me || null };
+    const roleIds = Object.fromEntries([...document.querySelectorAll("#nw-roles input:checked")].map(x => [x.value, true]));
+    const data = { ...(Object.keys(roleIds).length ? { roleIds } : {}), createdAt: Date.now(), used: false, note: note || null, expiresAt: days ? Date.now() + days * DAY : null, createdBy: _user.id, createdByName: me || null };
     await dbSet(`invite_tokens/${token}`, data);
     items[token] = data;
+    if (document.getElementById("nw-def").checked) { await dbSet("settings/defaultRoleIds", Object.keys(roleIds).length ? roleIds : null); defaultRoles = roleIds; }
     logAction("invite.create", { type: "invite", id: token, label: note || "без позначки" }, days ? `діє ${days} ${plural(days, ["день", "дні", "днів"])}` : "без терміну");
     document.getElementById("nw-link").value = linkOf(token);
     document.getElementById("nw-note-done").textContent = (days ? `Діє до ${fmt(data.expiresAt)}. ` : "") + "Посилання одноразове: після реєстрації стане недійсним.";
@@ -301,8 +318,8 @@ document.querySelectorAll(".modal-bd").forEach(m => m.addEventListener("click", 
 document.addEventListener("keydown", e => { if (e.key === "Escape"){ const o = [...document.querySelectorAll(".modal-bd.on")]; if (o.length) closeModal(o[o.length - 1].id); } });
 
 try {
-  const [i, u] = await Promise.all([dbGet("invite_tokens"), dbGet("users").catch(() => null)]);
-  items = i || {}; users = u || {};
+  const [i, u, r, d] = await Promise.all([dbGet("invite_tokens"), dbGet("users").catch(() => null), dbGet("roles").catch(() => null), dbGet("settings/defaultRoleIds").catch(() => null)]);
+  items = i || {}; users = u || {}; roles = r || {}; defaultRoles = d || {};
 } catch (e){ toast("Не вдалося завантажити: " + e.message, "err"); }
 render();
 hideLoader();

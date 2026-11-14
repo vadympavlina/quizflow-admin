@@ -181,3 +181,57 @@ test("зміни доступу залишають викладачу спові
   expect(n.some(x => /режим перегляду/.test(x.msg))).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test("запрошення: ролі за замовчуванням і ролі в посиланні", async ({ page, errors }) => {
+  const d = legacyDb();
+  d.settings.defaultRoleIds = { authors: true };
+  await seed(page, d, "t5");
+  await page.goto("/invites?new=1"); await page.waitForTimeout(900);
+  // типова роль уже позначена
+  await expect(page.locator('#nw-roles input[value="authors"]')).toBeChecked();
+  await expect(page.locator('#nw-roles input[value="games"]')).not.toBeChecked();
+  await page.locator('#nw-roles input[value="games"]').evaluate(el => el.click());
+  await page.locator("#nw-def").evaluate(el => el.click());
+  await page.locator("#nw-create").click(); await page.waitForTimeout(500);
+  const db = await readDb(page);
+  const tok = Object.values(db.invite_tokens || {}).find(t => t.roleIds);
+  expect(tok.roleIds).toEqual({ authors: true, games: true });
+  expect(db.settings.defaultRoleIds).toEqual({ authors: true, games: true });
+  expect(errors).toEqual([]);
+});
+
+test("видалення викладача: тести можна передати колезі", async ({ page, errors }) => {
+  const d = admSeed(Date.now());
+  await seed(page, d, "t5");
+  const srcCount = Object.keys(d.teachers.t2.tests).length;
+  expect(srcCount).toBeGreaterThan(0);
+  await page.goto("/teachers?id=t2"); await page.waitForTimeout(800);
+  await page.locator('[data-act="delete"]').first().click();
+  await page.locator("#del-xfer-inp").fill("Олена");
+  await page.locator("#del-xfer-sug [data-xf]").first().click();
+  await expect(page.locator("#del-xfer-pick")).toContainText("Олена");
+  await page.locator("#del-confirm-inp").fill("a.melnyk@itstep.org");
+  await page.locator("#del-confirm-btn").click(); await page.waitForTimeout(700);
+  const db = await readDb(page);
+  expect(db.users.t2).toBeUndefined();
+  expect(db.teachers.t2).toBeUndefined();
+  const copies = Object.entries(db.teachers.t1.tests).filter(([id]) => id.startsWith("xf_"));
+  expect(copies.length).toBe(srcCount);
+  expect(copies[0][1].transferredFrom).toContain("Мельник");
+  expect(copies[0][1].folderId ?? null).toBeNull();
+  const n = Object.values(db.teachers.t1.notifications || {}).find(x => x.title === "Вам передано тести");
+  expect(n.msg).toContain(String(srcCount));
+  expect(errors).toEqual([]);
+});
+
+test("видалення без передачі тестів працює як раніше", async ({ page, errors }) => {
+  await seed(page, admSeed(Date.now()), "t5");
+  await page.goto("/teachers?id=t3"); await page.waitForTimeout(800);
+  await page.locator('[data-act="delete"]').first().click();
+  await page.locator("#del-confirm-inp").fill("shevchenko@itstep.org");
+  await page.locator("#del-confirm-btn").click(); await page.waitForTimeout(600);
+  const db = await readDb(page);
+  expect(db.users.t3).toBeUndefined();
+  expect(Object.keys(db.teachers.t1.tests).some(id => id.startsWith("xf_"))).toBe(false);
+  expect(errors).toEqual([]);
+});
