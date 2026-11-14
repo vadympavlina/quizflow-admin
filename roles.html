@@ -239,6 +239,7 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=21";
 import { PERMS, GROUPS, PAGE_PERMS, IMPLIES, normalizeCfg, resolvePerms, conflicts } from "./shared/perms.js?v=1";
 import { buildSave } from "./shared/perms-store.js?v=1";
+import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
 import { CAP_LIMITS } from "./shared/caps.js?v=4";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -492,10 +493,10 @@ function userUpd(uid, rid, on){
 }
 async function setMember(uid, on){
   const rid = _selId; if (!rid) return;
-  const upd = userUpd(uid, rid, on);
+  const upd = { ...userUpd(uid, rid, on), ...accessNotice([uid], `role_${rid}_${Date.now()}`, on ? `Вам додано роль «${roles[rid]?.name || ""}». Доступ до сторінок і дій міг змінитися.` : `З вас знято роль «${roles[rid]?.name || ""}». Доступ до сторінок і дій міг змінитися.`) };
   try {
     await update(ref(db), upd);
-    Object.entries(upd).forEach(([p, v]) => {
+    Object.entries(upd).filter(([p]) => p.startsWith("users/")).forEach(([p, v]) => {
       const [, id, key, r2] = p.split("/"); const u = users[id]; if (!u) return;
       if (key === "customRoleId"){ delete u.customRoleId; return; }
       if (!u.customRoleIds || typeof u.customRoleIds !== "object") u.customRoleIds = {};
@@ -550,6 +551,8 @@ document.addEventListener("keydown", e => {
 // Перше ж збереження переводить старі налаштування (прапорці й обмеження меню за ролями) у новий формат
 async function saveFeat(mutate, what){
   const { upd, data, newNav } = buildSave(feat, navRaw, navFromDb, mutate, id => !!roles[id]);
+  // Викладачам цієї ролі: одне сповіщення на годину, скільки б налаштувань не змінили
+  Object.assign(upd, accessNotice(membersOf(_selId).map(m => m.uid), `rp_${_selId}_${hourKey()}`, `Змінено налаштування вашої ролі «${roles[_selId]?.name || ""}»: доступ до деяких сторінок і дій міг змінитися.`));
   await update(ref(db), upd);
   feat = data;
   if (newNav){ navRaw = newNav; nav = asArr(newNav).filter(Boolean).map(s => ({ ...s, items: asArr(s.items).filter(Boolean) })); }
