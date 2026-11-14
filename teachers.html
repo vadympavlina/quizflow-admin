@@ -498,6 +498,8 @@
 import { resolveCaps, CAP_LIMITS, monthKey } from "./shared/caps.js?v=4";
 import { PERMS, GROUPS, layerPerms, encodePerms } from "./shared/perms.js?v=2";
 import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
+import { syncPerms, unsynced } from "./shared/perms-sync.js?v=1";
+const syncFor = async uids => { try { await syncPerms(uids); } catch (e) { toast("Збережено, але сервер не оновив дозволи: " + e.message, "err"); } };
 import { logAction, initAdminShell, loadAllTeachers, cachedTeachers, esc, formatTimeAgo, dbGet, dbSet, dbUpd, dbRemove, openModal, closeModal, toast, genPass, hideLoader, mailApi, mailWorkerUrl, filterSheet } from "./shared/admin-shell.js?v=21";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -784,6 +786,7 @@ async function saveCaps(u, patch){
   try {
     await dbUpd("", { [`users/${u.id}/features`]: Object.keys(f).length ? f : null,
       ...accessNotice([u.id], `perm_${hourKey()}`, "Адміністратор змінив ваші особисті дозволи або ліміти: доступ до деяких сторінок і дій міг змінитися.") });
+    await syncFor([u.id]);
     if (Object.keys(f).length) u.features = f; else delete u.features;
     logAction("teacher.caps", { type: "teacher", id: u.id, label: fullName(u) }, capsSummary(f));
     toast("Доступ оновлено");
@@ -794,6 +797,7 @@ async function setReadOnly(u, on){
   try {
     await dbUpd("", { [`users/${u.id}/readOnly`]: on ? true : null,
       ...accessNotice([u.id], `ro_${Date.now()}`, on ? "Ваш акаунт переведено в режим перегляду: ви бачите дані, але змінювати їх не можна." : "Режим перегляду вимкнено: акаунт знову працює у звичайному режимі.") });
+    await syncFor([u.id]);
     if (on) u.readOnly = true; else delete u.readOnly;
     logAction("teacher.readonly", { type: "teacher", id: u.id, label: fullName(u) }, on ? "лише перегляд: увімкнено" : "лише перегляд: вимкнено");
     toast(on ? "Режим «лише перегляд» увімкнено" : "Режим «лише перегляд» вимкнено");
@@ -922,6 +926,7 @@ async function toggleRole(u, rid, btn){
       ...Object.fromEntries(Object.entries(upd).map(([k, v]) => [`users/${u.id}/${k}`, v])),
       ...accessNotice([u.id], `role_${rid}_${Date.now()}`, on ? `Вам додано роль «${rname}». Доступ до сторінок і дій міг змінитися.` : `З вас знято роль «${rname}». Доступ до сторінок і дій міг змінитися.`),
     });
+    await syncFor([u.id]);
     if (!u.customRoleIds || typeof u.customRoleIds !== "object") u.customRoleIds = {};
     Object.entries(upd).forEach(([k, v]) => { if (k === "customRoleId") delete u.customRoleId; else { const id = k.split("/")[1]; v ? u.customRoleIds[id] = true : delete u.customRoleIds[id]; } });
     toast(on ? `Роль «${(window._roles[rid] || {}).name}» додано` : "Роль знято");
@@ -944,6 +949,7 @@ async function setSysRole(u, role){
   if (!ok) return;
   try {
     await dbUpd(`users/${u.id}`, { role });
+    await syncFor([u.id]);
     u.role = role;
     logAction(role === "admin" ? "teacher.admin.grant" : "teacher.admin.revoke", { type: "teacher", id: u.id, label: fullName(u) });
     toast(role === "admin" ? "Тепер це адміністратор" : "Права адміністратора знято");
@@ -1139,6 +1145,7 @@ window.createTeacher = async () => {
     roleIdsArr.forEach(id => { customRoleIds[id] = true; });
     const profile = { name, surname, email, role, customRoleIds, createdAt: Date.now(), blocked: false };
     await dbSet(`users/${uid}`, profile);
+    await syncFor([uid]);
 
     // Показуємо результат
     document.getElementById("created-email").textContent = email;
@@ -1391,6 +1398,8 @@ try {
   await Promise.all([rolesP, refreshData()]);
   fillRoleFilter();
   renderAll();
+  // нові користувачі без дзеркала дозволів (щойно зареєструвались) — рахуємо автоматично
+  try { const miss = unsynced(await dbGet("users")); if (miss.length) await syncPerms(miss); } catch (e) { console.warn("[teachers] perms sync", e); }
 } catch (e) {
   console.error("[teachers] Initial load failed:", e);
   const root = document.getElementById("admin-content");

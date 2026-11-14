@@ -240,6 +240,7 @@
 import { logAction, initAdminShell, dbGet, db, ref, update, esc, toast, openModal, closeModal, hideLoader } from "./shared/admin-shell.js?v=21";
 import { PERMS, PAGE_PERMS, normalizeCfg, resolvePerms } from "./shared/perms.js?v=2";
 import { toStoreCfg } from "./shared/perms-store.js?v=1";
+import { syncPerms } from "./shared/perms-sync.js?v=1";
 
 // ─── ІКОНКИ (40 штук, 5 категорій) ────────────────────────────────────────
 const ICON_CATS = {
@@ -718,6 +719,7 @@ async function save(){
     // Обмеження сторінок за ролями більше не живуть у меню: старі переходять у дозволи, щоб нічого не загубилось
     if (featOrig.v !== 2) { featOrig = toStoreCfg(normalizeCfg(featOrig, navOrig), id => !!roles[id]); upd["settings/features"] = featOrig; }
     await update(ref(db), upd);
+    if (upd["settings/features"]) { try { await syncPerms(null); } catch (e) { toast("Збережено, але сервер не оновив дозволи: " + e.message, "err"); } }
     nav = clone(data); saved = clone(data);
     logAction("nav.update", { type: "service", label: "Навігація" }, `${data.length} розділів, ${data.reduce((n, s) => n + s.items.length, 0)} пунктів`);
     render();

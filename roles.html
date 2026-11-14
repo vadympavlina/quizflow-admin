@@ -240,6 +240,9 @@ import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModa
 import { PERMS, GROUPS, PAGE_PERMS, IMPLIES, normalizeCfg, resolvePerms, conflicts } from "./shared/perms.js?v=2";
 import { buildSave } from "./shared/perms-store.js?v=1";
 import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
+import { syncPerms } from "./shared/perms-sync.js?v=1";
+// Дзеркало дозволів у профілях: правила бази читають його. Збій не ховаємо, але й не ламаємо збереження
+const syncFor = async uids => { try { await syncPerms(uids); } catch (e) { toast("Збережено, але сервер не оновив дозволи: " + e.message, "err"); } };
 import { CAP_LIMITS } from "./shared/caps.js?v=4";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -496,6 +499,7 @@ async function setMember(uid, on){
   const upd = { ...userUpd(uid, rid, on), ...accessNotice([uid], `role_${rid}_${Date.now()}`, on ? `Вам додано роль «${roles[rid]?.name || ""}». Доступ до сторінок і дій міг змінитися.` : `З вас знято роль «${roles[rid]?.name || ""}». Доступ до сторінок і дій міг змінитися.`) };
   try {
     await update(ref(db), upd);
+    await syncFor([uid]);
     Object.entries(upd).filter(([p]) => p.startsWith("users/")).forEach(([p, v]) => {
       const [, id, key, r2] = p.split("/"); const u = users[id]; if (!u) return;
       if (key === "customRoleId"){ delete u.customRoleId; return; }
@@ -553,8 +557,10 @@ async function saveFeat(mutate, what){
   const { upd, data, newNav } = buildSave(feat, navRaw, navFromDb, mutate, id => !!roles[id]);
   // Викладачам цієї ролі: одне сповіщення на годину, скільки б налаштувань не змінили
   Object.assign(upd, accessNotice(membersOf(_selId).map(m => m.uid), `rp_${_selId}_${hourKey()}`, `Змінено налаштування вашої ролі «${roles[_selId]?.name || ""}»: доступ до деяких сторінок і дій міг змінитися.`));
+  const migrating = (feat || {}).v !== 2;
   await update(ref(db), upd);
   feat = data;
+  await syncFor(migrating ? null : membersOf(_selId).map(m => m.uid));      // перехід на новий формат змінює всіх
   if (newNav){ navRaw = newNav; nav = asArr(newNav).filter(Boolean).map(s => ({ ...s, items: asArr(s.items).filter(Boolean) })); }
   logAction("role.perms", { type: "role", id: _selId, label: roles[_selId]?.name || _selId }, what);
 }
@@ -694,7 +700,9 @@ window.confirmDeleteRole = async () => {
       return { ...it, roleIds: it.roleIds.filter(r => r !== id) };
     }) }));
     if (navChanged){ upd["settings/navigation"] = newNav; upd["settings/navigation_ts"] = Date.now(); }
+    const affected = membersOf(id).map(u => u.uid);
     await update(ref(db), upd);   // усе одним атомарним записом
+    await syncFor(affected);
     delete roles[id];
     membersOf(id).forEach(u => { const x = users[u.uid]; if (x?.customRoleIds) delete x.customRoleIds[id]; else if (x) delete x.customRoleId; });
     if (navChanged) nav = newNav;
