@@ -5,6 +5,9 @@
 //                       roles:{ roleId:{ flags:{…}, limits:{…} } } }
 // users/{uid}/features = { flags:{…}, limits:{…} }   — індивідуально для викладача
 //
+// Дозволи (що можна робити) живуть у shared/perms.js, тут — ліміти й сумісність: flags.games/import/export
+// похідні від дозволів games.run / tests.import / export, тож старий код працює без змін.
+//
 // Пріоритет: індивідуально → ролі викладача → для всіх.
 //  • перемикач: якщо хоч одна роль дозволяє — дозволено (найщедріше правило);
 //  • ліміт: 0 = без обмежень; серед ролей береться найбільший.
@@ -12,6 +15,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { limitNotice } from "./notices.js?v=2";
+import { resolvePerms, LEGACY_FLAG_PERM } from "./perms.js?v=1";
 
 export const CAP_FLAGS = {
   games:  { label: "Ігри наживо",           desc: "Запуск ігор з телефонами учнів" },
@@ -27,17 +31,15 @@ const ids = v => v && typeof v === "object" ? Object.keys(v).filter(k => v[k]) :
 const num = v => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null; };
 
 // Повертає { flags:{k:bool}, limits:{k:number}, src:{k:"user"|"role"|"all"}, admin }
-export function resolveCaps(cfg = {}, userProfile = {}){
+export function resolveCaps(cfg = {}, userProfile = {}, nav){
   const roleIds = Array.isArray(userProfile.customRoleIds) ? userProfile.customRoleIds : ids(userProfile.customRoleIds).concat(userProfile.customRoleId ? [userProfile.customRoleId] : []);
   const roles = roleIds.map(r => cfg.roles?.[r]).filter(Boolean);
   const own = userProfile.features || {};
   const out = { flags: {}, limits: {}, src: {}, admin: userProfile.role === "admin" };
-  Object.keys(CAP_FLAGS).forEach(k => {
-    if (typeof own.flags?.[k] === "boolean"){ out.flags[k] = own.flags[k]; out.src[k] = "user"; return; }
-    const rv = roles.map(r => r.flags?.[k]).filter(v => typeof v === "boolean");
-    if (rv.length){ out.flags[k] = rv.some(Boolean); out.src[k] = "role"; return; }
-    out.flags[k] = cfg.flags?.[k] !== false; out.src[k] = "all";
-  });
+  // Дозволи: нові (v:2) або старі прапорці й обмеження меню за ролями — разом, з пріоритетом особисте → ролі → для всіх
+  const pr = resolvePerms(cfg, userProfile, nav);
+  out.perms = pr.perms; out.permSrc = pr.src; out.readOnly = pr.readOnly;
+  Object.keys(CAP_FLAGS).forEach(k => { out.flags[k] = pr.perms[LEGACY_FLAG_PERM[k]] !== false; out.src[k] = pr.src[LEGACY_FLAG_PERM[k]]; });
   Object.keys(CAP_LIMITS).forEach(k => {
     const o = num(own.limits?.[k]);
     if (o !== null){ out.limits[k] = o; out.src[k] = "user"; return; }
@@ -45,14 +47,16 @@ export function resolveCaps(cfg = {}, userProfile = {}){
     if (rv.length){ out.limits[k] = rv.includes(0) ? 0 : Math.max(...rv); out.src[k] = "role"; return; }
     out.limits[k] = num(cfg.limits?.[k]) || 0; out.src[k] = "all";
   });
-  if (out.admin){ Object.keys(CAP_FLAGS).forEach(k => out.flags[k] = true); Object.keys(CAP_LIMITS).forEach(k => out.limits[k] = 0); }
+  if (out.admin){ Object.keys(CAP_LIMITS).forEach(k => out.limits[k] = 0); }
   return out;
 }
 
 export async function loadCaps(db, userProfile){
-  let cfg = {};
+  let cfg = {}, nav = null;
   try { cfg = (await get(ref(db, "settings/features"))).val() || {}; } catch {}
-  return resolveCaps(cfg, userProfile);
+  // Старий формат: сторінки, обмежені ролями, лежать у налаштуваннях меню
+  if (cfg.v !== 2) { try { nav = (await get(ref(db, "settings/navigation"))).val(); } catch {} }
+  return resolveCaps(cfg, userProfile, nav);
 }
 
 // Скільки AI-запитів викладач уже зробив цього місяця (облік — shared/ai-usage.js)

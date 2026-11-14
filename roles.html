@@ -131,6 +131,32 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
   .rl-how{grid-template-columns:1fr}
 }
 
+
+/* Вкладки й матриця дозволів */
+.rp-tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--line);overflow-x:auto}
+.rp-tabs button{border:0;background:none;padding:13px 14px;font:700 14px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;min-height:44px}
+.rp-tabs button.on{color:var(--v-600);border-bottom-color:var(--v-500)}
+.rp-tabs button:focus-visible{outline:2px solid var(--v-500);outline-offset:-2px;border-radius:8px}
+.rp-row{flex-wrap:wrap}
+.rp-w{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:var(--sf-3);color:var(--ink-500);vertical-align:1px}
+.rp-eff.yes{color:var(--grn-700)} .rp-eff.no{color:var(--red-700)}
+.rp-prev{margin-bottom:16px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--sf-1)}
+.rp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.rp-chip{font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--grn-50,#E9F8EF);color:var(--grn-700)}
+.rp-chips.no .rp-chip{background:var(--red-50);color:var(--red-700);text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25)}
+.rl-warn{margin-bottom:12px;padding:11px 14px;border-radius:12px;background:#FFF7ED;border:1px solid #FDE4BC;color:#9A3412;font-size:13px;line-height:1.55}
+.rl-warn ul{margin:4px 0 0;padding-left:18px}
+.tri{display:inline-flex;padding:3px;border-radius:10px;background:var(--sf-2);gap:2px;flex:0 0 auto}
+.tri button{border:0;background:transparent;padding:8px 11px;border-radius:8px;font:700 12px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer;white-space:nowrap;min-height:36px}
+.tri button.on{background:#fff;color:var(--ink-900);box-shadow:0 1px 3px rgba(15,30,71,.12)}
+.tri button.on[data-v="1"]{color:var(--grn-700)} .tri button.on[data-v="0"]{color:var(--red-700)}
+.tri button:disabled{opacity:.6;cursor:default}
+.tri button:focus-visible{outline:2px solid var(--v-500);outline-offset:1px}
+.fx-num{width:150px;flex:0 0 auto;padding:9px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:600 14px "Geist Mono",monospace;color:var(--ink-900);outline:none;text-align:right}
+.fx-num::placeholder{font:600 13px "Manrope",sans-serif;color:var(--ink-400)}
+.fx-num:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+@media (max-width:760px){ .rp-row .tri{width:100%} .rp-row .tri button{flex:1} .rp-tabs{padding:0 8px} .fx-num{width:110px} }
+
 /* Toggle switch */
 .toggle-sw{position:relative; display:inline-block; width:38px; height:22px; flex:0 0 auto}
 .toggle-sl{
@@ -155,7 +181,7 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=11"></script>
+<script src="shared/admin-nav.js?v=12"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -211,6 +237,9 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 
 <script type="module">
 import { logAction, initAdminShell, db, ref, update, dbGet, openModal, closeModal, toast, esc, hideLoader } from "./shared/admin-shell.js?v=21";
+import { PERMS, GROUPS, PAGE_PERMS, IMPLIES, normalizeCfg, resolvePerms, conflicts } from "./shared/perms.js?v=1";
+import { buildSave } from "./shared/perms-store.js?v=1";
+import { CAP_LIMITS } from "./shared/caps.js?v=4";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const IC = {
@@ -259,7 +288,7 @@ const content = `
   <div class="page-head">
     <div>
       <h1>Хто що може робити</h1>
-      <p>Групуйте викладачів і обмежуйте, які сторінки панелі їм видно</p>
+      <p>Групуйте викладачів і задавайте, що кожна група бачить і може робити</p>
     </div>
   </div>
   <div id="rl-root"><div class="tp"><aside class="tp-side"><div class="tp-items">${'<div class="tc-sk"></div>'.repeat(4)}</div></aside><section class="tp-main"><div class="tp-blank"></div></section></div></div>
@@ -271,8 +300,10 @@ await initAdminShell({ activeId: "roles", crumbs: ["Ролі"], content, topbarR
 // ─── Стан ─────────────────────────────────────────────────────────────────
 let roles = {};    // roleId -> {name, color, description, createdAt}
 let users = {};    // uid -> профіль
-let nav = [];      // settings/navigation (секції з items[].roleIds)
-let navFromDb = false;
+let nav = [];      // settings/navigation (секції меню)
+let feat = {};     // settings/features (дозволи й ліміти для всіх і за ролями)
+let _tab = new URLSearchParams(location.search).get("tab") || "access";
+let navFromDb = false, navRaw = null;
 let editingRoleId = null, pickedColor = ROLE_COLORS[0];
 let _selId = new URLSearchParams(location.search).get("id") || "";
 const mobile = () => matchMedia("(max-width:1023px)").matches;
@@ -286,16 +317,13 @@ function getUserRoleIds(u){
 }
 const membersOf = id => Object.entries(users).filter(([, u]) => u && typeof u === "object" && getUserRoleIds(u).includes(id)).map(([uid, u]) => ({ uid, ...u }))
   .sort((a, b) => fullName(a).localeCompare(fullName(b), "uk"));
-const pagesOf = id => {
-  const out = [];
-  nav.forEach(sec => asArr(sec?.items).forEach(it => { if (Array.isArray(it.roleIds) && it.roleIds.includes(id)) out.push(it.label || it.id); }));
-  return out;
-};
+// Скільки дозволів і лімітів ця роль змінює відносно «для всіх»
+const changesOf = id => { const r = normalizeCfg(feat, navRaw).roles[id]; return r ? Object.keys(r.perms || {}).length + Object.values(r.limits || {}).filter(v => v !== "" && v != null).length : 0; };
 const sortedIds = () => Object.keys(roles).sort((a, b) => (roles[a].name || "").localeCompare(roles[b].name || "", "uk"));
 
 async function load(){
-  const [r, u, n] = await Promise.all([dbGet("roles"), dbGet("users"), dbGet("settings/navigation").catch(() => null)]);
-  roles = r || {}; users = u || {};
+  const [r, u, n, f] = await Promise.all([dbGet("roles"), dbGet("users"), dbGet("settings/navigation").catch(() => null), dbGet("settings/features").catch(() => null)]);
+  roles = r || {}; users = u || {}; feat = f || {}; navRaw = n || null;
   navFromDb = !!(n && asArr(n).length);
   nav = asArr(navFromDb ? n : JSON.parse(JSON.stringify(DEFAULT_NAV))).filter(Boolean).map(s => ({ ...s, items: asArr(s.items).filter(Boolean) }));
   render();
@@ -309,11 +337,11 @@ function render(){
     root.innerHTML = `<div class="rl-start">
       <div class="ei">${sm(IC.shield, 28)}</div>
       <h2>Ще немає жодної ролі</h2>
-      <p>Роль — це мітка для групи викладачів, наприклад «Куратор» чи «Методист». Через неї зручно шукати викладачів і показувати окремі сторінки панелі лише потрібним людям.</p>
+      <p>Роль — це мітка для групи викладачів, наприклад «Куратор» чи «Методист». Через неї задають, які сторінки бачить група, що вона може робити (тести, ігри, експорт, AI) і які ліміти має.</p>
       <div class="rl-how">
         <div class="rl-step"><span class="n">1</span><div><b>Створіть роль</b><span>Назва, опис і колір</span></div></div>
         <div class="rl-step"><span class="n">2</span><div><b>Додайте викладачів</b><span>Прямо в картці ролі або в картці викладача</span></div></div>
-        <div class="rl-step"><span class="n">3</span><div><b>Оберіть сторінки</b><span>Позначені сторінки бачитимуть лише викладачі з цією роллю</span></div></div>
+        <div class="rl-step"><span class="n">3</span><div><b>Налаштуйте доступ</b><span>Для кожної дії: як для всіх, так або ні</span></div></div>
       </div>
       <button class="tb-btn primary" type="button" onclick="openRoleModal()">${sm(IC.plus)} Створити роль</button>
     </div>`;
@@ -344,13 +372,74 @@ function renderList(){
   const ids = q ? all.filter(id => norm(roles[id].name).includes(q) || norm(roles[id].description).includes(q)) : all;
   document.getElementById("rl-meta").textContent = `${ids.length} / ${all.length}`;
   document.getElementById("rl-list").innerHTML = ids.length ? ids.map(id => {
-    const r = roles[id], m = membersOf(id).length, p = pagesOf(id).length;
+    const r = roles[id], m = membersOf(id).length, p = changesOf(id);
     return `<button type="button" class="rl-it${id === _selId ? " on" : ""}" style="--rc:${esc(r.color || ROLE_COLORS[0])}" data-id="${esc(id)}"${id === _selId ? ' aria-current="true"' : ""}>
       <span class="rl-ic">${IC.shield}</span>
       <span class="rl-it-i"><div class="rl-it-n">${esc(r.name || "—")}</div>
-        <div class="rl-it-m"><b>${m}</b> ${plural(m, ["викладач", "викладачі", "викладачів"])}${p ? ` · <b>${p}</b> ${plural(p, ["сторінка", "сторінки", "сторінок"])}` : ""}</div></span>
+        <div class="rl-it-m"><b>${m}</b> ${plural(m, ["викладач", "викладачі", "викладачів"])}${p ? ` · <b>${p}</b> ${plural(p, ["налаштування", "налаштування", "налаштувань"])}` : ""}</div></span>
     </button>`;
   }).join("") : `<div class="tc-empty"><div class="et">Нічого не знайдено</div><div>Спробуйте інший запит</div></div>`;
+}
+
+const TABS = [["access", "Доступ"], ["members", "Викладачі"], ["limits", "Ліміти"]];
+const triTxt = { "": "Як для всіх", "1": "Так", "0": "Ні" };
+
+// Ефективні дозволи викладача лише з цією роллю й те, що діє «для всіх»
+function permsView(rid){
+  const c = normalizeCfg(feat, navRaw);
+  const base = resolvePerms({ v: 2, perms: c.perms }, { role: "teacher" }).perms;
+  const eff = resolvePerms(c, { role: "teacher", customRoleIds: { [rid]: true } }).perms;
+  return { c, base, eff, own: c.roles[rid]?.perms || {} };
+}
+
+function accessTab(rid){
+  const { base, eff, own } = permsView(rid);
+  const groups = GROUPS.map(g => {
+    const keys = Object.keys(PERMS).filter(k => PERMS[k].group === g.id);
+    return `<div class="pg-sec"><div class="pg-sec-l">${esc(g.label)}</div><div class="pg-list">${keys.map(k => {
+      const v = own[k], val = typeof v === "boolean" ? (v ? "1" : "0") : "";
+      const implied = val === "0" && eff[k] ? " · «Ні» перекрито: потрібно для іншого дозволу" : !val && eff[k] && !base[k] ? " · увімкнено залежністю" : "";
+      const need = v === true && IMPLIES[k]?.length ? `Вмикає також: ${IMPLIES[k].map(d => PERMS[d].label).join(", ")}` : "";
+      return `<div class="pg-row rp-row${eff[k] ? " on" : ""}">
+        <div class="pg-i"><div class="pg-n">${esc(PERMS[k].label)}${PERMS[k].write ? ` <span class="rp-w" title="Змінює дані: у режимі «лише перегляд» вимкнено">зміни</span>` : ""}</div>
+          <div class="pg-s">${esc(PERMS[k].desc)}</div>
+          <div class="pg-s rp-eff ${eff[k] ? "yes" : "no"}">${eff[k] ? "Роль має доступ" : "Роль не має доступу"}${implied}${need ? ` · ${esc(need)}` : ""}</div></div>
+        <div class="tri" role="radiogroup" aria-label="${esc(PERMS[k].label)}">${["", "1", "0"].map(x => `<button type="button" role="radio" aria-checked="${x === val}" data-pk="${esc(k)}" data-v="${x}" class="${x === val ? "on" : ""}">${x === "" ? `Як для всіх: ${base[k] ? "так" : "ні"}` : triTxt[x]}</button>`).join("")}</div>
+      </div>`; }).join("")}</div></div>`; }).join("");
+  // Що побачить викладач лише з цією роллю
+  const pages = []; nav.forEach(sec => asArr(sec?.items).forEach(it => { if (it && it.enabled !== false) pages.push(it); }));
+  const vis = pages.filter(it => it.protected || !PAGE_PERMS[it.id] || eff[PAGE_PERMS[it.id]] !== false);
+  const hid = pages.filter(it => !vis.includes(it));
+  const warn = conflicts(eff);
+  return `<div class="rl-hint">${IC.info}<span>Кожен пункт: <b>Як для всіх</b> (роль нічого не змінює), <b>Так</b> або <b>Ні</b>. Якщо в викладача кілька ролей, достатньо, щоб одна дозволяла. Особисті налаштування в картці викладача сильніші за роль. Зміни зберігаються одразу.</span></div>
+    ${warn.length ? `<div class="rl-warn" role="alert"><b>Перевірте налаштування</b><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+    <div class="rp-prev"><div class="pg-sec-l">Що побачить викладач лише з цією роллю</div>
+      <div class="rp-chips">${vis.map(it => `<span class="rp-chip">${esc(it.label || it.id)}</span>`).join("") || `<span class="sub">Нічого</span>`}</div>
+      ${hid.length ? `<div class="rp-chips no">${hid.map(it => `<span class="rp-chip">${esc(it.label || it.id)}</span>`).join("")}</div><div class="pg-s" style="margin-top:6px">Сторінки не показуються в меню й не відкриваються за прямим посиланням.</div>` : ""}</div>
+    ${groups}`;
+}
+
+function limitsTab(rid){
+  const r = normalizeCfg(feat, navRaw);
+  const own = r.roles[rid]?.limits || {}, all = r.limits || {};
+  return `<div class="rl-hint">${IC.info}<span>Порожнє поле: як для всіх. <b>0</b>: без обмежень. Якщо ролей кілька, діє найбільший ліміт.</span></div>
+    <div class="pg-list">${Object.entries(CAP_LIMITS).map(([k, f]) => { const v = own[k];
+      return `<div class="pg-row"><div class="pg-i"><div class="pg-n">${esc(f.label)}</div><div class="pg-s">${esc(f.desc)} · Для всіх: ${Number(all[k]) > 0 ? Number(all[k]) : "без обмежень"}</div></div>
+        <input class="fx-num" type="number" min="0" step="1" inputmode="numeric" data-lk="${esc(k)}" value="${v === undefined || v === null || v === "" ? "" : Number(v)}" placeholder="Як для всіх" aria-label="${esc(f.label)}"></div>`; }).join("")}</div>`;
+}
+
+function membersTab(rid){
+  const members = membersOf(rid);
+  return `<div class="tp-sec-h"><div><h3>Викладачі з цією роллю · ${members.length}</h3><p>Знайдіть викладача, щоб додати. Зміни зберігаються одразу</p></div></div>
+    <div class="rl-add">
+      <div class="search-input">${sm(IC.plus)}<input class="input" id="mb-add" type="search" placeholder="Додати викладача: ім'я або email…" autocomplete="off" aria-label="Додати викладача" aria-autocomplete="list" aria-controls="mb-sug"></div>
+      <div class="rl-sug" id="mb-sug" role="listbox" hidden></div>
+    </div>
+    ${members.length ? `<div class="mb-list">${members.map(u => `<div class="mb-row${u.blocked ? " blocked" : ""}">
+        <a href="teachers?id=${encodeURIComponent(u.uid)}" title="Відкрити картку викладача"><span class="mb-ava">${esc(initials(u))}</span><span class="mb-i"><div class="mb-n">${esc(fullName(u))}</div><div class="mb-e">${esc(u.email || "")}</div></span></a>
+        <button type="button" class="mb-x" data-act="rm" data-uid="${esc(u.uid)}" title="Зняти роль" aria-label="Зняти роль з ${esc(fullName(u))}">${IC.x}</button>
+      </div>`).join("")}</div>`
+      : `<div class="rl-none">Поки нікому не призначена</div>`}`;
 }
 
 function renderDetail(){
@@ -358,7 +447,9 @@ function renderDetail(){
   const r = roles[_selId];
   if (!r){ host.classList.remove("open"); host.innerHTML = `<div class="tp-blank"></div>`; return; }
   const color = r.color || ROLE_COLORS[0];
-  const members = membersOf(_selId);
+  if (!TABS.some(t => t[0] === _tab)) _tab = "access";
+  const body = _tab === "members" ? membersTab(_selId) : _tab === "limits" ? limitsTab(_selId) : accessTab(_selId);
+  // Поля вводу не перемальовуємо під час набору: зберігаємо фокус вкладки
   host.innerHTML = `
     <button type="button" class="tb-btn tp-back" data-act="back">${sm(IC.back)} До списку</button>
     <article class="tp-card" style="--rc:${esc(color)}">
@@ -370,35 +461,8 @@ function renderDetail(){
           <button type="button" class="tb-btn danger" data-act="delete" title="Видалити роль" aria-label="Видалити роль">${sm(IC.trash)}</button>
         </div>
       </header>
-
-      <section class="tp-sec">
-        <div class="tp-sec-h"><div><h3>Викладачі з цією роллю · ${members.length}</h3><p>Знайдіть викладача, щоб додати. Зміни зберігаються одразу</p></div></div>
-        <div class="rl-add">
-          <div class="search-input">${sm(IC.plus)}<input class="input" id="mb-add" type="search" placeholder="Додати викладача: ім'я або email…" autocomplete="off" aria-label="Додати викладача" aria-autocomplete="list" aria-controls="mb-sug"></div>
-          <div class="rl-sug" id="mb-sug" role="listbox" hidden></div>
-        </div>
-        ${members.length ? `<div class="mb-list">${members.map(u => `<div class="mb-row${u.blocked ? " blocked" : ""}">
-            <a href="teachers?id=${encodeURIComponent(u.uid)}" title="Відкрити картку викладача"><span class="mb-ava">${esc(initials(u))}</span><span class="mb-i"><div class="mb-n">${esc(fullName(u))}</div><div class="mb-e">${esc(u.email || "")}</div></span></a>
-            <button type="button" class="mb-x" data-act="rm" data-uid="${esc(u.uid)}" title="Зняти роль" aria-label="Зняти роль з ${esc(fullName(u))}">${IC.x}</button>
-          </div>`).join("")}</div>`
-          : `<div class="rl-none">Поки нікому не призначена</div>`}
-      </section>
-
-      <section class="tp-sec">
-        <div class="tp-sec-h"><div><h3>Доступ до сторінок панелі</h3><p>Увімкніть, щоб сторінку бачили лише викладачі з цією роллю</p></div><a href="navigation">Уся навігація</a></div>
-        <div class="rl-hint">${IC.info}<span>Сторінку без жодної ролі бачать усі викладачі. Якщо на сторінці кілька ролей — її бачить кожен, у кого є хоча б одна з них. Головна сторінка доступна завжди.</span></div>
-        ${nav.map((sec, si) => { const items = asArr(sec.items); if (!items.length) return ""; return `<div class="pg-sec"><div class="pg-sec-l">${esc(sec.label || "Розділ")}</div><div class="pg-list">${items.map((it, ii) => {
-          const rids = (Array.isArray(it.roleIds) ? it.roleIds : []).filter(x => roles[x]);
-          const on = rids.includes(_selId);
-          const others = rids.filter(x => x !== _selId);
-          const sub = it.protected ? "Бачать усі — цю сторінку не можна обмежити"
-            : !rids.length ? "Бачать усі викладачі"
-            : `Бачать лише: ${rids.map(x => `<i style="background:${esc(roles[x].color || "#7C3AED")}"></i>${esc(roles[x].name)}`).join(", ")}`;
-          return `<div class="pg-row${on ? " on" : ""}${it.enabled === false ? " off" : ""}">
-            <div class="pg-i"><div class="pg-n">${esc(it.label || it.id)}${it.enabled === false ? " · вимкнено в меню" : ""}</div><div class="pg-s">${sub}${others.length && on ? "" : ""}</div></div>
-            ${it.protected ? `<span class="pg-lock">${sm(IC.lock, 12)} Завжди</span>` : `<label class="toggle-sw"><input type="checkbox" data-pg="${si}:${ii}" ${on ? "checked" : ""} aria-label="Лише для ролі: ${esc(it.label || it.id)}"><span class="toggle-sl"></span></label>`}
-          </div>`; }).join("")}</div></div>`; }).join("")}
-      </section>
+      <div class="rp-tabs" role="tablist" aria-label="Розділи ролі">${TABS.map(([id, t]) => `<button type="button" role="tab" id="rp-t-${id}" aria-selected="${id === _tab}" data-tab="${id}" class="${id === _tab ? "on" : ""}">${t}</button>`).join("")}</div>
+      <section class="tp-sec" role="tabpanel" aria-labelledby="rp-t-${_tab}">${body}</section>
     </article>`;
   if (mobile()) host.classList.add("open");
 }
@@ -482,26 +546,47 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape" && document.getElementById("rl-main")?.classList.contains("open") && !document.querySelector(".modal-bd.on")) closeDetail();
 });
 
-// ─── Доступ до сторінок ───────────────────────────────────────────────────
-document.addEventListener("change", async e => {
-  const k = e.target.dataset?.pg; if (!k) return;
-  const [si, ii] = k.split(":").map(Number);
-  const rid = _selId, on = e.target.checked;
-  const newNav = nav.map((sec, a) => ({ ...sec, items: asArr(sec.items).map((it, b) => {
-    if (a !== si || b !== ii) return it;
-    const set = new Set((Array.isArray(it.roleIds) ? it.roleIds : []).filter(x => roles[x]));
-    on ? set.add(rid) : set.delete(rid);
-    return { ...it, roleIds: [...set] };
-  }) }));
-  e.target.disabled = true;
+// ─── Збереження дозволів і лімітів ────────────────────────────────────────
+// Перше ж збереження переводить старі налаштування (прапорці й обмеження меню за ролями) у новий формат
+async function saveFeat(mutate, what){
+  const { upd, data, newNav } = buildSave(feat, navRaw, navFromDb, mutate, id => !!roles[id]);
+  await update(ref(db), upd);
+  feat = data;
+  if (newNav){ navRaw = newNav; nav = asArr(newNav).filter(Boolean).map(s => ({ ...s, items: asArr(s.items).filter(Boolean) })); }
+  logAction("role.perms", { type: "role", id: _selId, label: roles[_selId]?.name || _selId }, what);
+}
+document.addEventListener("click", async e => {
+  const tab = e.target.closest("#rl-main [data-tab]");
+  if (tab){
+    _tab = tab.dataset.tab;
+    const url = new URL(location.href); url.searchParams.set("tab", _tab); history.replaceState(null, "", url);
+    renderDetail(); document.getElementById(`rp-t-${_tab}`)?.focus();
+    return;
+  }
+  const b = e.target.closest("#rl-main [data-pk]"); if (!b) return;
+  const k = b.dataset.pk, v = b.dataset.v, rid = _selId;
+  document.querySelectorAll("#rl-main [data-pk]").forEach(x => x.disabled = true);
   try {
-    // Уся навігація одним записом + мітка часу — так само, як на сторінці «Навігація»
-    await update(ref(db), { "settings/navigation": newNav, "settings/navigation_ts": Date.now() });
-    nav = newNav; navFromDb = true;
-    logAction(on ? "role.page.restrict" : "role.page.open", { type: "role", id: rid, label: roles[rid]?.name || rid }, asArr(nav[si]?.items)[ii]?.label || "");
-    toast(on ? "Сторінку обмежено цією роллю" : "Обмеження знято");
+    await saveFeat(c => {
+      const r = (c.roles[rid] ||= { perms: {}, limits: {} }); r.perms ||= {};
+      if (v === "") delete r.perms[k]; else r.perms[k] = v === "1";
+    }, `${PERMS[k].label}: ${triTxt[v]}`);
     renderList(); renderDetail();
-  } catch (err) { toast("Помилка: " + err.message, "err"); e.target.checked = !on; e.target.disabled = false; }
+  } catch (err) { toast("Помилка: " + err.message, "err"); renderDetail(); }
+  document.querySelector(`#rl-main [data-pk="${CSS.escape(k)}"][data-v="${v}"]`)?.focus();
+});
+document.addEventListener("change", async e => {
+  const k = e.target.dataset?.lk; if (!k) return;
+  const raw = e.target.value.trim(), rid = _selId;
+  if (raw !== "" && !(Number(raw) >= 0)) { toast("Ліміт має бути числом від 0", "err"); renderDetail(); return; }
+  try {
+    await saveFeat(c => {
+      const r = (c.roles[rid] ||= { perms: {}, limits: {} }); r.limits ||= {};
+      if (raw === "") delete r.limits[k]; else r.limits[k] = Math.floor(Number(raw));
+    }, `${CAP_LIMITS[k].label}: ${raw === "" ? "як для всіх" : raw === "0" ? "без обмежень" : raw}`);
+    toast("Збережено");
+    renderList();
+  } catch (err) { toast("Помилка: " + err.message, "err"); renderDetail(); }
 });
 
 // ─── Створення / редагування ─────────────────────────────────────────────
@@ -578,12 +663,12 @@ window.saveRole = async () => {
 let _delRoleId = null;
 function openDeleteRole(id){
   _delRoleId = id;
-  const m = membersOf(id).length, pages = pagesOf(id);
+  const m = membersOf(id).length, ch = changesOf(id);
   document.getElementById("del-role-name").textContent = roles[id]?.name || "—";
   document.getElementById("del-err").classList.remove("show");
   const pts = [];
   pts.push(m ? `Роль буде знято з <b>${m}</b> ${plural(m, ["викладача", "викладачів", "викладачів"])} (інші їхні ролі й дані не зміняться)` : "Роль нікому не призначена");
-  if (pages.length) pts.push(`Обмеження знімуться зі сторінок: <b>${pages.map(esc).join(", ")}</b>. Якщо інших ролей на пункті немає, він стане видимим усім`);
+  if (ch) pts.push(`Налаштування ролі (<b>${ch}</b>) буде видалено: викладачі без інших ролей отримають доступ «як для всіх»`);
   document.getElementById("del-role-warn").innerHTML = `Що станеться:<ul>${pts.map(p => `<li>${p}</li>`).join("")}</ul>`;
   openModal("m-del-role");
 }
@@ -593,7 +678,7 @@ window.confirmDeleteRole = async () => {
   const btn = document.getElementById("del-role-confirm-btn");
   btn.disabled = true;
   try {
-    const upd = { [`roles/${id}`]: null };
+    const upd = { [`roles/${id}`]: null, [`settings/features/roles/${id}`]: null };
     membersOf(id).forEach(u => {
       if (u.customRoleIds && typeof u.customRoleIds === "object") upd[`users/${u.uid}/customRoleIds/${id}`] = null;
       else upd[`users/${u.uid}/customRoleId`] = null;

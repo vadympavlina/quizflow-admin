@@ -7,7 +7,7 @@
 <link rel="icon" href="/assets/icons/admin/icon.svg?v=3" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/icons/admin/apple-touch-icon.png?v=3">
 <link rel="manifest" href="/assets/icons/admin/site.webmanifest?v=4">
-<title>QuizFlow Admin — Можливості</title>
+<title>QuizFlow Admin — Для всіх</title>
 <!-- Прев'ю посилання в месенджерах (картинки: у репозиторії quizflow, cd tests && npm run og) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="QuizFlow">
@@ -67,6 +67,12 @@
 .tri button.on[data-v="0"]{color:var(--red-700)}
 .fx-cell .fx-num{width:100%;text-align:left}
 .fx-cell .fx-num::placeholder{text-align:left}
+.fx-rl{text-decoration:none;color:inherit;align-items:center;transition:background .12s}
+.fx-rl:hover{background:var(--sf-1)}
+.fx-rl:focus-visible{outline:2px solid var(--v-500);outline-offset:-2px}
+.fx-rs{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;color:var(--ink-500)}
+.fx-warn{margin-top:14px;padding:11px 14px;border-radius:12px;background:#FFF7ED;border:1px solid #FDE4BC;color:#9A3412;font-size:13px;line-height:1.55}
+.fx-warn ul{margin:4px 0 0;padding-left:18px}
 .fx-empty{padding:26px 22px;text-align:center;font-size:13px;color:var(--ink-500)}
 .fx-empty a{color:var(--v-600);font-weight:700}
 
@@ -88,13 +94,15 @@
 <body>
 
 <div id="admin-loader"><div class="spin"></div></div>
-<script src="shared/admin-nav.js?v=11"></script>
+<script src="shared/admin-nav.js?v=12"></script>
 <div id="admin-root"></div>
 <div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
 import { logAction, initAdminShell, db, ref, update, dbGet, toast, esc, hideLoader } from "./shared/admin-shell.js?v=21";
-import { CAP_FLAGS, CAP_LIMITS } from "./shared/caps.js?v=3";
+import { CAP_LIMITS } from "./shared/caps.js?v=4";
+import { PERMS, GROUPS, normalizeCfg, resolvePerms, conflicts } from "./shared/perms.js?v=1";
+import { buildSave } from "./shared/perms-store.js?v=1";
 
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const IC = {
@@ -105,8 +113,8 @@ const IC = {
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b === 1 ? f[0] : b >= 2 && b <= 4 ? f[1] : f[2]; };
 
 const content = `
-  <div class="page-head"><div><h1>Функції й ліміти</h1><p>Що доступно викладачам: для всіх, для окремих ролей або індивідуально в картці викладача</p></div></div>
-  <div class="fx-how">${IC.info}<span><b>Як це працює.</b> Спершу діють налаштування з картки викладача, потім — його ролей, і лише потім — для всіх. Якщо хоча б одна роль викладача дозволяє функцію, вона доступна. Серед лімітів ролей діє найбільший. Адміністраторів ці обмеження не стосуються.</span></div>
+  <div class="page-head"><div><h1>Базові дозволи й ліміти</h1><p>Базові дозволи й ліміти. Ролі та особисті налаштування можуть їх змінити</p></div></div>
+  <div class="fx-how">${IC.info}<span><b>Як це працює.</b> Спершу діють особисті налаштування викладача, потім його ролі, і лише потім ці. Якщо хоча б одна роль дозволяє, дія доступна. Серед лімітів ролей діє найбільший. Адміністраторів ці обмеження не стосуються.</span></div>
   <section class="fx-card" id="fx-all"></section>
   <section class="fx-card" id="fx-roles"></section>
   <div class="save-bar" id="save-bar" role="region" aria-label="Незбережені зміни">
@@ -115,84 +123,63 @@ const content = `
     <button type="button" class="tb-btn primary" id="btn-save">Зберегти</button>
   </div>
 `;
-await initAdminShell({ activeId: "features", crumbs: ["Можливості"], content });
+await initAdminShell({ activeId: "features", crumbs: ["Для всіх"], content });
 
-let cfg = {}, saved = "{}", roles = {}, users = {};
-const clean = c => {
-  const o = { flags: {}, limits: {}, roles: {} };
-  Object.keys(CAP_FLAGS).forEach(k => { if (c.flags?.[k] === false) o.flags[k] = false; });
-  Object.keys(CAP_LIMITS).forEach(k => { const n = Number(c.limits?.[k]); if (n > 0) o.limits[k] = Math.floor(n); });
-  Object.entries(c.roles || {}).forEach(([rid, r]) => {
-    if (!roles[rid]) return;
-    const x = { flags: {}, limits: {} };
-    Object.keys(CAP_FLAGS).forEach(k => { if (typeof r.flags?.[k] === "boolean") x.flags[k] = r.flags[k]; });
-    Object.keys(CAP_LIMITS).forEach(k => { const v = r.limits?.[k]; if (v !== undefined && v !== null && v !== "" && Number(v) >= 0) x.limits[k] = Math.floor(Number(v)); });
-    if (Object.keys(x.flags).length || Object.keys(x.limits).length) o.roles[rid] = x;
-  });
-  return o;
-};
-const dirty = () => JSON.stringify(clean(cfg)) !== saved;
+let feat = {}, navRaw = null, navFromDb = false, roles = {}, users = {};
+let cur = { perms: {}, limits: {} }, saved = "";
+const ser = c => JSON.stringify({ p: Object.keys(c.perms).filter(k => c.perms[k] === false).sort(), l: Object.fromEntries(Object.entries(c.limits).filter(([, v]) => Number(v) > 0).map(([k, v]) => [k, Math.floor(Number(v))])) });
+const dirty = () => ser(cur) !== saved;
 const syncBar = () => document.getElementById("save-bar").classList.toggle("on", dirty());
+const fromRaw = () => { const n = normalizeCfg(feat, navRaw); cur = { perms: { ...n.perms }, limits: { ...n.limits } }; saved = ser(cur); };
 
 function renderAll(){
+  const eff = resolvePerms({ v: 2, perms: cur.perms }, { role: "teacher" }).perms;
+  const warn = conflicts(eff);
   document.getElementById("fx-all").innerHTML = `
-    <div class="fx-h"><span class="ic">${IC.all}</span><div><h2>Для всіх викладачів</h2><p>Базові налаштування сервісу</p></div></div>
+    <div class="fx-h"><span class="ic">${IC.all}</span><div><h2>Що дозволено всім</h2><p>Вимкніть, щоб дія була доступна лише ролям і людям, яким її дозволили окремо</p></div></div>
     <div class="fx-b">
-      <div><div class="fx-sub">Функції</div><div class="fx-list">${Object.entries(CAP_FLAGS).map(([k, f]) => `<label class="fx-row"><span class="i"><b>${f.label}</b><span class="d">${f.desc}</span></span>
-        <span class="toggle-sw"><input type="checkbox" data-all-flag="${k}" ${cfg.flags?.[k] !== false ? "checked" : ""} aria-label="${f.label}"><span class="toggle-sl"></span></span></label>`).join("")}</div></div>
+      <div>${GROUPS.map(g => `<div class="fx-sub">${esc(g.label)}</div><div class="fx-list" style="margin-bottom:14px">${Object.keys(PERMS).filter(k => PERMS[k].group === g.id).map(k => `<label class="fx-row"><span class="i"><b>${esc(PERMS[k].label)}</b><span class="d">${esc(PERMS[k].desc)}</span></span>
+        <span class="toggle-sw"><input type="checkbox" data-pk="${esc(k)}" ${cur.perms[k] !== false ? "checked" : ""} aria-label="${esc(PERMS[k].label)}"><span class="toggle-sl"></span></span></label>`).join("")}</div>`).join("")}</div>
       <div><div class="fx-sub">Ліміти</div><div class="fx-list">${Object.entries(CAP_LIMITS).map(([k, f]) => `<div class="fx-row"><span class="i"><b>${f.label}</b><span class="d">${f.desc}</span></span>
-        <input class="fx-num" type="number" min="0" step="1" inputmode="numeric" data-all-lim="${k}" value="${Number(cfg.limits?.[k]) > 0 ? Number(cfg.limits[k]) : ""}" placeholder="Без обмежень" aria-label="${f.label}"></div>`).join("")}</div></div>
+        <input class="fx-num" type="number" min="0" step="1" inputmode="numeric" data-lim="${k}" value="${Number(cur.limits[k]) > 0 ? Number(cur.limits[k]) : ""}" placeholder="Без обмежень" aria-label="${f.label}"></div>`).join("")}</div>
+        ${warn.length ? `<div class="fx-warn" role="alert"><b>Перевірте налаштування</b><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}</div>
     </div>`;
   const rids = Object.keys(roles).sort((a, b) => (roles[a].name || "").localeCompare(roles[b].name || "", "uk"));
-  const members = rid => Object.values(users).filter(u => u && u.customRoleIds && u.customRoleIds[rid]).length;
+  const n = normalizeCfg(feat, navRaw);
+  const members = rid => Object.values(users).filter(u => u && ((u.customRoleIds && u.customRoleIds[rid]) || u.customRoleId === rid)).length;
   document.getElementById("fx-roles").innerHTML = `
-    <div class="fx-h"><span class="ic">${IC.roles}</span><div><h2>Для ролей</h2><p>«Як для всіх» — роль нічого не змінює. Порожній ліміт — теж як для всіх, 0 — без обмежень</p></div></div>
-    ${rids.length ? `<div class="fx-roles">${rids.map(rid => { const r = cfg.roles?.[rid] || {}, m = members(rid);
-      const changed = Object.keys(r.flags || {}).length + Object.values(r.limits || {}).filter(v => v !== "" && v !== null && v !== undefined).length;
-      return `<div class="fx-role" style="--rc:${esc(roles[rid].color || "#7C3AED")}">
-        <div class="fx-rn"><i></i><div><b>${esc(roles[rid].name || "—")}</b><span>${m} ${plural(m, ["викладач", "викладачі", "викладачів"])}</span>${changed ? `<div class="mod">Змінено: ${changed}</div>` : ""}</div></div>
-        <div>
-          <div class="fx-rc">${Object.entries(CAP_FLAGS).map(([k, f]) => { const v = r.flags?.[k];
-            return `<div class="fx-cell"><span class="l">${f.label}</span><div class="tri" role="radiogroup" aria-label="${f.label}">
-              ${[["", "Як для всіх"], ["1", "Так"], ["0", "Ні"]].map(([val, t]) => `<button type="button" role="radio" data-role="${esc(rid)}" data-flag="${k}" data-v="${val}" class="${(val === "" && typeof v !== "boolean") || (val === "1" && v === true) || (val === "0" && v === false) ? "on" : ""}">${t}</button>`).join("")}</div></div>`; }).join("")}</div>
-          <div class="fx-rc" style="margin-top:10px">${Object.entries(CAP_LIMITS).map(([k, f]) => { const v = r.limits?.[k];
-            return `<div class="fx-cell"><label for="rl-${esc(rid)}-${k}">${f.label}</label><input class="fx-num" id="rl-${esc(rid)}-${k}" type="number" min="0" step="1" inputmode="numeric" data-role="${esc(rid)}" data-lim="${k}" value="${v === undefined || v === null || v === "" ? "" : Number(v)}" placeholder="Як для всіх"></div>`; }).join("")}</div>
-        </div>
-      </div>`; }).join("")}</div>`
-      : `<div class="fx-empty">Ролей ще немає. <a href="roles">Створіть роль</a>, щоб задавати окремі можливості групам викладачів.</div>`}`;
+    <div class="fx-h"><span class="ic">${IC.roles}</span><div><h2>Ролі</h2><p>Дозволи й ліміти кожної ролі налаштовуються в самій ролі</p></div></div>
+    ${rids.length ? `<div class="fx-roles">${rids.map(rid => { const r = n.roles[rid], m = members(rid);
+      const ch = r ? Object.keys(r.perms || {}).length + Object.values(r.limits || {}).filter(v => v !== "" && v != null).length : 0;
+      return `<a class="fx-role fx-rl" href="roles?id=${encodeURIComponent(rid)}" style="--rc:${esc(roles[rid].color || "#7C3AED")}">
+        <div class="fx-rn"><i></i><div><b>${esc(roles[rid].name || "—")}</b><span>${m} ${plural(m, ["викладач", "викладачі", "викладачів"])}</span></div></div>
+        <div class="fx-rs">${ch ? `${ch} ${plural(ch, ["налаштування", "налаштування", "налаштувань"])}` : "Нічого не змінює"}<span aria-hidden="true">›</span></div></a>`; }).join("")}</div>`
+      : `<div class="fx-empty">Ролей ще немає. <a href="roles">Створіть роль</a>, щоб задавати окремі дозволи групам викладачів.</div>`}`;
   syncBar();
 }
 
-const root = document.getElementById("admin-content") || document;
 document.addEventListener("change", e => {
   const t = e.target;
-  if (t.dataset.allFlag){ cfg.flags ||= {}; cfg.flags[t.dataset.allFlag] = t.checked; return syncBar(); }
+  if (t.dataset.pk){ if (t.checked) delete cur.perms[t.dataset.pk]; else cur.perms[t.dataset.pk] = false; renderAll(); document.querySelector(`[data-pk="${CSS.escape(t.dataset.pk)}"]`)?.focus(); }
 });
 document.addEventListener("input", e => {
   const t = e.target;
-  if (t.dataset.allLim){ cfg.limits ||= {}; cfg.limits[t.dataset.allLim] = t.value; return syncBar(); }
-  if (t.dataset.lim && t.dataset.role){ cfg.roles ||= {}; const r = cfg.roles[t.dataset.role] ||= {}; (r.limits ||= {})[t.dataset.lim] = t.value; return syncBar(); }
+  if (t.dataset.lim){ cur.limits[t.dataset.lim] = t.value; syncBar(); }
 });
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-flag][data-role]"); if (!b) return;
-  cfg.roles ||= {}; const r = cfg.roles[b.dataset.role] ||= {}; r.flags ||= {};
-  if (b.dataset.v === "") delete r.flags[b.dataset.flag]; else r.flags[b.dataset.flag] = b.dataset.v === "1";
-  renderAll();
-});
-document.getElementById("btn-discard").addEventListener("click", () => { cfg = JSON.parse(saved); renderAll(); });
+document.getElementById("btn-discard").addEventListener("click", () => { fromRaw(); renderAll(); });
 async function save(){
   const btn = document.getElementById("btn-save"); btn.disabled = true;
   try {
-    const data = clean(cfg);
-    await update(ref(db), { "settings/features": data });
-    const prev = JSON.parse(saved), diff = [];
-    Object.keys(CAP_FLAGS).forEach(k => { if ((prev.flags?.[k] !== false) !== (data.flags?.[k] !== false)) diff.push(`${CAP_FLAGS[k].label}: ${data.flags?.[k] === false ? "ні" : "так"}`); });
-    Object.keys(CAP_LIMITS).forEach(k => { if ((prev.limits?.[k] || 0) !== (data.limits?.[k] || 0)) diff.push(`${CAP_LIMITS[k].label}: ${data.limits?.[k] || "без обмежень"}`); });
-    if (JSON.stringify(prev.roles || {}) !== JSON.stringify(data.roles || {})) diff.push("налаштування ролей");
-    logAction("features.update", { type: "service", label: "Можливості та ліміти" }, diff.join(", ") || null);
-    saved = JSON.stringify(data); cfg = JSON.parse(saved);
-    renderAll();
-    toast("Збережено — викладачі отримають зміни при наступному відкритті сторінки");
+    const prev = JSON.parse(saved);
+    const { upd, data, newNav } = buildSave(feat, navRaw, navFromDb, c => { c.perms = { ...cur.perms }; c.limits = { ...cur.limits }; }, id => !!roles[id]);
+    await update(ref(db), upd);
+    feat = data; if (newNav) navRaw = newNav;
+    const now = JSON.parse(ser(cur)), diff = [];
+    Object.keys(PERMS).forEach(k => { const was = !prev.p.includes(k), is = !now.p.includes(k); if (was !== is) diff.push(`${PERMS[k].label}: ${is ? "так" : "ні"}`); });
+    Object.keys(CAP_LIMITS).forEach(k => { if ((prev.l[k] || 0) !== (now.l[k] || 0)) diff.push(`${CAP_LIMITS[k].label}: ${now.l[k] || "без обмежень"}`); });
+    logAction("features.update", { type: "service", label: "Дозволи й ліміти для всіх" }, diff.join(", ") || null);
+    fromRaw(); renderAll();
+    toast("Збережено: викладачі отримають зміни при наступному відкритті сторінки");
   } catch (e) { toast("Помилка: " + e.message, "err"); }
   finally { btn.disabled = false; }
 }
@@ -201,9 +188,10 @@ document.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.ke
 addEventListener("beforeunload", e => { if (dirty()){ e.preventDefault(); e.returnValue = ""; } });
 
 try {
-  const [c, r, u] = await Promise.all([dbGet("settings/features"), dbGet("roles").catch(() => null), dbGet("users").catch(() => null)]);
-  roles = r || {}; users = u || {};
-  cfg = clean(c || {}); saved = JSON.stringify(cfg); cfg = JSON.parse(saved);
+  const [f, r, u, n] = await Promise.all([dbGet("settings/features"), dbGet("roles").catch(() => null), dbGet("users").catch(() => null), dbGet("settings/navigation").catch(() => null)]);
+  feat = f || {}; roles = r || {}; users = u || {}; navRaw = n || null;
+  navFromDb = !!(n && (Array.isArray(n) ? n.length : Object.keys(n).length));
+  fromRaw();
 } catch (e) { toast("Не вдалося завантажити: " + e.message, "err"); }
 renderAll();
 hideLoader();
