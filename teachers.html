@@ -339,10 +339,11 @@
         </div>
         <div class="field">
           <div class="field-l">Роль</div>
-          <select class="field-input" id="new-role">
-            <option value="teacher">Викладач</option>
-            <option value="admin">Адміністратор</option>
-          </select>
+          <div class="tp-seg" id="new-role" role="radiogroup" aria-label="Роль" data-value="teacher">
+            <button type="button" role="radio" data-v="teacher" class="on" aria-checked="true">Викладач</button>
+            <button type="button" role="radio" data-v="admin" aria-checked="false" id="new-role-admin">Адміністратор</button>
+          </div>
+          <div class="field-hint" id="new-role-hint" hidden>Адміністраторів призначає лише власник сервісу.</div>
         </div>
         <div class="field">
           <div class="field-l">Кастомні ролі (необов'язково)</div>
@@ -578,7 +579,7 @@ const topbarRight = `
   </button>
 `;
 
-const { _user } = await initAdminShell({ activeId: "teachers", crumbs: ["Викладачі"], content, topbarRight });
+const { _user, isOwner } = await initAdminShell({ activeId: "teachers", crumbs: ["Викладачі"], content, topbarRight });
 filterSheet({ anchor: ".tp-sh .search-input", items: [".tp-sel"], title: "Фільтри", count: () => (document.getElementById("tc-role")?.value ? 1 : 0) + (document.getElementById("tc-sort")?.value && document.getElementById("tc-sort").value !== "activity" ? 1 : 0) });
 
 // ─── State ────────────────────────────────────────────────────────────────
@@ -820,7 +821,7 @@ function renderDetail(){
             ${u.role === "admin" ? '<span class="tc-status adm">Адміністратор</span>' : ""}
           </div>
         </div>
-        ${isMe ? "" : `<div class="tp-acts">
+        ${isMe ? "" : (u.role === "admin" && !isOwner) ? `<div class="tp-none">Адміністратором керує лише власник сервісу.</div>` : `<div class="tp-acts">
           ${u.email ? `<button type="button" class="tb-btn" data-act="mail" title="Написати лист через «Розсилки»">${IC.send.replace("<svg", '<svg width="14" height="14"')} Лист</button>` : ""}
           <button type="button" class="tb-btn" data-act="reset">${IC.key.replace("<svg", '<svg width="14" height="14"')} Скинути пароль</button>
           <button type="button" class="tb-btn${blocked ? "" : " danger"}" data-act="block">${(blocked ? IC.unlock : IC.ban).replace("<svg", '<svg width="14" height="14"')} ${blocked ? "Розблокувати" : "Заблокувати"}</button>
@@ -838,10 +839,10 @@ function renderDetail(){
       </div>
 
       <section class="tp-sec">
-        <div class="tp-sec-h"><div><h3>Доступ</h3><p>Адміністратор бачить цю адмінку й керує всіма викладачами</p></div></div>
+        <div class="tp-sec-h"><div><h3>Доступ</h3><p>${isOwner ? "Адміністратор бачить цю адмінку й керує викладачами. Адміністраторів призначає лише власник" : "Адміністраторів призначає й змінює лише власник сервісу"}</p></div></div>
         <div class="tp-seg" role="radiogroup" aria-label="Системна роль">
-          <button type="button" role="radio" data-act="sysrole" data-v="teacher" class="${u.role !== "admin" ? "on" : ""}" aria-checked="${u.role !== "admin"}"${isMe ? " disabled" : ""}>${IC.users}Викладач</button>
-          <button type="button" role="radio" data-act="sysrole" data-v="admin" class="${u.role === "admin" ? "on" : ""}" aria-checked="${u.role === "admin"}"${isMe ? " disabled" : ""}>${IC.roles}Адміністратор</button>
+          <button type="button" role="radio" data-act="sysrole" data-v="teacher" class="${u.role !== "admin" ? "on" : ""}" aria-checked="${u.role !== "admin"}"${isMe || !isOwner ? " disabled" : ""}>${IC.users}Викладач</button>
+          <button type="button" role="radio" data-act="sysrole" data-v="admin" class="${u.role === "admin" ? "on" : ""}" aria-checked="${u.role === "admin"}"${isMe || !isOwner ? " disabled" : ""}>${IC.roles}Адміністратор</button>
         </div>
       </section>
 
@@ -927,6 +928,12 @@ async function toggleRole(u, rid, btn){
     afterChange();
   } catch (e) { toast("Помилка: " + e.message, "err"); btn.disabled = false; }
 }
+
+function setNewRole(v){
+  const box = document.getElementById("new-role"); box.dataset.value = v;
+  box.querySelectorAll("button").forEach(b => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
+}
+document.getElementById("new-role").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (b && !b.disabled) setNewRole(b.dataset.v); });
 
 async function setSysRole(u, role){
   if (u.role === role || (role === "teacher" && u.role !== "admin")) return;
@@ -1077,7 +1084,9 @@ window.openCreateModal = () => {
   document.getElementById("new-name").value = "";
   document.getElementById("new-email").value = "";
   document.getElementById("new-pass").value = genPass();
-  document.getElementById("new-role").value = "teacher";
+  setNewRole("teacher");
+  document.getElementById("new-role-admin").disabled = !isOwner;
+  document.getElementById("new-role-hint").hidden = isOwner;
   renderRoleCheckboxes("new-custom-roles", window._defaultRoleIds || []);
   document.getElementById("created-box").style.display = "none";
   document.getElementById("created-mail").hidden = true;
@@ -1099,7 +1108,7 @@ window.createTeacher = async () => {
   const name    = document.getElementById("new-name").value.trim();
   const email   = document.getElementById("new-email").value.trim();
   const pass    = document.getElementById("new-pass").value.trim();
-  const role    = document.getElementById("new-role").value;
+  const role    = isOwner ? document.getElementById("new-role").dataset.value : "teacher";
   const roleIdsArr = getCheckedRoleIds("new-custom-roles");
   const errEl   = document.getElementById("create-err");
 

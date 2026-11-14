@@ -23,6 +23,7 @@ export function admSeed(now){
   db.bugReports = { r1: { status: 'new', text: 'Не відкривається тест на iPad', createdAt: now - 3 * 36e5, uid: 't2', page: '/tests' },
     r2: { status: 'new', text: 'Помилка при збереженні питання з картинкою', createdAt: now - D, uid: 't3', page: '/constructor' },
     r3: { status: 'resolved', text: 'Сповіщення приходять двічі', createdAt: now - 6 * D, uid: 't1', page: '/notifications' } };
+  db.settings = { ...(db.settings || {}), ownerUid: "t5" };
   db.news = { n1: { title: 'Нове: історія ігор', text: 'Тепер результати всіх ігор зберігаються.', createdAt: now - 2 * D, published: true, category: 'update' },
     n2: { title: 'Оновлено аналітику', text: 'Графіки стали зручнішими.', createdAt: now - 9 * D, published: true, category: 'update' } };
   return db;
