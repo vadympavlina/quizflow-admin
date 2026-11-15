@@ -91,6 +91,14 @@
 .tc-status.adm::before{display:none}
 .tp-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto;margin-left:auto}
 
+.tp-tabs{display:flex;gap:2px;padding:0 20px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tp-tabs button{position:relative;border:0;background:none;padding:13px 12px;font:700 14px "Manrope",sans-serif;color:var(--ink-500);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.tp-tabs button:hover{color:var(--ink-900)}
+.tp-tabs button.on{color:var(--v-600,#6D28D9)}
+.tp-tabs button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--v-600,#6D28D9)}
+.tp-tabs button b{font:700 11px "Geist Mono",monospace;background:var(--sf-2);color:var(--ink-700);border-radius:99px;padding:1px 7px}
+.tp-tabs button i{width:7px;height:7px;border-radius:50%;background:var(--v-600,#7C3AED)}
+.tp-more{margin-top:12px}
 .tp-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
 .tp-stat{background:#fff;padding:16px 22px;min-width:0}
 .tp-stat .l{font-size:12px;font-weight:700;color:var(--ink-500);display:flex;align-items:center;gap:7px}
@@ -604,6 +612,7 @@ let _selId = new URLSearchParams(location.search).get("id") || "";
 let _resetUid = "";
 let _blockUid = "", _blockCurrent = false;
 let _delUid = "", _delLogin = "";
+let _tab = "overview", _capsAll = false;   // вкладка картки; показ усіх дозволів (а не лише винятків)
 let _globalAI = null;          // settings/ai — дефолти для перемикачів у картці
 const byId = id => (window._users || []).find(u => u.id === id);
 const mobile = () => matchMedia("(max-width:1023px)").matches;
@@ -782,10 +791,19 @@ function capsSection(u, s){
     <div class="tp-sec-h"><div><h3>Особисті дозволи</h3><p>${isAdm ? "Адміністратора ці обмеження не стосуються" : "Особисті налаштування мають перевагу над ролями, а ролі над «для всіх»"}</p></div><a href="features">Для всіх</a></div>
     <label class="cp-row cp-ro${ro ? " on" : ""}"><span class="cp-i"><b>Лише перегляд</b><span class="cp-s ${ro ? "off" : ""}">${ro ? "Може дивитися, але не змінювати дані: ні тестів, ні посилань, ні ігор" : "Звичайний доступ. Увімкніть, наприклад, на час відпустки чи звільнення"}</span></span>
       <span class="toggle-sw"><input type="checkbox" data-act="readonly" ${ro ? "checked" : ""}${isAdm ? " disabled" : ""} aria-label="Лише перегляд"><span class="toggle-sl"></span></span></label>
-    ${GROUPS.map(g => `<div class="cp-gl">${esc(g.label)}</div><div class="cp-grid">${Object.keys(PERMS).filter(k => PERMS[k].group === g.id).map(k => { const v = ownPerms[k];
-      return `<div class="cp-row"><div class="cp-i"><b>${esc(PERMS[k].label)}</b><span class="cp-s ${eff.perms[k] ? "on" : "off"}">${eff.perms[k] ? "Доступно" : "Вимкнено"} · ${SRC[eff.permSrc[k]] || ""}</span></div>
+    ${(() => {
+      const overridden = Object.keys(PERMS).filter(k => typeof ownPerms[k] === "boolean");
+      const rowsFor = g => Object.keys(PERMS).filter(k => PERMS[k].group === g.id && (_capsAll || typeof ownPerms[k] === "boolean"));
+      const row = k => { const v = ownPerms[k];
+        return `<div class="cp-row"><div class="cp-i"><b>${esc(PERMS[k].label)}</b><span class="cp-s ${eff.perms[k] ? "on" : "off"}">${eff.perms[k] ? "Доступно" : "Вимкнено"} · ${SRC[eff.permSrc[k]] || ""}</span></div>
         <div class="tri" role="radiogroup" aria-label="${esc(PERMS[k].label)}">${[["", `Авто: ${inh.perms[k] ? "так" : "ні"}`], ["1", "Так"], ["0", "Ні"]].map(([val, t]) =>
-          `<button type="button" role="radio" aria-checked="${(val === "" && typeof v !== "boolean") || (val === "1" && v === true) || (val === "0" && v === false)}" data-act="cap-perm" data-k="${esc(k)}" data-v="${val}" class="${(val === "" && typeof v !== "boolean") || (val === "1" && v === true) || (val === "0" && v === false) ? "on" : ""}"${isAdm ? " disabled" : ""}>${t}</button>`).join("")}</div></div>`; }).join("")}</div>`).join("")}
+          `<button type="button" role="radio" aria-checked="${(val === "" && typeof v !== "boolean") || (val === "1" && v === true) || (val === "0" && v === false)}" data-act="cap-perm" data-k="${esc(k)}" data-v="${val}" class="${(val === "" && typeof v !== "boolean") || (val === "1" && v === true) || (val === "0" && v === false) ? "on" : ""}"${isAdm ? " disabled" : ""}>${t}</button>`).join("")}</div></div>`; };
+      const head = !overridden.length && !_capsAll
+        ? `<div class="tp-none">Особистих винятків немає: викладач має те, що дають його ролі та «Усі викладачі».</div>` : "";
+      const body = GROUPS.map(g => { const ks = rowsFor(g); return ks.length ? `<div class="cp-gl">${esc(g.label)}</div><div class="cp-grid">${ks.map(row).join("")}</div>` : ""; }).join("");
+      const btn = isAdm ? "" : `<button type="button" class="tb-btn tp-more" data-act="caps-all">${_capsAll ? "Показати лише винятки" : overridden.length ? "Показати всі дозволи" : "Задати виняток"}</button>`;
+      return head + body + btn;
+    })()}
     <div class="cp-gl">Ліміти</div>
     <div class="cp-grid">
       ${Object.entries(CAP_LIMITS).map(([k, f]) => { const v = own.limits?.[k], lim = eff.limits[k], u2 = used[k];
@@ -866,6 +884,10 @@ function renderDetail(){
         ${stat(IC.cal, "У системі з", esc(fmtDate(u.createdAt)), null, "sm")}
       </div>
 
+      <nav class="tp-tabs" role="tablist" aria-label="Розділи картки">
+        ${[["overview", "Огляд"], ["access", "Доступ"], ["ai", "AI"], ["names", "Історія імен"]].map(([id, t]) => `<button type="button" role="tab" class="${_tab === id ? "on" : ""}" aria-selected="${_tab === id}" data-act="tab" data-t="${id}">${t}${id === "access" && Object.keys(layerPerms(u.features || {})).length ? `<b>${Object.keys(layerPerms(u.features || {})).length}</b>` : ""}${id === "ai" && u.aiSettings ? "<i></i>" : ""}</button>`).join("")}
+      </nav>
+      ${_tab === "overview" ? `
       <section class="tp-sec">
         <div class="tp-sec-h"><div><h3>Роль у системі</h3><p>${isOwner ? "Адміністратор бачить цю адмінку й керує викладачами. Адміністраторів призначає лише власник" : "Адміністраторів призначає й змінює лише власник сервісу"}</p></div></div>
         <div class="tp-seg" role="radiogroup" aria-label="Системна роль">
@@ -880,8 +902,10 @@ function renderDetail(){
           : `<div class="tp-none">Ролей ще немає. <a href="roles">Створіть першу</a>, щоб групувати викладачів і обмежувати доступ до сторінок.</div>`}
       </section>
 
+` : _tab === "access" ? `
       ${capsSection(u, s)}
 
+` : _tab === "ai" ? `
       <section class="tp-sec">
         <div class="tp-sec-h"><div><h3>AI можливості <span class="tp-src${u.aiSettings ? " custom" : ""}">${u.aiSettings ? "Індивідуальні" : "Як у глобальних"}</span></h3><p>${u.aiSettings ? "Для цього викладача діють власні налаштування" : "Змініть перемикач, щоб задати власні налаштування для цього викладача"}</p></div>
           ${u.aiSettings ? `<button type="button" class="tb-btn ghost" data-act="ai-reset">${SVG('<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/>').replace("<svg", '<svg width="13" height="13"')} До глобальних</button>` : ""}</div>
@@ -891,10 +915,12 @@ function renderDetail(){
           </div>`).join("")}</div>
       </section>
 
+` : `
       <section class="tp-sec" id="tp-names">
         <div class="tp-sec-h"><div><h3>Історія імен</h3><p>Зміни імені й прізвища, які викладач зробив у своєму профілі. Самому викладачу ця історія не показується</p></div></div>
         <div id="tp-names-list"><div class="tc-sk"></div></div>
       </section>
+`}
     </article>`;
   if (mobile()) host.classList.add("open");
   loadNameHistory(u);
@@ -919,6 +945,7 @@ async function loadNameHistory(u){
 }
 
 function select(id){
+  if (id !== _selId){ _tab = "overview"; _capsAll = false; }
   _selId = id;
   const url = new URL(location.href); url.searchParams.set("id", id); history.replaceState(null, "", url);
   document.querySelectorAll(".tp-it").forEach(b => { const on = b.dataset.id === id; b.classList.toggle("on", on); on ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current"); });
@@ -1018,6 +1045,8 @@ document.getElementById("tp-main").addEventListener("click", e => {
     case "role":    return toggleRole(u, b.dataset.rid, b);
     case "sysrole": return setSysRole(u, b.dataset.v);
     case "ai-reset": return resetAI(u);
+    case "tab": _tab = b.dataset.t; return renderDetail();
+    case "caps-all": _capsAll = !_capsAll; return renderDetail();
     case "cap-perm": return saveCaps(u, f => { f.perms ||= {}; if (b.dataset.v === "") delete f.perms[b.dataset.k]; else f.perms[b.dataset.k] = b.dataset.v === "1"; });
   }
 });

@@ -144,6 +144,9 @@ test("картка викладача: особисті дозволи, джер
   d.users.t1.customRoleIds = { games: true };
   await seed(page, d, "t5");
   await page.goto("/teachers?id=t1");
+  const tab = async t => { await page.locator(`[data-act="tab"][data-t="${t}"]`).click(); };
+  await tab("access");
+  await page.locator('[data-act="caps-all"]').click();
   const row = name => page.locator(".cp-row", { hasText: name }).first();
   await expect(row("Проводити ігри")).toContainText("за роллю");
   await expect(row("Проводити ігри")).toContainText("Доступно");
@@ -203,6 +206,7 @@ test("зміни доступу залишають викладачу спові
   expect(n.length).toBe(2);                               // додавання + одне про налаштування ролі
   // «лише перегляд» з картки викладача
   await page.goto("/teachers?id=t1");
+  await page.locator('[data-act="tab"][data-t="access"]').click();
   await page.locator('[data-act="readonly"]').evaluate(el => el.click());
   await page.waitForTimeout(400);
   n = Object.values((await readDb(page)).teachers.t1.notifications).filter(x => x.type === "access");
@@ -272,6 +276,8 @@ test("усі збереження дозволів лягають у базу з
   await level(page, "Ігри наживо", "Проводити");
   await toggle(page, "Тести", "Імпорт з Excel");
   await page.goto("/teachers?id=t1"); await page.waitForTimeout(700);
+  await page.locator('[data-act="tab"][data-t="access"]').click();
+  await page.locator('[data-act="caps-all"]').click();
   await page.locator('.cp-row', { hasText: "Створювати посилання" }).locator('[data-k="links.manage"][data-v="0"]').click(); await page.waitForTimeout(300);
   await page.goto("/roles?id=__base"); await page.waitForTimeout(700);
   await toggle(page, "Ігри наживо", "Історія ігор");
@@ -306,5 +312,27 @@ test("ролі: на вузькому екрані підсумок «що по�
   await page.waitForTimeout(300);
   await expect(page.locator(".rv-prev-t")).toBeHidden();
   await expect(page.locator(".rv-prev .rv-menu")).toBeVisible();
+
+test("картка викладача: вкладки; у «Доступі» лише винятки, усі дозволи — за кнопкою", async ({ page, errors }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.goto("/teachers?id=t1"); await page.waitForTimeout(700);
+  await expect(page.locator(".tp-tabs [aria-selected='true']")).toHaveText("Огляд");
+  await expect(page.locator(".tp-sec h3", { hasText: "Ролі" })).toBeVisible();
+  await expect(page.locator(".cp-row")).toHaveCount(0);                    // доступу на «Огляді» немає
+  await page.locator('[data-act="tab"][data-t="access"]').click();
+  await expect(page.getByText("Особистих винятків немає")).toBeVisible();
+  await expect(page.locator(".cp-row.cp-ro")).toHaveCount(1);              // «лише перегляд» і ліміти лишаються
+  await expect(page.locator('.cp-row [data-act="cap-perm"]')).toHaveCount(0);
+  await page.locator('[data-act="caps-all"]').click();                     // «Задати виняток»
+  expect(await page.locator('.cp-row [data-act="cap-perm"][data-v=""]').count()).toBeGreaterThan(15);
+  await page.locator('.cp-row', { hasText: "Створювати посилання" }).locator('[data-k="links.manage"][data-v="0"]').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-act="caps-all"]').click();                     // «Показати лише винятки»
+  await expect(page.locator('.cp-row [data-act="cap-perm"][data-v=""]')).toHaveCount(1);
+  await expect(page.locator(".tp-tabs button", { hasText: "Доступ" }).locator("b")).toHaveText("1");
+  await page.locator('[data-act="tab"][data-t="ai"]').click();
+  await expect(page.locator("[data-ai]").first()).toBeVisible();
+  await page.locator('[data-act="tab"][data-t="names"]').click();
+  await expect(page.locator("#tp-names-list")).toBeVisible();
   expect(errors).toEqual([]);
 });
