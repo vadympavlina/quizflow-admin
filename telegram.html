@@ -577,11 +577,8 @@ document.addEventListener("keydown", e => {
 // ─── Старт ────────────────────────────────────────────────────────────────
 try {
   const [c, list] = await Promise.all([dbGet("settings/telegramBot"), dbGet("telegramChats")]);
-  // Токен тепер лише у воркері: прибираємо його копії з бази (лише власник може їх видалити)
-  if (isOwner){
-    if (c?.token) dbUpd("settings/telegramBot", { token: null }).catch(() => {});
-    dbGet("secrets/telegramToken").then(v => { if (v) dbUpd("secrets", { telegramToken: null }).catch(() => {}); }).catch(() => {});
-  }
+  // Токен лежить лише у воркері; копію в settings/telegramBot/token (якщо лишилась) прибирає власник
+  if (isOwner && c?.token) dbUpd("settings/telegramBot", { token: null }).catch(() => {});
   cfg = { enabled: !!c?.enabled, recipients: c?.recipients || {} };
   chats = {};
   Object.entries(list || {}).forEach(([id, v]) => { const { messages, ...meta } = v || {}; chats[id] = meta; if (messages) thread[id] = messages; });

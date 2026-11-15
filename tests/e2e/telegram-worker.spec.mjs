@@ -19,7 +19,7 @@ async function fakeWorker(page, calls, { token = true } = {}) {
     return json({ ok: false, error: "404" }, 404);
   });
 }
-const db = () => { const d = admSeed(Date.now()); d.settings.ownerUid = "t5"; d.settings.mail = { workerUrl: WORKER }; d.settings.telegramBot = { enabled: true, token: "old:token", recipients: {} }; d.secrets = { telegramToken: "old:token" }; return d; };
+const db = () => { const d = admSeed(Date.now()); d.settings.ownerUid = "t5"; d.settings.mail = { workerUrl: WORKER }; d.settings.telegramBot = { enabled: true, token: "old:token", recipients: {} }; return d; };
 
 test("Telegram: бот береться з воркера, старі копії токена в базі зникають", async ({ page, errors }) => {
   const calls = [];
@@ -32,7 +32,6 @@ test("Telegram: бот береться з воркера, старі копії
   expect(calls.map(c => c.method)).toContain("getMe");
   const d = await readDb(page);
   expect(d.settings.telegramBot.token).toBeUndefined();
-  expect(d.secrets?.telegramToken ?? null).toBeNull();
   expect(errors).toEqual([]);
 });
 
