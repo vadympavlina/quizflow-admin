@@ -96,14 +96,6 @@ a.kpi:hover{transform:translateY(-2px);border-color:var(--line-strong);box-shado
 .kpi .kpi-row{gap:12px}
 .kpi .kpi-v{font-size:28px}
 
-/* Стан викладачів */
-.status-row{display:grid;grid-template-columns:auto 110px 1fr 34px;align-items:center;gap:10px;padding:9px 0;text-decoration:none;color:inherit;border-radius:8px}
-.status-row .lbl{font-size:13px;font-weight:600;color:var(--ink-700);white-space:nowrap}
-.status-row .bar{height:7px;background:#F1F5FB;border-radius:99px;overflow:hidden}
-.status-row .bar i{display:block;height:100%;border-radius:99px;transition:width .4s}
-.status-row .v{font-family:"Geist Mono",monospace;font-weight:800;font-size:14px;text-align:right}
-.status-dot{width:9px;height:9px;border-radius:50%}
-
 /* Нові проблеми */
 .prob{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
 .prob:first-child{border-top:0;padding-top:0}
@@ -119,23 +111,6 @@ a.kpi:hover{transform:translateY(-2px);border-color:var(--line-strong);box-shado
 .card-link{font-size:12px;font-weight:700;color:var(--v-600);text-decoration:none;white-space:nowrap}
 .card-link:hover{text-decoration:underline}
 
-/* Таблиця викладачів */
-.tbl-search{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
-.tbl-search .search-input{flex:1;max-width:320px}
-.tbl-search .search-input .input{width:100%}
-.tbl-search .meta{margin-left:auto;font-size:12px;color:var(--ink-500);font-family:"Geist Mono",monospace}
-.tbl-wrap{overflow-x:auto}
-#ov-table tr{cursor:pointer}
-#ov-table tr:focus-visible td{background:var(--v-50)}
-.t-name{font-weight:700;display:flex;align-items:center;gap:7px;white-space:nowrap}
-.t-mail{font-size:12px;color:var(--ink-400);font-family:"Geist Mono",monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
-#ov-table td{white-space:nowrap}
-.t-sub{font-size:11px;color:var(--ink-400);margin-left:4px;font-family:"Geist Mono",monospace}
-.g-pill{font-family:"Geist Mono",monospace;font-weight:700;font-size:12px;padding:3px 8px;border-radius:999px}
-.g-pill.ok{background:var(--grn-100);color:var(--grn-700)}.g-pill.mid{background:var(--amb-100);color:#92400E}.g-pill.bad{background:var(--red-100);color:var(--red-700)}
-.last{white-space:nowrap;font-size:12px;font-family:"Geist Mono",monospace;color:var(--ink-500)}
-.last.recent{color:var(--grn-700);font-weight:700}
-.last.stale{color:var(--ink-300)}
 </style>
 <!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
 <link rel="modulepreload" href="shared/admin-shell.js?v=22">
@@ -200,7 +175,7 @@ const content = `
 
   <div class="kpi-grid" id="kpi-grid"></div>
 
-  <div class="row-2">
+  <div>
       <section class="card">
         <div class="card-h">
           <div>
@@ -211,52 +186,7 @@ const content = `
         </div>
         <div id="prob-list"></div>
       </section>
-
-      <section class="card">
-        <div class="card-h">
-          <div>
-            <h3>Стан викладачів</h3>
-            <div class="sub" id="teachers-total">—</div>
-          </div>
-          <a class="card-link" href="teachers">Керувати →</a>
-        </div>
-        <div id="status-rows"></div>
-      </section>
   </div>
-
-  <section class="card" style="padding:0">
-    <div class="card-h" style="padding:18px 18px 0">
-      <div>
-        <h3>Викладачі</h3>
-        <div class="sub">Натисніть на рядок, щоб відкрити картку викладача</div>
-      </div>
-    </div>
-    <div class="tbl-search">
-      <div class="search-input">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input class="input" id="ov-search" type="search" placeholder="Пошук за іменем або email…" autocomplete="off" aria-label="Пошук викладача">
-      </div>
-      <span class="meta" id="ov-table-count">—</span>
-    </div>
-    <div class="tbl-wrap">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th class="sortable" data-sort="name">Викладач <span class="ord"></span></th>
-            <th>Статус</th>
-            <th class="sortable" data-sort="tests">Тести <span class="ord"></span></th>
-            <th class="sortable" data-sort="students">Студенти <span class="ord"></span></th>
-            <th class="sortable" data-sort="attempts">Спроби <span class="ord"></span></th>
-            <th class="sortable" data-sort="games">Ігри <span class="ord"></span></th>
-            <th class="sortable" data-sort="weekAttempts">За тиждень <span class="ord"></span></th>
-            <th class="sortable" data-sort="avg">Сер. оцінка <span class="ord"></span></th>
-            <th class="sortable" data-sort="lastAct">Остання активність <span class="ord"></span></th>
-          </tr>
-        </thead>
-        <tbody id="ov-table"></tbody>
-      </table>
-    </div>
-  </section>
 `;
 
 const topbarRight = `
@@ -282,7 +212,6 @@ const { _user } = await initAdminShell({ activeId: "overview", crumbs: ["Огл�
 
 // ─── Дані ────────────────────────────────────────────────────────────────────
 let D = { users: [], stats: {}, attempts: [], games: [], live: [], problems: [] };
-let _ovSortBy = "attempts", _ovSortDir = "desc";
 
 function apply({ _users, _stats, _allAttempts, _allGames, _liveNow }, bugs){
   // Середня оцінка по викладачу — з уже завантажених спроб
@@ -318,8 +247,6 @@ function renderAll(){
   renderModes();
   renderKpis();
   renderProblems();
-  renderStatuses();
-  renderTable();
 }
 
 function renderPulse(){
@@ -428,88 +355,7 @@ function renderProblems(){
     : `<div class="ok-state"><span>${ICO.check}</span>Нових звернень немає</div>`;
 }
 
-function renderStatuses(){
-  const u = D.users, blocked = u.filter(x => x.blocked).length, first = u.filter(x => x.isFirstLogin && !x.blocked).length;
-  const act = u.length - blocked - first, total = u.length || 1;
-  document.getElementById("teachers-total").textContent = `${u.length} ${plural(u.length, ["акаунт", "акаунти", "акаунтів"])} у системі`;
-  document.getElementById("status-rows").innerHTML = [
-    { l: "Активні", v: act, c: "#16A34A", bg: "rgba(22,163,74,.15)" },
-    { l: "Не увійшли", v: first, c: "#D97706", bg: "rgba(217,119,6,.15)" },
-    { l: "Заблоковані", v: blocked, c: "#DC2626", bg: "rgba(220,38,38,.15)" },
-  ].map(s => `<div class="status-row">
-      <span class="status-dot" style="background:${s.c};box-shadow:0 0 0 3px ${s.bg}"></span>
-      <span class="lbl">${s.l}</span>
-      <span class="bar"><i style="width:${(s.v / total * 100).toFixed(0)}%;background:${s.c}"></i></span>
-      <span class="v" style="color:${s.v ? s.c : "var(--ink-300)"}">${s.v}</span>
-    </div>`).join("");
-}
-
-function renderTable(){
-  const q = (document.getElementById("ov-search")?.value || "").trim().toLowerCase();
-  const S = D.stats;
-  let list = D.users.filter(u => !q || fullName(u).toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q));
-  list.sort((a, b) => {
-    const av = _ovSortBy === "name" ? fullName(a).toLowerCase() : (S[a.id]?.[_ovSortBy] ?? -1);
-    const bv = _ovSortBy === "name" ? fullName(b).toLowerCase() : (S[b.id]?.[_ovSortBy] ?? -1);
-    const c = av > bv ? 1 : av < bv ? -1 : 0;
-    return _ovSortDir === "desc" ? -c : c;
-  });
-  document.querySelectorAll("th.sortable").forEach(th => {
-    const on = th.dataset.sort === _ovSortBy;
-    th.classList.toggle("active", on);
-    th.setAttribute("aria-sort", on ? (_ovSortDir === "desc" ? "descending" : "ascending") : "none");
-    th.querySelector(".ord").textContent = on ? (_ovSortDir === "desc" ? "↓" : "↑") : "";
-  });
-  document.getElementById("ov-table-count").textContent = `${list.length} / ${D.users.length}`;
-
-  const tb = document.getElementById("ov-table");
-  if (!list.length){
-    tb.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="et">${q ? "Нічого не знайдено" : "Ще немає викладачів"}</div><div class="es">${q ? "Спробуйте інший запит" : "Додайте першого викладача на сторінці «Викладачі»"}</div></div></td></tr>`;
-    return;
-  }
-  const PAL = ["", "b", "g", "o", "r"];
-  tb.innerHTML = list.map(u => {
-    const s = S[u.id] || {};
-    const name = fullName(u);
-    const ini = ((u.name || "")[0] || "") + ((u.surname || "")[0] || "") || name.slice(0, 2);
-    const status = u.blocked ? `<span class="pill red">Заблоковано</span>`
-      : u.isFirstLogin ? `<span class="pill amber">Не увійшов</span>`
-      : `<span class="pill green">Активний</span>`;
-    const age = s.lastAct ? Date.now() - s.lastAct : Infinity;
-    const lastCls = age < DAY ? "recent" : age > 30 * DAY ? "stale" : "";
-    return `<tr tabindex="0" data-q="${esc(u.email || name)}" style="${u.blocked ? "opacity:.55" : ""}">
-      <td>
-        <div style="display:flex;align-items:center;gap:11px">
-          <div class="avatar ${PAL[(name.charCodeAt(0) || 0) % PAL.length]}">${esc(ini.toUpperCase())}</div>
-          <div style="min-width:0">
-            <div class="t-name">${esc(name)}${u.role === "admin" ? `<span class="pill violet" style="font-size:11px;padding:2px 6px">Admin</span>` : ""}</div>
-            <div class="t-mail">${esc(u.email || "")}</div>
-          </div>
-        </div>
-      </td>
-      <td>${status}</td>
-      <td class="mono" style="font-weight:700">${s.tests || 0}<span class="t-sub">${s.activeTests || 0} акт.</span></td>
-      <td class="mono" style="font-weight:700">${s.students || 0}</td>
-      <td class="mono" style="font-weight:700">${s.attempts || 0}</td>
-      <td class="mono" style="font-weight:700">${s.games || 0}${s.gamePlayers ? `<span class="t-sub">${s.gamePlayers} грав.</span>` : ""}</td>
-      <td>${s.weekAttempts + s.weekGames ? `<span class="pill green" title="Спроб і ігор за 7 днів">+${s.weekAttempts + s.weekGames}</span>` : `<span class="mono" style="color:var(--ink-300)">0</span>`}</td>
-      <td>${s.avg != null ? `<span class="g-pill ${gradeTone(s.avg)}">${s.avg.toFixed(1)}</span>` : `<span class="mono" style="color:var(--ink-300)">—</span>`}</td>
-      <td><span class="last ${lastCls}">${s.lastAct ? esc(formatTimeAgo(s.lastAct)) : "—"}</span></td>
-    </tr>`;
-  }).join("");
-}
-
 // ─── Обробники ────────────────────────────────────────────────────────────
-document.querySelectorAll("th.sortable").forEach(th => th.addEventListener("click", () => {
-  const k = th.dataset.sort;
-  if (_ovSortBy === k) _ovSortDir = _ovSortDir === "desc" ? "asc" : "desc";
-  else { _ovSortBy = k; _ovSortDir = k === "name" ? "asc" : "desc"; }
-  renderTable();
-}));
-document.getElementById("ov-search").addEventListener("input", renderTable);
-const openTeacher = tr => { if (tr?.dataset.q) location.href = "teachers?q=" + encodeURIComponent(tr.dataset.q); };
-document.getElementById("ov-table").addEventListener("click", e => openTeacher(e.target.closest("tr[data-q]")));
-document.getElementById("ov-table").addEventListener("keydown", e => { if (e.key === "Enter") openTeacher(e.target.closest("tr[data-q]")); });
 // Підписи осей залежать від ширини — перемальовуємо графіки після зміни розміру
 let _rsT, _rsW = innerWidth;
 addEventListener("resize", () => { clearTimeout(_rsT); _rsT = setTimeout(() => { if (Math.abs(innerWidth - _rsW) < 40) return; _rsW = innerWidth; renderModes(); }, 200); });
