@@ -27,7 +27,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=19">
+<link rel="stylesheet" href="shared/admin-shell.css?v=20">
 <style>
 .ai-sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 0 -4px}
 .ai-sec-h h2{margin:0;font-size:16px;font-weight:800;letter-spacing:-.01em}
@@ -247,7 +247,7 @@ const provCard = p => {
       </div>
       <span class="prov-state" id="st-${p}">Не налаштовано</span>
     </div>
-    <div>
+    <div data-keyblock>
       <div class="lbl"><label for="key-${p}">API-ключ</label><span class="hint">зберігається в settings/ai</span></div>
       <div class="key-row">
         <div class="key-wrap">
@@ -288,7 +288,7 @@ const content = `
     <a href="teachers">До викладачів →</a>
   </div>
 
-  <div class="sec-note">
+  <div class="sec-note" id="sec-note">
     ${SVG(IC.warn).replace("<svg", '<svg width="16" height="16"')}
     <span>Запити до AI йдуть прямо з браузера, тому ключі доступні сторінкам тесту. Використовуйте окремі ключі з лімітами витрат і за потреби перевипускайте їх у консолі провайдера.</span>
   </div>
@@ -583,7 +583,9 @@ hideLoader();
   const host = document.createElement("section");
   host.id = "wk-panel"; host.className = "wk";
   host.setAttribute("aria-label", "Ключі у воркері");
-  document.getElementById("admin-content").prepend(host);
+  // Панель стоїть під заголовком сторінки, а не над ним
+  const head = document.querySelector("#admin-content .page-head");
+  head ? head.after(host) : document.getElementById("admin-content").prepend(host);
   const ok = (v, yes, no) => `<span class="wk-st ${v ? "yes" : "no"}">${v ? yes : no}</span>`;
   let armed = false;
   async function loadStatus(){
@@ -593,6 +595,9 @@ hideLoader();
     renderWk();
   }
   function renderWk(){
+    // Коли ключі у воркері, поля ключів у браузері не потрібні
+    document.querySelectorAll("[data-keyblock]").forEach(el => { el.hidden = wk.viaWorker; });
+    const sn = document.getElementById("sec-note"); if (sn) sn.hidden = wk.viaWorker;
     const st = wk.status, anyKey = !!(st && (st.configured.groq || st.configured.gemini));
     const legacy = !!(st && (st.legacyKeysInDb.groq || st.legacyKeysInDb.gemini));
     host.innerHTML = `

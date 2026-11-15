@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Адмін-панель · QuizFlow">
 <meta name="twitter:description" content="Лише для адміністраторів QuizFlow.">
 <meta name="twitter:image" content="https://admin.quizflow.space/assets/og/admin.jpg?v=1">
-<link rel="stylesheet" href="shared/admin-shell.css?v=19">
+<link rel="stylesheet" href="shared/admin-shell.css?v=20">
 <style>
 /* ═══ Плитки-фільтри ═══ */
 .pb-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 16px}
@@ -263,13 +263,13 @@ const userName = uid => { const u = S.users[uid]; return u ? ([u.name, u.surname
 // Нормалізований елемент: і звіт викладача, і задача адміна
 function normBug(id, b){
   return { id, src: "bug", kind: b.reportType === "improvement" ? "idea" : "bug",
-    title: b.message || b.title || "—", text: b.message || "", col: b.status === "in_progress" ? "in_progress" : b.status === "resolved" ? "done" : "new",
+    title: b.message || b.title || b.description || b.text || "Без опису", text: b.message || b.description || b.text || "", col: b.status === "in_progress" ? "in_progress" : b.status === "resolved" ? "done" : "new",
     createdAt: b.createdAt || 0, doneAt: b.resolvedAt || 0, page: b.page && b.page !== "—" ? b.page : "",
     authorId: b.uid && b.uid !== "—" ? b.uid : "", authorName: (b.userName && b.userName !== "—" ? b.userName : "") || userName(b.uid),
     assignee: b.assignee || "", assigneeId: b.assigneeId || "", deadline: b.deadline || "", priority: b.priority || "normal", note: b.note || "" };
 }
 function normTask(id, t){
-  return { id, src: "task", kind: "task", title: t.title || "—", text: t.description || "", col: t.col || "new",
+  return { id, src: "task", kind: "task", title: t.title || "Без назви", text: t.description || "", col: t.col || "new",
     createdAt: t.createdAt || 0, doneAt: t.completedAt || 0, authorName: t.createdByName || "", authorId: t.createdBy || "",
     assignee: t.assignee || "", assigneeId: t.assigneeId || "", deadline: t.deadline || "", priority: t.priority || "normal", note: "" };
 }
