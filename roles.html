@@ -181,6 +181,9 @@ textarea.field-input{resize:vertical;min-height:70px;line-height:1.45}
 .rv-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#F1F3F9;color:var(--ink-500);margin-left:6px}
 .toggle-sw input:disabled + .toggle-sl{opacity:.55;cursor:not-allowed}
 .rv-prev{position:sticky;top:12px;border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+.rv-prev-t{display:none;width:100%;align-items:center;justify-content:space-between;gap:8px;border:0;background:none;padding:0;font:700 13.5px "Manrope",sans-serif;color:var(--ink-900);cursor:pointer;text-align:left}
+.rv-prev-t svg{flex:none;transition:transform .18s}.rv-prev.open .rv-prev-t svg{transform:rotate(180deg)}
+@media (max-width:1280px){.rv-prev>.pg-sec-l{display:none}.rv-prev-t{display:flex}.rv-prev:not(.open) .rv-body{display:none}.rv-prev.open .rv-body{margin-top:10px}}
 .rv-menu{display:flex;flex-direction:column;gap:2px;margin-top:6px}
 .rv-mi{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:9px;font-weight:600;font-size:13px}
 .rv-mi .d{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
@@ -511,10 +514,13 @@ function accessTab(rid){
     ${legacy ? `<div class="rl-hint warn">${IC.info}<span>У цій ролі лишились старі «Ні». Вони більше не діють. Першу ж зміну нижче їх приберуть.</span></div>` : ""}
     ${warn.length ? `<div class="rl-warn" role="alert"><b>Перевірте налаштування</b><ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
     <div class="rv-grid"><div class="rv-blocks">${blocks}</div>
-      <aside class="rv-prev" aria-label="Що побачить викладач"><div class="pg-sec-l">${bs ? "Що побачить кожен викладач" : "Що побачить викладач з цією роллю"}</div>
+      <aside class="rv-prev${_open.has("__prev") ? " open" : ""}" aria-label="Що побачить викладач"><div class="pg-sec-l">${bs ? "Що побачить кожен викладач" : "Що побачить викладач з цією роллю"}</div>
+        <button type="button" class="rv-prev-t" data-open="__prev" aria-expanded="${_open.has("__prev")}">${bs ? "Що побачить кожен викладач" : "Що побачить викладач з цією роллю"}: ${vis.length} з ${pages.length} сторінок ${sm(IC.chev, 14)}</button>
+        <div class="rv-body">
         <div class="rv-menu">${pages.map(it => `<div class="rv-mi ${vis.includes(it) ? "on" : "off"}"><span class="d"></span>${esc(it.label || it.id)}</div>`).join("")}</div>
         <div class="rv-acts">${ACTS.map(([n, k]) => `<div class="rv-act ${eff[k] ? "on" : "off"}">${sm(eff[k] ? IC.ok : IC.no, 14)}<span>${n}</span></div>`).join("")}</div>
-        ${hid.length ? `<div class="pg-s" style="margin-top:10px">Закриті сторінки не показуються в меню й не відкриваються за прямим посиланням.</div>` : ""}</aside></div>`;
+        ${hid.length ? `<div class="pg-s" style="margin-top:10px">Закриті сторінки не показуються в меню й не відкриваються за прямим посиланням.</div>` : ""}
+        </div></aside></div>`;
 }
 
 function limitsTab(rid){
