@@ -15,6 +15,7 @@ async function fakeWorker(page, calls, { configured = true } = {}) {
     if (path === "/status") return json({ ok: true, from: "QuizFlow <noreply@quizflow.space>", configured: { resend: configured, unsubscribe: true, kv: true }, unsubscribed: ["t2"] });
     if (path === "/preview") return json({ ok: true, html: broadcastEmail({ ...body, name: "Олено", unsubUrl: "#" }).html });
     if (path === "/invite") return json({ ok: true, id: "e1", to: body.to });
+    if (path === "/ai") return json({ ok: true, text: JSON.stringify({ subject: "Тема від воркера", body: "Текст листа.", button: null }), tokens: 9, provider: "groq" });
     if (path === "/broadcast") return json({ ok: true, sent: body.test ? 1 : body.uids.length, failed: 0, skipped: { noEmail: 0, blocked: 0, unsubscribed: 0, missing: 0 } });
     return json({ ok: false, error: "404" }, 404);
   });
@@ -210,5 +211,22 @@ test("розсилки: окремі викладачі — пошук, вибі
   await page.click('[data-act="pick-clear"]');
   await expect(page.locator("#sum")).toContainText("Отримають 0");
   await expect(page.locator('[data-act="send"]')).toBeDisabled();
+  expect(errors).toEqual([]);
+});
+
+test("розсилки: коли ключі AI лише у воркері, «Написати з AI» доступне й іде через воркер", async ({ page, errors }) => {
+  const calls = [];
+  await fakeWorker(page, calls);
+  const db = mailDb();
+  db.settings = { mail: { workerUrl: WORKER }, ai: { viaWorker: true, aiMail: true } };      // ключів у базі немає
+  await seed(page, db, "t5");
+  await page.goto("/mail");
+  await expect(page.locator(".ai-off")).toHaveCount(0);
+  await page.fill("#ai-prompt", "Розкажи про ролі");
+  await page.click('[data-act="ai-new"]');
+  await expect(page.locator("#f-subj")).toHaveValue("Тема від воркера");
+  const ai = calls.find(c => c.path === "/ai");
+  expect(ai.body.feature).toBe("mail");
+  expect(ai.auth).toBe("Bearer mock-token-t5");
   expect(errors).toEqual([]);
 });
