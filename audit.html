@@ -145,6 +145,9 @@ function render(){
     (!q || [e.name, e.targetLabel, e.details, (ACT[e.action] || [])[1]].some(x => String(x || "").toLowerCase().includes(q))));
   document.getElementById("lg-meta").textContent = `${list.length} / ${all.length}`;
   const host = document.getElementById("lg-list");
+  // Поки журнал порожній, пошук і фільтри з нулями зайві
+  document.querySelector(".lg-bar").style.display = all.length ? "" : "none";
+  document.getElementById("lg-cats").style.display = all.length ? "" : "none";
   if (!all.length){ host.innerHTML = `<div class="lg-empty"><b>Журнал поки порожній</b>Тут з'являтимуться зміни: блокування, ролі, ліміти, оголошення, налаштування.</div>`; return; }
   if (!list.length){ host.innerHTML = `<div class="lg-empty"><b>Нічого не знайдено</b>Спробуйте інший фільтр або запит</div>`; return; }
   let day = "", html = "";

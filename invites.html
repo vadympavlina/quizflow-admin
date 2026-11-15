@@ -189,6 +189,8 @@ function render(){
     `<button type="button" role="tab" data-f="${k}" class="${filter === k ? "on" : ""}">${c ? `<i style="background:${c}"></i>` : ""}${l} <b>${counts[k]}</b></button>`).join("");
   const rows = list.filter(t => (filter === "all" || t.st === filter) && (!q || [t.note, t.createdByName, nameOf(t.usedBy), users[t.usedBy]?.email, t.sentTo].some(x => String(x || "").toLowerCase().includes(q))));
   const host = document.getElementById("iv-list");
+  // Поки запрошень немає, пошук і фільтри з нулями зайві
+  document.querySelector(".iv-bar").style.display = list.length ? "" : "none";
   if (!list.length){ host.innerHTML = `<div class="iv-empty"><b>Запрошень ще немає</b>Створіть посилання — викладач зареєструється сам.<div style="margin-top:14px"><button class="tb-btn primary" type="button" data-new>${IC.plus} Нове запрошення</button></div></div>`; return; }
   if (!rows.length){ host.innerHTML = `<div class="iv-empty"><b>Нічого не знайдено</b>Спробуйте інший фільтр або запит</div>`; return; }
   host.innerHTML = rows.map(t => {

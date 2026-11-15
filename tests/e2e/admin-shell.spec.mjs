@@ -79,3 +79,23 @@ test("ai-settings: панель «Ключі у воркері» стоїть п
   expect(order).toBe(true);
   await expect(page.locator("[data-keyblock]").first()).toBeHidden();
 });
+
+test("порожні списки: пошук і фільтри з нулями не показуються (запрошення, журнал)", async ({ page }) => {
+  const d = admSeed(Date.now()); d.settings.ownerUid = "t5";
+  delete d.invite_tokens; delete d.adminLog; delete d.audit;
+  await seed(page, d, "t5");
+  await page.goto("/invites"); await page.waitForTimeout(900);
+  await expect(page.locator(".iv-bar")).toBeHidden();
+  await expect(page.getByText("Запрошень ще немає")).toBeVisible();
+  await page.goto("/audit"); await page.waitForTimeout(900);
+  await expect(page.locator(".lg-bar")).toBeHidden();
+  await expect(page.getByText("Журнал поки порожній")).toBeVisible();
+});
+
+test("розсилки без воркера: пояснення й нумеровані кроки підключення", async ({ page }) => {
+  const d = admSeed(Date.now()); d.settings.ownerUid = "t5";
+  await seed(page, d, "t5");
+  await page.goto("/mail"); await page.waitForTimeout(900);
+  await expect(page.locator(".setup-lead")).toContainText("Розсилки ще не підключені");
+  await expect(page.locator(".setup ol li")).toHaveCount(4);
+});
