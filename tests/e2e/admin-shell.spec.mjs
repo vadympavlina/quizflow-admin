@@ -99,3 +99,18 @@ test("розсилки без воркера: пояснення й нумеро
   await expect(page.locator(".setup-lead")).toContainText("Розсилки ще не підключені");
   await expect(page.locator(".setup ol li")).toHaveCount(4);
 });
+
+test("статистика: оцінки, ігри й теплова карта сховані під «Докладніше» і малюються після розкриття", async ({ page, errors }) => {
+  const d = admSeed(Date.now()); d.settings.ownerUid = "t5";
+  await seed(page, d, "t5");
+  await page.goto("/stats"); await page.waitForTimeout(1000);
+  await expect(page.locator("#st-more")).toBeHidden();
+  await expect(page.locator("#ch-dyn")).toBeVisible();
+  await page.locator("#st-more-t").click();
+  await expect(page.locator("#st-more")).toBeVisible();
+  await expect(page.locator("#heat .c").first()).toBeVisible();
+  expect(await page.locator("#ch-grades").innerHTML()).not.toBe("");
+  await page.locator("#st-more-t").click();
+  await expect(page.locator("#st-more")).toBeHidden();
+  expect(errors).toEqual([]);
+});
