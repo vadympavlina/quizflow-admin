@@ -40,16 +40,25 @@
 .tp-it-i{flex:1;min-width:0}
 .tp-it-n{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--ink-900);white-space:nowrap;overflow:hidden}
 .tp-it-n span{overflow:hidden;text-overflow:ellipsis}
-.tp-it-n .me,.tp-it-n .tp-adm.own{background:linear-gradient(135deg,#B45309,#D97706)}
+.tp-it-n .me,.tp-it-n .tp-adm{font-style:normal}
 .tc-status.adm.own{background:#FEF3C7;color:#92400E}
 .owner-line{margin-top:4px;color:var(--ink-500)} .owner-line b{color:var(--ink-900)}
-.tp-adm{font-style:normal}
 .tp-it-n .me{font-size:11px;font-weight:600;color:var(--ink-400);flex:0 0 auto}
 .tp-it-e{font-size:12px;color:var(--ink-400);font-family:"Geist Mono",monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tp-it-t{font-size:12px;color:var(--ink-400);font-weight:600;white-space:nowrap;flex:0 0 auto;text-align:right}
 .tp-it-t.recent{color:var(--grn-700)}
+.tp-it-r{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tp-rc{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--sf-2);color:var(--ink-700);max-width:100%}
+.tp-rc i{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.tp-rc.more{color:var(--ink-500)}
+.tp-it-t.bad{color:var(--red-700);font-weight:800} .tp-it-t.wait{color:var(--amb-700);font-weight:800}
+.tp-it{align-items:flex-start;padding:11px 12px}
+.tp-it .tc-ava{margin-top:2px}
+.tp-it-t{margin-top:3px}
+@media (min-width:1024px){ .tp{grid-template-columns:minmax(380px,440px) minmax(0,1fr)} }
 .tp-dots{display:inline-flex;gap:3px;flex:0 0 auto}
 .tp-dots i{width:7px;height:7px;border-radius:50%}
+.tp-adm.own{background:linear-gradient(135deg,#B45309,#D97706)!important}
 .tp-adm{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:linear-gradient(135deg,var(--v-500),var(--ind-600));color:#fff;flex:0 0 auto}
 
 /* Аватар із крапкою статусу */
@@ -63,10 +72,10 @@
 .tc-ava > i.blocked{background:#EF4444}
 
 /* Права колонка: картка викладача */
-.tp-hero{display:flex;gap:18px;align-items:center;padding:24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FAF8FF,#fff)}
+.tp-hero{display:flex;flex-wrap:wrap;gap:18px;align-items:center;padding:24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FAF8FF,#fff)}
 .tp-hero .tc-ava{width:68px;height:68px;border-radius:20px;font-size:20px}
 .tp-hero .tc-ava > i{width:16px;height:16px;border-width:3px}
-.tp-hi{flex:1;min-width:0}
+.tp-hi{flex:1 1 240px;min-width:0}
 .tp-hi h2{font-size:20px;font-weight:800;letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere;margin:0}
 .tp-hi h2 .me{font-size:13px;font-weight:600;color:var(--ink-400);margin-left:6px}
 .tp-mail{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font:600 13px "Geist Mono",monospace;color:var(--ink-500);background:none;border:0;padding:2px 0;cursor:pointer;max-width:100%}
@@ -81,7 +90,7 @@
 .tc-status.blocked{background:var(--red-100);color:var(--red-700)}
 .tc-status.adm{background:var(--v-100);color:var(--v-600)}
 .tc-status.adm::before{display:none}
-.tp-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto}
+.tp-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto;margin-left:auto}
 
 .tp-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
 .tp-stat{background:#fff;padding:16px 22px;min-width:0}
@@ -731,15 +740,19 @@ function renderGrid(){
   const now = Date.now();
   grid.innerHTML = list.map(u => {
     const s = (window._stats || {})[u.id] || {};
-    const dots = getUserRoleIds(u).filter(id => roles[id]).slice(0, 4).map(id => `<i style="background:${esc(roles[id].color || "#7C3AED")}" title="${esc(roles[id].name)}"></i>`).join("");
+    const rids = getUserRoleIds(u).filter(id => roles[id]);
+    const chips = rids.slice(0, 2).map(id => `<span class="tp-rc"><i style="background:${esc(roles[id].color || "#7C3AED")}"></i>${esc(roles[id].name || "—")}</span>`).join("") + (rids.length > 2 ? `<span class="tp-rc more">+${rids.length - 2}</span>` : "");
     const recent = s.lastAct && now - s.lastAct < DAY;
-    return `<button type="button" class="tp-it${u.id === _selId ? " on" : ""}${statusOf(u) === "blocked" ? " is-blocked" : ""}" data-id="${esc(u.id)}"${u.id === _selId ? ' aria-current="true"' : ""}>
+    const stt = statusOf(u);
+    const when = stt === "blocked" ? '<span class="tp-it-t bad">Заблоковано</span>' : stt === "first" ? '<span class="tp-it-t wait">Не входив</span>' : `<span class="tp-it-t${recent ? " recent" : ""}">${s.lastAct ? esc(formatTimeAgo(s.lastAct)) : "—"}</span>`;
+    return `<button type="button" class="tp-it${u.id === _selId ? " on" : ""}${stt === "blocked" ? " is-blocked" : ""}" data-id="${esc(u.id)}"${u.id === _selId ? ' aria-current="true"' : ""}>
       ${avaHtml(u)}
       <span class="tp-it-i">
-        <span class="tp-it-n"><span>${esc(fullName(u))}</span>${u.id === _user.id ? '<em class="me">ви</em>' : ""}${u.id === window.QF_OWNER?.uid ? '<em class="tp-adm own">Власник</em>' : u.role === "admin" ? '<em class="tp-adm">Адмін</em>' : ""}${dots ? `<span class="tp-dots">${dots}</span>` : ""}</span>
+        <span class="tp-it-n"><span>${esc(fullName(u))}</span>${u.id === _user.id ? '<em class="me">ви</em>' : ""}${u.id === window.QF_OWNER?.uid ? '<em class="tp-adm own">Власник</em>' : u.role === "admin" ? '<em class="tp-adm">Адмін</em>' : ""}</span>
         <span class="tp-it-e">${esc(u.email || "—")}</span>
+        ${chips ? `<span class="tp-it-r">${chips}</span>` : ""}
       </span>
-      <span class="tp-it-t${recent ? " recent" : ""}">${s.lastAct ? esc(formatTimeAgo(s.lastAct)) : "—"}</span>
+      ${when}
     </button>`;
   }).join("");
 }
@@ -767,7 +780,7 @@ function capsSection(u, s){
   const isAdm = u.role === "admin";
   const ro = u.readOnly === true;
   return `<section class="tp-sec">
-    <div class="tp-sec-h"><div><h3>Доступ</h3><p>${isAdm ? "Адміністратора ці обмеження не стосуються" : "Особисті налаштування мають перевагу над ролями, а ролі над «для всіх»"}</p></div><a href="features">Для всіх</a></div>
+    <div class="tp-sec-h"><div><h3>Особисті дозволи</h3><p>${isAdm ? "Адміністратора ці обмеження не стосуються" : "Особисті налаштування мають перевагу над ролями, а ролі над «для всіх»"}</p></div><a href="features">Для всіх</a></div>
     <label class="cp-row cp-ro${ro ? " on" : ""}"><span class="cp-i"><b>Лише перегляд</b><span class="cp-s ${ro ? "off" : ""}">${ro ? "Може дивитися, але не змінювати дані: ні тестів, ні посилань, ні ігор" : "Звичайний доступ. Увімкніть, наприклад, на час відпустки чи звільнення"}</span></span>
       <span class="toggle-sw"><input type="checkbox" data-act="readonly" ${ro ? "checked" : ""}${isAdm ? " disabled" : ""} aria-label="Лише перегляд"><span class="toggle-sl"></span></span></label>
     ${GROUPS.map(g => `<div class="cp-gl">${esc(g.label)}</div><div class="cp-grid">${Object.keys(PERMS).filter(k => PERMS[k].group === g.id).map(k => { const v = ownPerms[k];
@@ -855,7 +868,7 @@ function renderDetail(){
       </div>
 
       <section class="tp-sec">
-        <div class="tp-sec-h"><div><h3>Доступ</h3><p>${isOwner ? "Адміністратор бачить цю адмінку й керує викладачами. Адміністраторів призначає лише власник" : "Адміністраторів призначає й змінює лише власник сервісу"}</p></div></div>
+        <div class="tp-sec-h"><div><h3>Роль у системі</h3><p>${isOwner ? "Адміністратор бачить цю адмінку й керує викладачами. Адміністраторів призначає лише власник" : "Адміністраторів призначає й змінює лише власник сервісу"}</p></div></div>
         <div class="tp-seg" role="radiogroup" aria-label="Системна роль">
           <button type="button" role="radio" data-act="sysrole" data-v="teacher" class="${u.role !== "admin" ? "on" : ""}" aria-checked="${u.role !== "admin"}"${isMe || !isOwner ? " disabled" : ""}>${IC.users}Викладач</button>
           <button type="button" role="radio" data-act="sysrole" data-v="admin" class="${u.role === "admin" ? "on" : ""}" aria-checked="${u.role === "admin"}"${isMe || !isOwner ? " disabled" : ""}>${IC.roles}Адміністратор</button>
