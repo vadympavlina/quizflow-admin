@@ -312,6 +312,8 @@ test("ролі: на вузькому екрані підсумок «що по�
   await page.waitForTimeout(300);
   await expect(page.locator(".rv-prev-t")).toBeHidden();
   await expect(page.locator(".rv-prev .rv-menu")).toBeVisible();
+  expect(errors).toEqual([]);
+});
 
 test("картка викладача: вкладки; у «Доступі» лише винятки, усі дозволи — за кнопкою", async ({ page, errors }) => {
   await seed(page, legacyDb(), "t5");
