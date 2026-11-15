@@ -114,7 +114,10 @@ textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 .empty{padding:36px 20px;text-align:center;color:var(--ink-500);font-size:13px}
 .empty b{display:block;font-size:16px;color:var(--ink-900);margin-bottom:4px}
 .setup{max-width:720px}
-.setup ol{margin:0;padding-left:20px;font-size:13px;color:var(--ink-700);line-height:1.7}
+.setup ol{margin:0 0 16px;padding:0;list-style:none;counter-reset:st;display:grid;gap:8px;font-size:13px;color:var(--ink-700);line-height:1.6}
+.setup ol li{counter-increment:st;display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.setup ol li::before{content:counter(st);width:28px;height:28px;border-radius:50%;background:var(--v-100);color:var(--v-600);font:800 13px "Manrope",sans-serif;display:grid;place-items:center}
+.setup-lead{margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--amb-100,#FEF3C7);color:var(--amb-700,#92400E);font-size:14px;font-weight:600;line-height:1.5}
 .setup code{font:500 12px "Geist Mono",monospace;background:var(--sf-2);padding:1px 6px;border-radius:6px}
 .checks{display:flex;gap:8px;flex-wrap:wrap}
 .res{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.55}
@@ -253,6 +256,7 @@ function setupHtml(){
   return `<section class="card setup">
     <div class="card-h"><div><h2>Воркер пошти</h2><p>Cloudflare Worker, який зберігає ключ Resend і надсилає листи від імені сервісу</p></div></div>
     <div class="card-b">
+      ${workerUrl ? "" : `<div class="setup-lead">Розсилки ще не підключені. Без воркера не працюють листи викладачам, запрошення на пошту й розсилки. Підключення займає кілька хвилин.</div>`}
       <ol>
         <li>На dash.cloudflare.com створіть Worker і вставте в редактор файл <code>worker/dist/worker.js</code> з репозиторію (покроково — <code>docs/email-setup.md</code>, розділ «Воркер пошти»).</li>
         <li>У Settings воркера: прив'язка KV з назвою <code>MAIL_KV</code> і два секрети — <code>RESEND_API_KEY</code> (ключ Resend) та <code>UNSUB_SECRET</code> (будь-який довгий випадковий рядок).</li>

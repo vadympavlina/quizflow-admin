@@ -55,7 +55,7 @@
 @media (max-width:640px){.pulse{flex-wrap:wrap}.pulse-live{margin-left:0;width:100%;justify-content:center}}
 
 /* Row layouts */
-.row-2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.row-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
 .side-stack{display:flex;flex-direction:column;gap:16px}
 @media (max-width:1280px){.row-2{grid-template-columns:1fr}}
 .seg{display:inline-flex;background:var(--sf-2);border-radius:10px;padding:3px;gap:2px}
@@ -202,23 +202,6 @@ const content = `
   <div class="kpi-grid" id="kpi-grid"></div>
 
   <div class="row-2">
-    <section class="card">
-      <div class="card-h" style="flex-wrap:wrap;gap:10px">
-        <div>
-          <h3>Активність учнів</h3>
-          <div class="sub">Скільки разів учні проходили тести й грали в ігри по днях</div>
-        </div>
-        <div class="seg" role="tablist" aria-label="Період">
-          <button type="button" data-range="7">7 днів</button>
-          <button type="button" data-range="14" class="on">14 днів</button>
-          <button type="button" data-range="30">30 днів</button>
-        </div>
-      </div>
-      <div class="chart-sum" id="chart-sum"></div>
-      <div id="chart-act"></div>
-    </section>
-
-    <div class="side-stack">
       <section class="card">
         <div class="card-h">
           <div>
@@ -240,7 +223,6 @@ const content = `
         </div>
         <div id="status-rows"></div>
       </section>
-    </div>
   </div>
 
   <section class="card" style="padding:0">
@@ -301,7 +283,7 @@ const { _user } = await initAdminShell({ activeId: "overview", crumbs: ["Огл�
 
 // ─── Дані ────────────────────────────────────────────────────────────────────
 let D = { users: [], stats: {}, attempts: [], games: [], live: [], problems: [] };
-let _range = 14, _ovSortBy = "attempts", _ovSortDir = "desc";
+let _ovSortBy = "attempts", _ovSortDir = "desc";
 
 function apply({ _users, _stats, _allAttempts, _allGames, _liveNow }, bugs){
   // Середня оцінка по викладачу — з уже завантажених спроб
@@ -336,7 +318,6 @@ function renderAll(){
   renderPulse();
   renderModes();
   renderKpis();
-  renderChart();
   renderProblems();
   renderStatuses();
   renderTable();
@@ -426,21 +407,6 @@ function renderKpis(){
       <div class="kpi-l">${esc(k.l)}</div>
       <div class="kpi-s">${k.s}</div>
     </a>`).join("");
-}
-
-function renderChart(){
-  const n = _range, L = dayLabels(n);
-  const t = perDay(n), g = perDay(n, D.games, x => x.playedAt, x => x.players);
-  const gc = perDay(n, D.games, x => x.playedAt);
-  const sum = a => a.reduce((s, v) => s + v, 0);
-  const busiest = t.map((v, i) => v + g[i]).reduce((bi, v, i, arr) => v > arr[bi] ? i : bi, 0);
-  document.getElementById("chart-sum").innerHTML = `
-    <div><b>${sum(t)}</b><span><i style="background:${C.tests}"></i>спроб тестів</span></div>
-    <div><b>${sum(g)}</b><span><i style="background:${C.games}"></i>участей в іграх</span></div>
-    <div><b>${sum(gc)}</b><span>${plural(sum(gc), ["гра", "гри", "ігор"])} проведено</span></div>
-    <div><b>${sum(t) + sum(g) ? esc(L.short[busiest]) : "—"}</b><span>найактивніший день</span></div>`;
-  bars(document.getElementById("chart-act"), { labels: L.short, full: L.full, highlightLast: true, height: 210,
-    series: [{ name: "Спроби тестів", color: C.tests, values: t }, { name: "Участь в іграх", color: C.games, values: g }] });
 }
 
 function renderProblems(){
@@ -545,15 +511,9 @@ document.getElementById("ov-search").addEventListener("input", renderTable);
 const openTeacher = tr => { if (tr?.dataset.q) location.href = "teachers?q=" + encodeURIComponent(tr.dataset.q); };
 document.getElementById("ov-table").addEventListener("click", e => openTeacher(e.target.closest("tr[data-q]")));
 document.getElementById("ov-table").addEventListener("keydown", e => { if (e.key === "Enter") openTeacher(e.target.closest("tr[data-q]")); });
-document.querySelector(".seg").addEventListener("click", e => {
-  const b = e.target.closest("button[data-range]"); if (!b) return;
-  _range = +b.dataset.range;
-  document.querySelectorAll(".seg button").forEach(x => x.classList.toggle("on", x === b));
-  renderChart();
-});
 // Підписи осей залежать від ширини — перемальовуємо графіки після зміни розміру
 let _rsT, _rsW = innerWidth;
-addEventListener("resize", () => { clearTimeout(_rsT); _rsT = setTimeout(() => { if (Math.abs(innerWidth - _rsW) < 40) return; _rsW = innerWidth; renderModes(); renderChart(); }, 200); });
+addEventListener("resize", () => { clearTimeout(_rsT); _rsT = setTimeout(() => { if (Math.abs(innerWidth - _rsW) < 40) return; _rsW = innerWidth; renderModes(); }, 200); });
 document.getElementById("btn-refresh").addEventListener("click", async () => {
   const btn = document.getElementById("btn-refresh");
   btn.disabled = true; btn.style.opacity = "0.5";
