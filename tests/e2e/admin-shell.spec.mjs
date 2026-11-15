@@ -112,6 +112,8 @@ test("статистика: оцінки, ігри й теплова карта 
   expect(await page.locator("#ch-grades").innerHTML()).not.toBe("");
   await page.locator("#st-more-t").click();
   await expect(page.locator("#st-more")).toBeHidden();
+  expect(errors).toEqual([]);
+});
 
 test("огляд: без дублів сторінки «Викладачі» — немає таблиці й блоку статусів, є зведення й проблеми", async ({ page, errors }) => {
   const d = admSeed(Date.now()); d.settings.ownerUid = "t5";
