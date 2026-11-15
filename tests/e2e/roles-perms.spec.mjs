@@ -300,6 +300,21 @@ test("список викладачів: ролі видно чипами, ст�
   expect(errors).toEqual([]);
 });
 
+test("ролі: на вузькому екрані підсумок «що побачить» згорнуто в один рядок, на широкому видно одразу", async ({ page, errors }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await page.goto("/roles?id=__base"); await page.waitForTimeout(800);
+  await expect(page.locator(".rv-prev-t")).toBeVisible();
+  await expect(page.locator(".rv-prev .rv-menu")).toBeHidden();
+  await page.locator(".rv-prev-t").click();
+  await expect(page.locator(".rv-prev .rv-menu")).toBeVisible();
+  await page.setViewportSize({ width: 1500, height: 900 });
+  await page.waitForTimeout(300);
+  await expect(page.locator(".rv-prev-t")).toBeHidden();
+  await expect(page.locator(".rv-prev .rv-menu")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test("картка викладача: вкладки; у «Доступі» лише винятки, усі дозволи — за кнопкою", async ({ page, errors }) => {
   await seed(page, legacyDb(), "t5");
   await page.goto("/teachers?id=t1"); await page.waitForTimeout(700);
