@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const host = fs.readFileSync(path.join(ROOT, "CNAME"), "utf8").trim();
 const pages = [...fs.readdirSync(ROOT).filter(f => f.endsWith(".html")), ...(fs.existsSync(path.join(ROOT, "live")) ? fs.readdirSync(path.join(ROOT, "live")).filter(f => f.endsWith(".html")).map(f => "live/" + f) : [])]
-  .filter(f => f !== "404.html");
+  .filter(f => f !== "404.html" && f !== "features.html");   // features.html лише веде на «Ролі»
 
 // Розмір JPEG зі службового блоку SOF (без залежностей)
 function jpegSize(buf) {

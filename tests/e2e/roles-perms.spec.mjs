@@ -15,47 +15,100 @@ function legacyDb() {
     ] }] };
   return d;
 }
-const row = (page, name) => page.locator(".rp-row", { hasText: name }).first();
-const pick = async (page, name, v) => { await row(page, name).locator(`[data-pk][data-v="${v}"]`).click(); await page.waitForTimeout(250); };
+const blk = (page, name) => page.locator(".rv-blk", { hasText: name }).first();
+const level = async (page, block, lvl) => { await blk(page, block).locator(".rv-seg button", { hasText: new RegExp(`^${lvl}$`) }).click(); await page.waitForTimeout(300); };
+const open = async (page, block) => { const b = blk(page, block); if (await b.locator(".rv-detail").count() === 0) await b.locator("[data-open]").click(); };
+const sw = (page, block, label) => blk(page, block).locator(".rv-sw-row", { hasText: label }).locator("input");
+const toggle = async (page, block, label) => { await open(page, block); await sw(page, block, label).evaluate(el => el.click()); await page.waitForTimeout(300); };
 
-test("матриця дозволів: зберігається одразу, показує, що побачить викладач", async ({ page, errors }) => {
+test("сторінка ролі: рівні блоків зберігаються одразу, міграція зі старого формату", async ({ page, errors }) => {
   await seed(page, legacyDb(), "t5");
   await page.goto("/roles?id=games");
   await expect(page.locator(".rl-hero h2")).toHaveText("Лише ігри");
   await expect(page.locator("#rp-t-access")).toHaveAttribute("aria-selected", "true");
-  // Старе обмеження меню читається як дозволи: «Тести» закриті для всіх, крім «Автори»
-  await expect(row(page, "Сторінка «Тести»")).toContainText("Роль не має доступу");
+  // Старе обмеження меню: «Тести» закриті в «Усі викладачі», тож у цій ролі сторінки «Тести» немає
+  await expect(page.locator(".rv-mi.off", { hasText: "Тести" })).toBeVisible();
 
-  await pick(page, "Проводити ігри", "1");
-  await expect(row(page, "Проводити ігри")).toContainText("Роль має доступ");
-  await pick(page, "Експорт результатів", "0");
-  await expect(row(page, "Експорт результатів")).toContainText("Роль не має доступу");
-
+  await level(page, "Ігри наживо", "Проводити");
+  await expect(page.locator(".rv-act.on", { hasText: "Проводити Live-ігри" })).toBeVisible();
+  await level(page, "Інше", "Розширене");
   // Перше збереження перевело налаштування у новий формат і зняло обмеження з меню
   const db = await readDb(page);
   expect(db.settings.features.v).toBe(2);
-  expect(db.settings.features.roles.games.perms).toMatchObject({ games_run: true, export: false });
+  expect(db.settings.features.roles.games.perms).toMatchObject({ games_run: true, games_history: true, export: true });
+  expect(Object.values(db.settings.features.roles.games.perms).every(v => v === true)).toBe(true);   // роль лише додає
   expect(db.settings.features.roles.authors.perms.tests_view).toBe(true);     // автори, як і було
   expect(db.settings.features.perms.tests_view).toBe(false);                  // для всіх закрито, як і було
   expect(JSON.stringify(db.settings.navigation)).not.toContain("roleIds");
   expect(db.settings.features.roles.authors.limits.maxTests).toBe(50);           // ліміти не загубились
   expect(db.settings.features.limits.maxTests).toBe(20);
   expect(Object.keys(db.settings.features)).not.toContain("flags");
-
-  // Перегляд: що бачить викладач лише з цією роллю
-  await expect(page.locator(".rp-chips").first()).toContainText("Історія ігор");
-  await expect(page.locator(".rp-chips.no")).toContainText("Тести");
   expect(errors).toEqual([]);
 });
 
-test("попередження про суперечності: ігри без доступу до тестів", async ({ page }) => {
+test("залежності: ігри без тестів вмикають «Вибирати тест» самі, і його не можна вимкнути окремо", async ({ page }) => {
+  const d = legacyDb();
+  d.settings.features = { v: 2, perms: { tests_use: false, tests_view: false }, roles: {} };   // «Усі викладачі» тестів не дають
+  d.settings.navigation = null;
+  await seed(page, d, "t5");
+  await page.goto("/roles?id=games");
+  await level(page, "Ігри наживо", "Проводити");
+  await open(page, "Тести");
+  await expect(sw(page, "Тести", "Вибирати тест")).toBeChecked();
+  await expect(sw(page, "Тести", "Вибирати тест")).toBeDisabled();
+  await expect(blk(page, "Тести").locator(".rv-tag", { hasText: "потрібно для" })).toBeVisible();
+  await expect(page.locator(".rl-warn")).toHaveCount(0);
+});
+
+test("окремий перемикач у блоці дає «Свій набір»", async ({ page }) => {
   await seed(page, legacyDb(), "t5");
   await page.goto("/roles?id=games");
-  await pick(page, "Вибирати тест", "0");
-  await pick(page, "Проводити ігри", "1");
-  // «Проводити ігри» вмикає «Вибирати тест» залежністю, тож суперечності немає
-  await expect(page.locator(".rl-warn")).toHaveCount(0);
-  await expect(row(page, "Вибирати тест")).toContainText("потрібно для іншого дозволу");
+  await level(page, "Інше", "Базове");
+  await toggle(page, "Інше", "Експорт результатів");   // «Усі викладачі» експорт закрили
+  await expect(blk(page, "Інше").locator(".rv-seg .cust")).toBeVisible();
+  const db = await readDb(page);
+  expect(db.settings.features.roles.games.perms.export).toBe(true);
+});
+
+test("«Усі викладачі»: базові права редагуються тут і зберігають лише заборонене", async ({ page, errors }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.goto("/roles?id=__base");
+  await expect(page.locator(".rl-hero h2")).toHaveText("Усі викладачі");
+  await expect(page.locator("#rp-t-members")).toHaveCount(0);
+  await expect(page.locator('[data-act="delete"]')).toHaveCount(0);
+  await level(page, "Інше", "Базове");
+  await toggle(page, "Аналіз", "Підозрілі");
+  const f = (await readDb(page)).settings.features;
+  expect(f.v).toBe(2);
+  expect(f.perms.tests_view).toBe(false);          // стара обмеженість меню
+  expect(f.perms.ai).toBe(false);                  // «Інше → Базове» закрило AI
+  expect(f.perms.export).toBe(false);
+  expect(f.perms.news_view ?? null).toBeNull();    // новини лишились відкритими
+  expect(Object.values(f.perms).every(v => v === false)).toBe(true);
+  expect(f.roles.authors.limits.maxTests).toBe(50);
+  expect(errors).toEqual([]);
+});
+
+test("у ролі те, що дає «Усі викладачі», видно заблокованим", async ({ page }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.goto("/roles?id=games");
+  await open(page, "Інше");
+  await expect(sw(page, "Інше", "Новини")).toBeChecked();
+  await expect(sw(page, "Інше", "Новини")).toBeDisabled();
+  await expect(blk(page, "Інше").locator(".rv-tag", { hasText: "Усі викладачі" }).first()).toBeVisible();
+});
+
+test("нова роль із шаблону отримує його права", async ({ page, errors }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.goto("/roles");
+  await page.locator(".rl-new-btn").click();
+  await page.locator("#role-name-inp").fill("Тільки ігри 2");
+  await page.locator('#role-tpls [data-tpl="Лише ігри"]').click();
+  await page.locator("#role-save-btn").click(); await page.waitForTimeout(600);
+  const db = await readDb(page);
+  const id = Object.keys(db.roles).find(k => db.roles[k].name === "Тільки ігри 2");
+  expect(db.settings.features.roles[id].perms).toMatchObject({ tests_use: true, games_history: true, games_run: true });
+  expect(errors).toEqual([]);
 });
 
 test("ліміти ролі: порожнє = як для всіх, 0 = без обмежень", async ({ page, errors }) => {
@@ -85,46 +138,23 @@ test("вкладки й клавіатура, телефон без горизо
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
 });
 
-test("«Для всіх»: вимкнути дозвіл і ліміт, зберегти, ролі видно списком", async ({ page, errors }) => {
-  await seed(page, legacyDb(), "t5");
-  await page.goto("/features");
-  await expect(page.locator("h1")).toHaveText("Базові дозволи й ліміти");
-  // Стара обмеженість сторінки «Тести» ролями відображається як вимкнено для всіх
-  await expect(page.locator('[data-pk="tests.view"]')).not.toBeChecked();
-  await expect(page.locator('[data-pk="export"]')).not.toBeChecked();             // старий прапорець export:false
-  await expect(page.locator(".fx-rl", { hasText: "Автори" })).toBeVisible();
-  await page.locator('[data-pk="export"]').evaluate(el => el.click());             // перемикач із візуальним слайдером
-  await page.locator('[data-pk="ai"]').evaluate(el => el.click());
-  await page.locator('[data-lim="maxActiveLinks"]').fill("15");
-  await expect(page.locator("#save-bar")).toHaveClass(/on/);
-  await page.locator("#btn-save").click(); await page.waitForTimeout(400);
-  const f = (await readDb(page)).settings.features;
-  expect(f.v).toBe(2);
-  expect(f.perms.ai).toBe(false);
-  expect(f.perms.export).toBeUndefined();
-  expect(f.perms.tests_view).toBe(false);
-  expect(f.limits).toMatchObject({ maxTests: 20, maxActiveLinks: 15 });
-  expect(f.roles.authors.limits.maxTests).toBe(50);
-  expect(errors).toEqual([]);
-});
-
 test("картка викладача: особисті дозволи, джерело, «лише перегляд»", async ({ page, errors }) => {
   const d = legacyDb();
-  d.settings.features = { v: 2, perms: { ai: false }, roles: { games: { perms: { games_run: false } } } };
+  d.settings.features = { v: 2, perms: { ai: false, games_run: false }, roles: { games: { perms: { games_run: true } } } };
   d.users.t1.customRoleIds = { games: true };
   await seed(page, d, "t5");
   await page.goto("/teachers?id=t1");
   const row = name => page.locator(".cp-row", { hasText: name }).first();
   await expect(row("Проводити ігри")).toContainText("за роллю");
-  await expect(row("Проводити ігри")).toContainText("Вимкнено");
+  await expect(row("Проводити ігри")).toContainText("Доступно");
   await expect(row("AI-функції")).toContainText("як для всіх");
-  // особисте «Так» сильніше за роль
-  await row("Проводити ігри").locator('[data-k="games.run"][data-v="1"]').click();
+  // особисте «Ні» сильніше за роль
+  await row("Проводити ігри").locator('[data-k="games.run"][data-v="0"]').click();
   await page.waitForTimeout(400);
   await expect(row("Проводити ігри")).toContainText("особисто");
-  await expect(row("Проводити ігри")).toContainText("Доступно");
+  await expect(row("Проводити ігри")).toContainText("Вимкнено");
   let u = (await readDb(page)).users.t1;
-  expect(u.features.perms.games_run).toBe(true);
+  expect(u.features.perms.games_run).toBe(false);
   // «лише перегляд» зберігається й вимикає зміни у підсумку
   await page.locator('[data-act="readonly"]').evaluate(el => el.click());
   await page.waitForTimeout(400);
@@ -167,9 +197,8 @@ test("зміни доступу залишають викладачу спові
   expect(n[0].read).toBe(false);
   // налаштування ролі: одне сповіщення на годину, скільки б кліків не було
   await page.locator("#rp-t-access").click();
-  const r = name => page.locator(".rp-row", { hasText: name }).first();
-  await r("Експорт результатів").locator('[data-pk][data-v="1"]').click(); await page.waitForTimeout(250);
-  await r("AI-функції").locator('[data-pk][data-v="0"]').click(); await page.waitForTimeout(250);
+  await level(page, "Ігри наживо", "Проводити");
+  await level(page, "Ігри наживо", "Лише історія");
   n = Object.values((await readDb(page)).teachers.t1.notifications).filter(x => x.type === "access");
   expect(n.length).toBe(2);                               // додавання + одне про налаштування ролі
   // «лише перегляд» з картки викладача
@@ -240,18 +269,16 @@ function noDots(o, path = "db") { const bad = []; (function walk(v, p) { if (v &
 test("усі збереження дозволів лягають у базу з коректними ключами (без крапки)", async ({ page, errors }) => {
   await seed(page, legacyDb(), "t5");
   await page.goto("/roles?id=games");
-  const r = name => page.locator(".rp-row", { hasText: name }).first();
-  await r("Проводити ігри").locator('[data-pk][data-v="1"]').click(); await page.waitForTimeout(250);
-  await r("Імпорт з Excel і CSV").locator('[data-pk][data-v="0"]').click(); await page.waitForTimeout(250);
+  await level(page, "Ігри наживо", "Проводити");
+  await toggle(page, "Тести", "Імпорт з Excel");
   await page.goto("/teachers?id=t1"); await page.waitForTimeout(700);
   await page.locator('.cp-row', { hasText: "Створювати посилання" }).locator('[data-k="links.manage"][data-v="0"]').click(); await page.waitForTimeout(300);
-  await page.goto("/features"); await page.waitForTimeout(700);
-  await page.locator('[data-pk="games.history"]').evaluate(el => el.click());
-  await page.locator("#btn-save").click(); await page.waitForTimeout(400);
+  await page.goto("/roles?id=__base"); await page.waitForTimeout(700);
+  await toggle(page, "Ігри наживо", "Історія ігор");
   const db = await readDb(page);
   expect(noDots(db.settings.features, "settings/features")).toEqual([]);
   expect(noDots(db.users.t1, "users/t1")).toEqual([]);
-  expect(db.settings.features.roles.games.perms.tests_import).toBe(false);
+  expect(db.settings.features.roles.games.perms.tests_import).toBe(true);
   expect(db.users.t1.features.perms.links_manage).toBe(false);
   expect(db.settings.features.perms.games_history).toBe(false);
   expect(errors).toEqual([]);

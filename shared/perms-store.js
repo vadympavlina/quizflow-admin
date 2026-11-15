@@ -5,7 +5,7 @@
 // перетворюється на новий (v:2) одним записом, тож нічого не губиться. Після цього пункти меню
 // більше не обмежуються через roleIds: доступ до сторінок задають дозволи ролей.
 // ═══════════════════════════════════════════════════════════════════════
-import { PERMS, normalizeCfg, storeKey } from "./perms.js?v=2";
+import { PERMS, normalizeCfg, storeKey } from "./perms.js?v=3";
 
 const bool = v => typeof v === "boolean";
 const posInt = v => { const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.floor(n) : null; };

@@ -40,7 +40,10 @@
 .tp-it-i{flex:1;min-width:0}
 .tp-it-n{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--ink-900);white-space:nowrap;overflow:hidden}
 .tp-it-n span{overflow:hidden;text-overflow:ellipsis}
-.tp-it-n .me,.tp-it-n .tp-adm{font-style:normal}
+.tp-it-n .me,.tp-it-n .tp-adm.own{background:linear-gradient(135deg,#B45309,#D97706)}
+.tc-status.adm.own{background:#FEF3C7;color:#92400E}
+.owner-line{margin-top:4px;color:var(--ink-500)} .owner-line b{color:var(--ink-900)}
+.tp-adm{font-style:normal}
 .tp-it-n .me{font-size:11px;font-weight:600;color:var(--ink-400);flex:0 0 auto}
 .tp-it-e{font-size:12px;color:var(--ink-400);font-family:"Geist Mono",monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tp-it-t{font-size:12px;color:var(--ink-400);font-weight:600;white-space:nowrap;flex:0 0 auto;text-align:right}
@@ -496,7 +499,7 @@
 
 <script type="module">
 import { resolveCaps, CAP_LIMITS, monthKey } from "./shared/caps.js?v=4";
-import { PERMS, GROUPS, layerPerms, encodePerms } from "./shared/perms.js?v=2";
+import { PERMS, GROUPS, layerPerms, encodePerms } from "./shared/perms.js?v=3";
 import { accessNotice, hourKey } from "./shared/access-notify.js?v=1";
 import { syncPerms, unsynced } from "./shared/perms-sync.js?v=1";
 const syncFor = async uids => { try { await syncPerms(uids); } catch (e) { toast("Збережено, але сервер не оновив дозволи: " + e.message, "err"); } };
@@ -532,6 +535,7 @@ const content = `
     <div>
       <h1>Усі викладачі</h1>
       <p>Оберіть викладача зі списку — ролі, доступ і AI налаштовуються прямо в його картці</p>
+      <p class="owner-line" id="owner-line" hidden></p>
     </div>
   </div>
 
@@ -675,7 +679,14 @@ const PAL = ["", "b", "g", "o", "r"];
 const initialsOf = u => { const n = fullName(u); return ((((u.surname || "")[0] || "") + ((u.name || "")[0] || "")) || n.slice(0, 2)).toUpperCase(); };
 const avaHtml = u => { const n = fullName(u); return `<div class="tc-ava ${PAL[(n.charCodeAt(0) || 0) % PAL.length]}">${esc(initialsOf(u))}<i class="${statusOf(u)}"></i></div>`; };
 
+function renderOwnerLine(){
+  const el = document.getElementById("owner-line"); if (!el) return;
+  const oid = window.QF_OWNER?.uid, o = (window._users || []).find(x => x.id === oid);
+  el.hidden = !o;
+  if (o) el.innerHTML = `Власник сервісу: <b>${esc(fullName(o))}</b>${o.email ? ` · ${esc(o.email)}` : ""}`;
+}
 function renderAll(){
+  renderOwnerLine();
   const _users = window._users || [];
   const c = { all: _users.length, active: 0, first: 0, blocked: 0 };
   _users.forEach(u => c[statusOf(u)]++);
@@ -725,7 +736,7 @@ function renderGrid(){
     return `<button type="button" class="tp-it${u.id === _selId ? " on" : ""}${statusOf(u) === "blocked" ? " is-blocked" : ""}" data-id="${esc(u.id)}"${u.id === _selId ? ' aria-current="true"' : ""}>
       ${avaHtml(u)}
       <span class="tp-it-i">
-        <span class="tp-it-n"><span>${esc(fullName(u))}</span>${u.id === _user.id ? '<em class="me">ви</em>' : ""}${u.role === "admin" ? '<em class="tp-adm">Адмін</em>' : ""}${dots ? `<span class="tp-dots">${dots}</span>` : ""}</span>
+        <span class="tp-it-n"><span>${esc(fullName(u))}</span>${u.id === _user.id ? '<em class="me">ви</em>' : ""}${u.id === window.QF_OWNER?.uid ? '<em class="tp-adm own">Власник</em>' : u.role === "admin" ? '<em class="tp-adm">Адмін</em>' : ""}${dots ? `<span class="tp-dots">${dots}</span>` : ""}</span>
         <span class="tp-it-e">${esc(u.email || "—")}</span>
       </span>
       <span class="tp-it-t${recent ? " recent" : ""}">${s.lastAct ? esc(formatTimeAgo(s.lastAct)) : "—"}</span>
@@ -823,7 +834,7 @@ function renderDetail(){
           ${u.email ? `<button type="button" class="tp-mail" data-act="copy" title="Скопіювати email"><span>${esc(u.email)}</span>${IC.copy}</button>` : ""}
           <div class="tp-badges">
             ${blocked ? '<span class="tc-status blocked">Заблоковано</span>' : status === "first" ? '<span class="tc-status first">Ще не увійшов</span>' : '<span class="tc-status ok">Активний</span>'}
-            ${u.role === "admin" ? '<span class="tc-status adm">Адміністратор</span>' : ""}
+            ${u.id === window.QF_OWNER?.uid ? '<span class="tc-status adm own">Власник сервісу</span>' : u.role === "admin" ? '<span class="tc-status adm">Адміністратор</span>' : ""}
           </div>
         </div>
         ${isMe ? "" : (u.role === "admin" && !isOwner) ? `<div class="tp-none">Адміністратором керує лише власник сервісу.</div>` : `<div class="tp-acts">
