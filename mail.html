@@ -344,7 +344,8 @@ function renderHist(){
 // і ключ — з адмінки → AI (функція «Листи й розсилки»); облік — aiUsage/…/mail.
 const TONES = [["friendly", "Дружньо"], ["formal", "Офіційно"], ["short", "Коротко"]];
 const TONE_TXT = { friendly: "теплий, дружній, але діловий тон; звертайся на «ви»", formal: "офіційно-діловий стиль, стримано й чітко", short: "дуже коротко: 2–4 речення і, якщо треба, короткий список" };
-const aiReady = () => aiCfg && aiCfg.aiMail !== false && !!(aiCfg.groqApiKey || aiCfg.geminiApiKey || aiCfg.apiKey);
+// Ключі лежать у воркері (viaWorker); старі ключі в базі лишаються запасним варіантом
+const aiReady = () => aiCfg && aiCfg.aiMail !== false && (aiCfg.viaWorker === true || !!(aiCfg.groqApiKey || aiCfg.geminiApiKey || aiCfg.apiKey));
 function aiHtml(){
   if (!aiCfg) return "";
   const head = `<div class="ai-h"><span class="ic">${IC.spark}</span><div><b>Написати з AI</b><span>Опишіть, про що лист — AI сам напише тему, текст і кнопку</span></div></div>`;
