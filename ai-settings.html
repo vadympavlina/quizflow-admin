@@ -89,6 +89,10 @@
 .model-custom select:focus,.model-custom input:focus{border-color:var(--v-500)}
 
 /* Функції */
+.mainprov{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--ink-500)}
+.mainprov .seg2{min-width:190px}
+.pf-toggle{display:block;text-align:left;margin:10px 0 0;padding:6px 2px;border:0;background:none;font:700 13px "Manrope",sans-serif;color:var(--v-600);cursor:pointer}
+.pf-toggle:hover{text-decoration:underline}
 .feat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (max-width:1180px){.feat-grid{grid-template-columns:1fr}}
 .feat{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s,opacity .15s}
@@ -247,20 +251,25 @@ const content = `
     </div>
   </div>
 
-  <div class="ai-sec-h"><div><h2>Використання</h2><p>Скільки звернень до AI роблять викладачі та їхні студенти</p></div><div class="us-months" id="us-months" role="tablist" aria-label="Місяць"></div></div>
-  <div id="ai-usage"><div class="us-empty">Завантаження…</div></div>
-
-  <div class="ai-sec-h"><div><h2>Моделі</h2><p>Достатньо одного провайдера. Якщо в обраного немає ключа у воркері, функція використає інший.</p></div></div>
-  <div class="row-2">${provCard("groq")}${provCard("gemini")}</div>
-
-  <div class="ai-sec-h"><div><h2>Функції</h2><p>Що вмикати та через який провайдер працює кожна функція</p></div></div>
+  <div class="ai-sec-h"><div><h2>Функції</h2><p>Що вмикати для викладачів і студентів</p></div>
+    <div class="mainprov"><span>Провайдер</span>
+      <div class="seg2" id="main-prov" role="group" aria-label="Основний провайдер">${["groq", "gemini"].map(p => `<button type="button" data-main="${p}" aria-pressed="false"><span class="pdot"></span>${PROVIDERS[p].name.replace("Google ", "")}</button>`).join("")}</div>
+    </div>
+  </div>
   <div class="feat-grid" id="feat-grid"></div>
+  <button type="button" class="pf-toggle" id="pf-toggle" aria-expanded="false">Свій провайдер для кожної функції</button>
+
+  <div class="ai-sec-h"><div><h2>Моделі</h2><p>Достатньо одного провайдера. Якщо в основного немає ключа у воркері, функція використає інший.</p></div></div>
+  <div class="row-2">${provCard("groq")}${provCard("gemini")}</div>
 
   <div class="ovr" id="ovr" hidden>
     <div class="ovr-ico">${SVG(IC.users)}</div>
     <div class="ovr-t"><div id="ovr-t"></div><div class="ovr-names" id="ovr-names"></div></div>
     <a href="teachers">До викладачів →</a>
   </div>
+
+  <div class="ai-sec-h"><div><h2>Використання</h2><p>Скільки звернень до AI роблять викладачі та їхні студенти</p></div><div class="us-months" id="us-months" role="tablist" aria-label="Місяць"></div></div>
+  <div id="ai-usage"><div class="us-empty">Завантаження…</div></div>
 
   <div class="save-bar" id="save-bar" role="region" aria-label="Незбережені зміни">
     <span class="t">Є незбережені зміни</span>
@@ -283,6 +292,7 @@ const DEF = { groqModel: "llama-3.3-70b-versatile", geminiModel: "gemini-2.5-fla
   flags: { comments: true, analysis: true, generation: true, textcheck: true, mail: true },
   prov: { comments: "groq", analysis: "groq", generation: "groq", textcheck: "groq", mail: "groq" } };
 let saved = structuredClone(DEF), cur = structuredClone(DEF);
+let perFeature = false;   // свій провайдер для кожної функції (відкрито, якщо вони вже різні)
 const wk = { viaWorker: false, status: null, err: "", url: "" };   // ключі у воркері
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 // Ключі лежать у секретах воркера; поки статус не прийшов, вважаємо, що вони є
@@ -328,16 +338,25 @@ function renderFeatures(){
         <div class="feat-t"><div class="feat-name">${f.name}</div><div class="feat-desc">${f.desc}</div><div class="feat-where">${f.where}</div></div>
         <label class="toggle-sw" title="${on ? "Вимкнути" : "Увімкнути"}"><input type="checkbox" data-flag="${f.id}" ${on ? "checked" : ""} aria-label="${f.name}"><span class="toggle-sl"></span></label>
       </div>
-      <div class="feat-body">
+      ${perFeature ? `<div class="feat-body">
         <div class="seg2" role="group" aria-label="Провайдер">
           ${["groq", "gemini"].map(p => `<button type="button" data-prov="${p}" aria-pressed="${chosen === p}"><span class="pdot"></span>${p === "groq" ? "Groq" : "Gemini"}</button>`).join("")}
         </div>
-        ${note ? `<div class="feat-note">${SVG(IC.warn)}${note}</div>` : eff ? `<div class="feat-model">Модель: <b>${esc(cur[eff + "Model"])}</b></div>` : ""}
-      </div>
+      </div>` : ""}
+      ${note ? `<div class="feat-note">${SVG(IC.warn)}${note}</div>` : ""}
     </article>`;
   }).join("");
 }
 
+function renderMainProv(){
+  const vals = new Set(Object.values(cur.prov));
+  const main = vals.size === 1 ? [...vals][0] : "";
+  document.querySelectorAll("#main-prov [data-main]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.main === main)));
+  const t = document.getElementById("pf-toggle");
+  t.textContent = perFeature ? "Один провайдер для всіх функцій" : "Свій провайдер для кожної функції";
+  t.setAttribute("aria-expanded", String(perFeature));
+  document.getElementById("main-prov").parentElement.hidden = false;
+}
 function renderDirty(){
   const dirty = !same(cur, saved);
   document.getElementById("save-bar").classList.toggle("on", dirty);
@@ -346,7 +365,7 @@ function renderDirty(){
 
 function renderAll(){
   ["groq", "gemini"].forEach(p => { renderModels(p); renderProvState(p); });
-  renderFeatures(); renderDirty();
+  renderFeatures(); renderMainProv(); renderDirty();
 }
 
 // ─── Події ───────────────────────────────────────────────────────────────
@@ -377,10 +396,21 @@ root.addEventListener("change", e => {
   renderDirty();
 });
 root.addEventListener("click", e => {
-  const pb = e.target.closest(".seg2 [data-prov]");
+  const pb = e.target.closest("#feat-grid .seg2 [data-prov]");
   if (pb){
     cur.prov[pb.closest("[data-feat]").dataset.feat] = pb.dataset.prov;
-    renderFeatures(); renderDirty();
+    renderFeatures(); renderMainProv(); renderDirty();
+    return;
+  }
+  const mp = e.target.closest("#main-prov [data-main]");
+  if (mp){
+    Object.keys(cur.prov).forEach(k => { cur.prov[k] = mp.dataset.main; });
+    renderFeatures(); renderMainProv(); renderDirty();
+    return;
+  }
+  if (e.target.closest("#pf-toggle")){
+    perFeature = !perFeature;
+    renderFeatures(); renderMainProv();
   }
 });
 
@@ -444,6 +474,7 @@ function renderOverrides(users){
 try {
   const [s, users] = await Promise.all([dbGet("settings/ai"), dbGet("users").catch(() => null)]);
   saved = fromDb(s); cur = structuredClone(saved);
+  perFeature = new Set(Object.values(cur.prov)).size > 1;
   wk.viaWorker = s?.viaWorker === true;
   renderAll();
   renderOverrides(users);

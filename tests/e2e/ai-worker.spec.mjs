@@ -75,3 +75,23 @@ test("у режимі воркера збереження налаштувань
   expect(ai.aiMail).toBe(false);
   expect(errors).toEqual([]);
 });
+
+test("AI-сторінка: один провайдер для всіх функцій, свій для кожної — за кнопкою; статистика внизу", async ({ page, errors }) => {
+  const calls = [];
+  await fakeWorker(page, calls, { gemini: true });
+  await seed(page, db({ viaWorker: true }), "t5");
+  await page.goto("/ai-settings"); await page.waitForTimeout(1200);
+  await expect(page.locator("#feat-grid .seg2")).toHaveCount(0);                 // у функцій лише перемикачі
+  await expect(page.locator('#main-prov [data-main="groq"]')).toHaveAttribute("aria-pressed", "true");
+  await page.locator('#main-prov [data-main="gemini"]').click();
+  await page.locator("#btn-save-ai").click(); await page.waitForTimeout(600);
+  const prov = (await readDb(page)).settings.ai.featProviders;
+  expect(Object.values(prov).every(v => v === "gemini")).toBe(true);
+  await page.locator("#pf-toggle").click();
+  await expect(page.locator("#feat-grid .seg2")).toHaveCount(5);
+  await page.locator('[data-feat="mail"] [data-prov="groq"]').click();
+  await expect(page.locator('#main-prov [aria-pressed="true"]')).toHaveCount(0);   // провайдери різні
+  const order = await page.evaluate(() => { const u = document.getElementById("ai-usage"), f = document.getElementById("feat-grid"); return !!(f.compareDocumentPosition(u) & Node.DOCUMENT_POSITION_FOLLOWING); });
+  expect(order).toBe(true);
+  expect(errors).toEqual([]);
+});

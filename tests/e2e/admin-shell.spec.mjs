@@ -112,5 +112,15 @@ test("статистика: оцінки, ігри й теплова карта 
   expect(await page.locator("#ch-grades").innerHTML()).not.toBe("");
   await page.locator("#st-more-t").click();
   await expect(page.locator("#st-more")).toBeHidden();
+
+test("огляд: без дублів сторінки «Викладачі» — немає таблиці й блоку статусів, є зведення й проблеми", async ({ page, errors }) => {
+  const d = admSeed(Date.now()); d.settings.ownerUid = "t5";
+  await seed(page, d, "t5");
+  await page.goto("/"); await page.waitForTimeout(1000);
+  await expect(page.locator("#ov-table, #status-rows, #ov-search")).toHaveCount(0);
+  await expect(page.locator("#kpi-grid")).toContainText(/викладачів/i);
+  await expect(page.locator("#prob-list")).toBeVisible();
+  const h = await page.evaluate(() => document.documentElement.scrollHeight);
+  expect(h).toBeLessThan(1400);
   expect(errors).toEqual([]);
 });
