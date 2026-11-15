@@ -5,11 +5,12 @@
 // Будь-яка помилка тут тиха: сигнал не повинен ламати саму дію викладача.
 // ═══════════════════════════════════════════════════════════════════════
 import { ref, get, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const LIMIT_LABEL = { maxTests: "тестів", maxActiveLinks: "активних посилань", aiPerMonth: "AI-запитів на місяць" };
 const FEAT_LABEL = { comments: "коментарі студентам", analysis: "розбір помилок", generation: "генерація питань", textcheck: "перевірка відповідей", mail: "листи й розсилки" };
 const monthKey = (d = new Date()) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
-const escTg = s => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export function noticeText(n, name){
   const who = name || n.name || "Викладач";
@@ -20,15 +21,17 @@ export function noticeText(n, name){
   return n.text || "Сигнал";
 }
 
-async function sendTelegram(db, html){
+// Telegram: токен бота лежить у воркері, браузер його не бачить. Воркер сам будує текст з перевірених полів.
+async function sendTelegram(db, noticeKey, data){
   try {
-    const cfg = (await get(ref(db, "settings/telegramBot"))).val();
-    if (!cfg?.enabled || !cfg?.token) return;
-    const to = Object.keys(cfg.recipients || {}).filter(id => cfg.recipients[id]);
-    await Promise.all(to.map(chat_id => fetch(`https://api.telegram.org/bot${cfg.token}/sendMessage`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id, text: html, parse_mode: "HTML" }),
-    }).catch(() => {})));
+    const url = String((await get(ref(db, "settings/mail/workerUrl"))).val() || "").replace(/\/+$/, "");
+    if (!url) return;
+    const headers = { "Content-Type": "application/json" };
+    const user = getApps().length ? getAuth(getApps()[0]).currentUser : null;
+    if (user) headers.Authorization = "Bearer " + await user.getIdToken();
+    await fetch(url + "/telegram/notice", { method: "POST", headers, body: JSON.stringify({
+      key: noticeKey, type: data.type, uid: data.uid, limitKey: data.key, level: data.level, used: data.used, limit: data.limit, feature: data.feature, errors: data.errors,
+    }) });
   } catch {}
 }
 
@@ -38,7 +41,7 @@ export async function raiseNotice(db, key, data){
     let name = data.name || null;
     if (!name){ try { const u = (await get(ref(db, `users/${data.uid}`))).val(); name = [u?.name, u?.surname].filter(Boolean).join(" ") || u?.email || null; } catch {} }
     await set(ref(db, `adminNotices/${key}`), { ...data, name, at: serverTimestamp() });   // уже є — правила відхилять
-    sendTelegram(db, `<b>QuizFlow · сигнал</b>\n${escTg(noticeText(data, name))}`);
+    sendTelegram(db, key, data);
   } catch {}
 }
 

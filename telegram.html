@@ -399,11 +399,13 @@ document.getElementById("tg-save-btn").addEventListener("click", async e => {
     const me = t ? await validateToken() : null;
     if (t && !me) return;
     // update, а не set — щоб не стерти lastUpdateId і список отримувачів
-    const upd = { token: t, updatedAt: Date.now() };
+    // токен — у secrets/ (читає лише адмін); воркер бере його зі свого секрету TELEGRAM_BOT_TOKEN
+    const upd = { updatedAt: Date.now(), token: null };
     if (t !== cfg.token) upd.lastUpdateId = 0;
     if (!t) upd.enabled = false;
+    await dbUpd("secrets", { telegramToken: t || null });
     await dbUpd("settings/telegramBot", upd);
-    cfg = { ...cfg, ...upd };
+    cfg = { ...cfg, ...upd, token: t };
     logAction(t ? "tg.token" : "tg.token.remove", { type: "service", label: "Telegram" }, me?.username ? "@" + me.username : null);
     bot = me || null; botErr = "";
     renderBot();
@@ -671,8 +673,13 @@ document.addEventListener("keydown", e => {
 
 // ─── Старт ────────────────────────────────────────────────────────────────
 try {
-  const [c, list] = await Promise.all([dbGet("settings/telegramBot"), dbGet("telegramChats")]);
-  cfg = { token: c?.token || "", enabled: !!c?.enabled, recipients: c?.recipients || {} };
+  const [c, list, secTok] = await Promise.all([dbGet("settings/telegramBot"), dbGet("telegramChats"), dbGet("secrets/telegramToken").catch(() => null)]);
+  let tok = secTok || "";
+  if (!tok && c?.token){   // разова міграція: токен із відкритого settings/ у secrets/
+    tok = c.token;
+    dbUpd("secrets", { telegramToken: tok }).then(() => dbUpd("settings/telegramBot", { token: null })).catch(() => {});
+  }
+  cfg = { token: tok, enabled: !!c?.enabled, recipients: c?.recipients || {} };
   chats = {};
   Object.entries(list || {}).forEach(([id, v]) => { const { messages, ...meta } = v || {}; chats[id] = meta; if (messages) thread[id] = messages; });
   // Разова міграція: отримувачі зі старого поля notify → settings/telegramBot/recipients
