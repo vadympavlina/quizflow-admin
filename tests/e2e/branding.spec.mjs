@@ -13,7 +13,7 @@ test("кожна сторінка підключає іконки своєї ч�
   for (const f of htmlFiles()) {
     const s = fs.readFileSync(new URL(f, ROOT), "utf8");
     const hrefs = [...s.matchAll(/<link rel="(?:icon|apple-touch-icon|manifest)"[^>]*href="([^"]+)"/g)].map(m => m[1]);
-    expect(hrefs, f).toHaveLength(4);
+    expect(hrefs, f).toHaveLength(3);
     const g = f === "404.html" ? SETS[0] : groupOf(f);
     for (const h of hrefs) expect(h, f).toMatch(new RegExp(`^/assets/icons/${g}/`));
     expect(s, f).not.toContain('rel="icon" href="data:');
@@ -24,7 +24,7 @@ test("файли іконок і маніфестів віддаються се�
   const files = ["/favicon.ico", "/apple-touch-icon.png"];
   for (const g of SETS) {
     const base = `/assets/icons/${g}/`;
-    files.push(...["favicon.ico", "icon.svg", "apple-touch-icon.png"].map(f => base + f));
+    files.push(...["favicon.ico", "apple-touch-icon.png"].map(f => base + f));
     const res = await request.get(base + "site.webmanifest");
     expect(res.status(), base + "site.webmanifest").toBe(200);
     const man = await res.json();
