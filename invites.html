@@ -27,7 +27,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=19">
+<link rel="stylesheet" href="shared/admin-shell.css?v=20">
 <style>
 .iv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .iv-bar .search-input{flex:1;min-width:220px;max-width:360px}
@@ -164,7 +164,7 @@ const fmt = t => t ? new Date(t).toLocaleString("uk-UA", { day: "numeric", month
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b === 1 ? f[0] : b >= 2 && b <= 4 ? f[1] : f[2]; };
 
 const content = `
-  <div class="page-head"><div><h1>Самостійна реєстрація</h1><p>Посилання для самостійної реєстрації викладачів: хто скористався, які ще діють</p></div></div>
+  <div class="page-head"><div><h1>Реєстрація за посиланням</h1><p>Посилання, за якими викладачі реєструються самі: хто скористався, які ще діють</p></div></div>
   <div class="iv-bar">
     <div class="search-input"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="input" id="iv-q" type="search" placeholder="Пошук: для кого, хто зареєструвався…" autocomplete="off" aria-label="Пошук запрошень"></div>
     <div class="iv-chips" id="iv-chips" role="tablist" aria-label="Статус"></div>

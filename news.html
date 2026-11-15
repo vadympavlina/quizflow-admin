@@ -27,7 +27,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=19">
+<link rel="stylesheet" href="shared/admin-shell.css?v=20">
 <style>
 .mod-err.show{display:block}
 
@@ -260,7 +260,7 @@ const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return a > 1
 const fmtDate = t => t ? new Date(t).toLocaleDateString("uk-UA", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
 const content = `
-  <div class="page-head"><div><h1>Стрічка оновлень</h1><p>Повідомлення для всіх викладачів: оновлення, нові функції, важливі зміни</p></div></div>
+  <div class="page-head"><div><h1>Що нового для викладачів</h1><p>Повідомлення для всіх викладачів: оновлення, нові функції, важливі зміни</p></div></div>
   <div class="nt-tiles" id="nt-tiles" role="tablist">
     <button type="button" class="nt-tile violet on" data-f="all"><span class="ico">${ic("news")}</span><span><div class="v" id="c-all">—</div><div class="l">Усі новини</div></span></button>
     <button type="button" class="nt-tile green" data-f="pub"><span class="ico">${ic("check")}</span><span><div class="v" id="c-pub">—</div><div class="l">Опубліковані</div></span></button>

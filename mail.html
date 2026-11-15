@@ -27,7 +27,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="shared/admin-shell.css?v=19">
+<link rel="stylesheet" href="shared/admin-shell.css?v=20">
 <style>
 textarea.field-input{resize:vertical;min-height:220px;line-height:1.55}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -169,7 +169,7 @@ const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || "null");
 const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 
 const content = `
-  <div class="page-head"><div><h1>Листування з викладачами</h1><p>Листи викладачам з адреси сервісу. У кожному листі є посилання «Відписатися»</p></div></div>
+  <div class="page-head"><div><h1>Листи викладачам</h1><p>Розсилки з адреси сервісу. У кожному листі є посилання «Відписатися»</p></div></div>
   <div id="ml-root"><div class="empty">Завантаження…</div></div>
 `;
 const topbarRight = `<button class="tb-btn" type="button" id="btn-setup">${IC.gear} Воркер пошти</button>`;
