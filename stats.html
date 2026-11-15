@@ -46,6 +46,12 @@
 .delta.up{background:var(--grn-100);color:var(--grn-700)}.delta.down{background:var(--red-100);color:var(--red-700)}
 .card-h{flex-wrap:wrap;gap:8px}
 /* Теплова карта: день × година */
+.st-more-t{display:inline-flex;align-items:center;gap:7px;margin:0 0 16px;padding:8px 14px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font:700 13px "Manrope",sans-serif;color:var(--ink-700);cursor:pointer}
+.st-more-t:hover{border-color:var(--v-500);color:var(--v-600)}
+.st-more-t svg{transition:transform .18s}
+.st-more-t[aria-expanded="true"] svg{transform:rotate(180deg)}
+#st-more{display:flex;flex-direction:column;gap:16px;margin-bottom:16px}
+#st-more[hidden]{display:none}
 .heat{display:grid;grid-template-columns:28px repeat(24,minmax(0,1fr));gap:3px;align-items:center}
 .heat .d{font:600 11px "Geist Mono",monospace;color:var(--ink-400)}
 .heat .h{font:600 11px "Geist Mono",monospace;color:var(--ink-400);text-align:center}
@@ -126,6 +132,11 @@ const content = `
     </section>
   </div>
 
+  <button type="button" class="st-more-t" id="st-more-t" aria-expanded="false" aria-controls="st-more">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <span>Докладніше: оцінки, ігри, найактивніші години</span>
+  </button>
+  <div id="st-more" hidden>
   <div class="row-2">
     <section class="card">
       <div class="card-h"><div><h3>Розподіл оцінок</h3><div class="sub" id="gr-sub">Оцінені спроби тестів, шкала 1–12</div></div></div>
@@ -142,6 +153,7 @@ const content = `
     <div class="heat-scroll"><div class="heat" id="heat"></div></div>
     <div class="heat-legend">менше<span class="cells" id="heat-cells"></span>більше</div>
   </section>
+  </div>
 
   <section class="card" style="padding:0">
     <div class="card-h" style="padding:18px 18px 0"><div><h3>Деталізація по викладачах</h3><div class="sub">Тести, спроби, ігри, студенти, посилання — за весь час</div></div></div>
@@ -322,6 +334,13 @@ document.getElementById("period-seg").addEventListener("click", e => {
   renderPeriod();
 });
 document.getElementById("st-search").addEventListener("input", renderTable);
+// «Докладніше»: графіки малюються, коли блок видно (у прихованому немає ширини)
+document.getElementById("st-more-t").addEventListener("click", e => {
+  const b = e.currentTarget, box = document.getElementById("st-more"), open = box.hidden;
+  box.hidden = !open; b.setAttribute("aria-expanded", String(open));
+  b.querySelector("span").textContent = open ? "Сховати докладну статистику" : "Докладніше: оцінки, ігри, найактивніші години";
+  if (open) renderPeriod();
+});
 let _rsT, _rsW = innerWidth;
 addEventListener("resize", () => { clearTimeout(_rsT); _rsT = setTimeout(() => { if (Math.abs(innerWidth - _rsW) < 40) return; _rsW = innerWidth; renderDyn(); renderGrades(); }, 200); });
 document.getElementById("btn-refresh").addEventListener("click", async () => {
