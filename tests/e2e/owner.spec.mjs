@@ -52,3 +52,19 @@ test("власника ще не призначено: пропозиція ст
   await expect(page.locator("#owner-claim")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test("власника видно в системі: рядок над списком, позначка в списку й у картці", async ({ page, errors }) => {
+  await seed(page, as("t5"), "t5");
+  await page.goto("/teachers?id=t5"); await page.waitForTimeout(900);
+  await expect(page.locator("#owner-line")).toBeVisible();
+  await expect(page.locator("#owner-line")).toContainText("Власник сервісу");
+  await expect(page.locator(".tp-adm.own").first()).toHaveText("Власник");
+  await expect(page.locator(".tc-status.own")).toContainText("Власник сервісу");
+  expect(errors).toEqual([]);
+});
+
+test("без власника рядка власника немає", async ({ page }) => {
+  await seed(page, as(null), "t5");
+  await page.goto("/teachers"); await page.waitForTimeout(900);
+  await expect(page.locator("#owner-line")).toBeHidden();
+});

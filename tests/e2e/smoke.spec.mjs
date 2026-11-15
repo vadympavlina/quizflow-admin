@@ -2,7 +2,7 @@
 import { test, expect, seed } from "./fixtures.mjs";
 
 const db = { settings: { ownerUid: "t1" }, users: { t1: { role: "admin", name: "A" } }, teachers: { t1: { tests: { T1: { title: "x", questions: [] } } } } };
-const GROUPS = { admin: ["/", "teachers", "stats", "problems", "roles", "news", "navigation", "ai-settings", "telegram", "announcements", "mail", "features", "audit", "invites", "cleanup"] };
+const GROUPS = { admin: ["/", "teachers", "stats", "problems", "roles", "news", "navigation", "ai-settings", "telegram", "announcements", "mail", "audit", "invites", "cleanup"] };
 const EXPECTED = [];
 
 for (const [name, pages] of Object.entries(GROUPS)) {

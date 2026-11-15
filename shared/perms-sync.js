@@ -8,7 +8,7 @@
 // Викликати після кожної зміни ролей, дозволів, особистих налаштувань і режиму перегляду.
 // ═══════════════════════════════════════════════════════════════════════
 import { db, ref, update, dbGet } from "./admin-shell.js?v=22";
-import { PERM_KEYS, resolvePerms, storeKey } from "./perms.js?v=2";
+import { PERM_KEYS, resolvePerms, storeKey } from "./perms.js?v=3";
 
 // uids: список користувачів або null (усі). Повертає, скільком оновлено дзеркало.
 export async function syncPerms(uids = null) {

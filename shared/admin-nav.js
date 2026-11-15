@@ -60,7 +60,6 @@
     { label: "Користувачі", items: [
       { id: "teachers", label: "Викладачі", href: "teachers", icon: "teachers" },
       { id: "roles", label: "Ролі", href: "roles", icon: "roles" },
-      { id: "features", label: "Для всіх", href: "features", icon: "sliders" },
       { id: "invites", label: "Запрошення", href: "invites", icon: "invite" },
     ] },
     { label: "Контент", items: [
