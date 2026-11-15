@@ -14,7 +14,7 @@
 // Адміністраторів не обмежуємо.
 // ═══════════════════════════════════════════════════════════════════════
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { limitNotice } from "./notices.js?v=2";
+import { limitNotice } from "./notices.js?v=3";
 import { resolvePerms, LEGACY_FLAG_PERM } from "./perms.js?v=3";
 
 export const CAP_FLAGS = {
