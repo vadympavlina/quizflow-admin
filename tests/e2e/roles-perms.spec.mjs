@@ -283,3 +283,13 @@ test("усі збереження дозволів лягають у базу з
   expect(db.settings.features.perms.games_history).toBe(false);
   expect(errors).toEqual([]);
 });
+
+test("список викладачів: ролі видно чипами, статус не лише крапкою", async ({ page, errors }) => {
+  const d = legacyDb();
+  d.users.t4.blocked = true;
+  await seed(page, d, "t5");
+  await page.goto("/teachers"); await page.waitForTimeout(900);
+  await expect(page.locator('.tp-it[data-id="t1"] .tp-rc', { hasText: "Лише ігри" })).toBeVisible();
+  await expect(page.locator('.tp-it[data-id="t4"] .tp-it-t.bad')).toHaveText("Заблоковано");
+  expect(errors).toEqual([]);
+});
