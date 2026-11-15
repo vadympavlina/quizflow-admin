@@ -6,6 +6,7 @@ test("лише перегляд записує в дзеркало заборо�
   const d = admSeed(Date.now()); d.settings.ownerUid = "t5";
   await seed(page, d, "t5");
   await page.goto("/teachers?id=t2"); await page.waitForTimeout(900);
+  await page.locator('[data-act="tab"][data-t="access"]').click();
   await page.locator('[data-act="readonly"]').evaluate(el => { el.checked = true; el.dispatchEvent(new Event("change", { bubbles: true })); });
   await page.waitForTimeout(900);
   const db = await readDb(page);
