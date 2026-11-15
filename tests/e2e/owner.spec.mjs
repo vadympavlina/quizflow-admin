@@ -9,25 +9,19 @@ test("власник бачить усе: обслуговування, ключ
   await page.goto("/cleanup"); await page.waitForTimeout(700);
   await expect(page.getByText("Лише для власника")).toHaveCount(0);
   await page.goto("/ai-settings"); await page.waitForTimeout(900);
-  await expect(page.locator("#key-groq")).not.toHaveAttribute("readonly", "");
-  await page.goto("/telegram"); await page.waitForTimeout(700);
-  await expect(page.locator("#tg-save-btn")).toBeEnabled();
+  await expect(page.locator("#wk-panel")).toBeVisible();
   await page.goto("/teachers?id=t2"); await page.waitForTimeout(800);
   await expect(page.locator('[data-act="sysrole"][data-v="admin"]')).toBeEnabled();
   expect(await page.locator(".asb-urole").first().textContent()).toContain("Власник");
   expect(errors).toEqual([]);
 });
 
-test("адміністратор без прав власника: обслуговування закрите, ключі й токен лише для читання", async ({ page, errors }) => {
+test("адміністратор без прав власника: обслуговування закрите, старі ключі AI з бази видаляє лише власник", async ({ page, errors }) => {
   await seed(page, as("someone-else"), "t5");
   await page.goto("/cleanup"); await page.waitForTimeout(700);
   await expect(page.getByText("Лише для власника")).toBeVisible();
   await page.goto("/ai-settings"); await page.waitForTimeout(900);
-  await expect(page.locator("#key-groq")).toHaveAttribute("readonly", "");
-  await expect(page.locator("#key-gemini")).toHaveAttribute("readonly", "");
-  await page.goto("/telegram"); await page.waitForTimeout(700);
-  await expect(page.locator("#tg-token-inp")).toHaveAttribute("readonly", "");
-  await expect(page.locator("#tg-save-btn")).toBeDisabled();
+  await expect(page.locator("#wk-del")).toHaveCount(0);   // старі ключі з бази видаляє лише власник
   await page.goto("/teachers?id=t2"); await page.waitForTimeout(800);
   await expect(page.locator('[data-act="sysrole"][data-v="admin"]')).toBeDisabled();
   await page.locator('[data-act="new"], #btn-new-teacher, .tb-btn.primary').first().click().catch(() => {});

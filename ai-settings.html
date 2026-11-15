@@ -72,16 +72,6 @@
 
 .lbl{font-size:11px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.07em;font-weight:800;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .lbl .hint{text-transform:none;letter-spacing:0;font-weight:600;font-size:12px;color:var(--ink-400)}
-.key-row{display:flex;gap:8px}
-.key-wrap{position:relative;flex:1;display:flex}
-.key-input{width:100%;padding:11px 44px 11px 12px;border-radius:11px;border:1.5px solid var(--line);background:var(--sf-1);font-family:"Geist Mono",monospace;font-size:13px;color:var(--ink-900);outline:none;transition:border-color .15s,box-shadow .15s,background .15s}
-.key-input:focus{border-color:var(--v-500);box-shadow:0 0 0 3px rgba(124,58,237,.12);background:#fff}
-.key-input.warn{border-color:#F59E0B}
-.key-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--ink-400);display:grid;place-items:center}
-.key-eye:hover{background:var(--sf-2);color:var(--ink-700)}
-.key-eye svg{width:16px;height:16px}
-.key-msg{font-size:12px;margin-top:6px;color:var(--ink-500);min-height:15px}
-.key-msg.bad{color:var(--red-700)}.key-msg.warn{color:var(--amb-700)}.key-msg.ok{color:var(--grn-700)}
 
 .models{display:flex;flex-direction:column;gap:6px}
 .model{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;border:1.5px solid var(--line);cursor:pointer;transition:border-color .15s,background .15s;background:#fff}
@@ -140,8 +130,6 @@
 .ovr a{font-size:13px;font-weight:700;color:var(--v-600);text-decoration:none;white-space:nowrap}
 .ovr a:hover{text-decoration:underline}
 
-.sec-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#FFFBEB;border:1px solid var(--amb-200);color:#92400E;font-size:13px;line-height:1.5}
-.sec-note svg{flex:0 0 auto;margin-top:1px}
 
 /* Панель незбережених змін */
 .save-bar{position:sticky;bottom:16px;z-index:20;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;border-radius:14px;background:#1A1040;color:#fff;box-shadow:0 18px 40px -12px rgba(20,11,58,.55);transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.32,.72,0,1),opacity .2s}
@@ -152,8 +140,6 @@
   .prov-head{flex-wrap:wrap}
   .prov-state{margin-left:56px}
   .lbl{flex-wrap:wrap}
-  .key-row{flex-wrap:wrap}
-  .key-row > :not(.key-wrap){flex:1 1 100%;justify-content:center}
   .model{align-items:flex-start}
   .model .tag{margin-left:0}
   .model > div{flex:1;min-width:0}
@@ -246,17 +232,6 @@ const provCard = p => {
       </div>
       <span class="prov-state" id="st-${p}">Не налаштовано</span>
     </div>
-    <div data-keyblock>
-      <div class="lbl"><label for="key-${p}">API-ключ</label><span class="hint">зберігається в settings/ai</span></div>
-      <div class="key-row">
-        <div class="key-wrap">
-          <input class="key-input" type="password" id="key-${p}" placeholder="${P.placeholder}" autocomplete="off" spellcheck="false" data-lpignore="true">
-          <button type="button" class="key-eye" data-eye="${p}" aria-label="Показати ключ" title="Показати / сховати">${SVG(IC.eye)}</button>
-        </div>
-        <button type="button" class="tb-btn" data-test="${p}">Перевірити</button>
-      </div>
-      <div class="key-msg" id="msg-${p}"></div>
-    </div>
     <div>
       <div class="lbl"><span>Модель</span><span class="hint" id="mcount-${p}"></span></div>
       <div class="models" id="models-${p}" role="radiogroup" aria-label="Модель ${P.name}"></div>
@@ -268,14 +243,14 @@ const content = `
   <div class="page-head">
     <div>
       <h1>Штучний інтелект у сервісі</h1>
-      <p>Ключі, моделі та функції штучного інтелекту для всієї платформи</p>
+      <p>Моделі та функції штучного інтелекту для всієї платформи. Ключі зберігаються у воркері.</p>
     </div>
   </div>
 
   <div class="ai-sec-h"><div><h2>Використання</h2><p>Скільки звернень до AI роблять викладачі та їхні студенти</p></div><div class="us-months" id="us-months" role="tablist" aria-label="Місяць"></div></div>
   <div id="ai-usage"><div class="us-empty">Завантаження…</div></div>
 
-  <div class="ai-sec-h"><div><h2>Провайдери</h2><p>Достатньо одного. Якщо ключ для обраного провайдера відсутній, функція використає інший.</p></div></div>
+  <div class="ai-sec-h"><div><h2>Моделі</h2><p>Достатньо одного провайдера. Якщо в обраного немає ключа у воркері, функція використає інший.</p></div></div>
   <div class="row-2">${provCard("groq")}${provCard("gemini")}</div>
 
   <div class="ai-sec-h"><div><h2>Функції</h2><p>Що вмикати та через який провайдер працює кожна функція</p></div></div>
@@ -285,11 +260,6 @@ const content = `
     <div class="ovr-ico">${SVG(IC.users)}</div>
     <div class="ovr-t"><div id="ovr-t"></div><div class="ovr-names" id="ovr-names"></div></div>
     <a href="teachers">До викладачів →</a>
-  </div>
-
-  <div class="sec-note" id="sec-note">
-    ${SVG(IC.warn).replace("<svg", '<svg width="16" height="16"')}
-    <span>Запити до AI йдуть прямо з браузера, тому ключі доступні сторінкам тесту. Використовуйте окремі ключі з лімітами витрат і за потреби перевипускайте їх у консолі провайдера.</span>
   </div>
 
   <div class="save-bar" id="save-bar" role="region" aria-label="Незбережені зміни">
@@ -309,21 +279,19 @@ const topbarRight = `
 const { isOwner } = await initAdminShell({ activeId: "ai", crumbs: ["AI-налаштування"], content, topbarRight });
 
 // ─── Стан ────────────────────────────────────────────────────────────────
-const DEF = { groqKey: "", geminiKey: "", groqModel: "llama-3.3-70b-versatile", geminiModel: "gemini-2.5-flash",
+const DEF = { groqModel: "llama-3.3-70b-versatile", geminiModel: "gemini-2.5-flash",
   flags: { comments: true, analysis: true, generation: true, textcheck: true, mail: true },
   prov: { comments: "groq", analysis: "groq", generation: "groq", textcheck: "groq", mail: "groq" } };
 let saved = structuredClone(DEF), cur = structuredClone(DEF);
 const wk = { viaWorker: false, status: null, err: "", url: "" };   // ключі у воркері
-const fetched = { groq: null, gemini: null };  // моделі, отримані при перевірці ключа
-const tested = { groq: null, gemini: null };   // true / false / null
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-const keyOf = p => cur[p + "Key"].trim();
+// Ключі лежать у секретах воркера; поки статус не прийшов, вважаємо, що вони є
+const hasKey = p => wk.status ? !!wk.status.configured[p] : true;
 
 // ─── Рендер ──────────────────────────────────────────────────────────────
 function renderModels(p){
   const P = PROVIDERS[p], sel = cur[p + "Model"];
   const known = P.models.map(m => m.id);
-  const extra = (fetched[p] || []).filter(id => !known.includes(id));
   const isCustom = sel && !known.includes(sel);
   document.getElementById("models-" + p).innerHTML = P.models.map(m => `
     <label class="model"><input type="radio" name="model-${p}" value="${esc(m.id)}" ${sel === m.id ? "checked" : ""}>
@@ -332,39 +300,27 @@ function renderModels(p){
     <label class="model"><input type="radio" name="model-${p}" value="__custom" ${isCustom ? "checked" : ""}>
       <span style="flex:1;min-width:0"><div class="nm">Інша модель</div>
         <div class="model-custom" style="margin-top:6px">
-          ${extra.length
-            ? `<select data-custom="${p}" aria-label="Інша модель"><option value="">— оберіть із доступних (${extra.length}) —</option>${extra.map(id => `<option ${id === sel ? "selected" : ""}>${esc(id)}</option>`).join("")}</select>`
-            : `<input data-custom="${p}" placeholder="${p === "groq" ? "наприклад, qwen/qwen3-32b" : "наприклад, gemini-2.5-pro"}" value="${isCustom ? esc(sel) : ""}" aria-label="Назва моделі">`}
+          <input data-custom="${p}" placeholder="${p === "groq" ? "наприклад, qwen/qwen3-32b" : "наприклад, gemini-2.5-pro"}" value="${isCustom ? esc(sel) : ""}" aria-label="Назва моделі">
         </div></span></label>`;
-  document.getElementById("mcount-" + p).textContent = fetched[p] ? `доступно ${fetched[p].length}` : "";
+  document.getElementById("mcount-" + p).textContent = "";
 }
 
 function renderProvState(p){
-  const el = document.getElementById("st-" + p), key = keyOf(p);
+  const el = document.getElementById("st-" + p);
   el.className = "prov-state";
-  if (!key){ el.textContent = "Не налаштовано"; return; }
-  if (tested[p] === "busy"){ el.classList.add("busy", "set"); el.textContent = "Перевірка…"; return; }
-  if (tested[p] === true){ el.classList.add("ok"); el.textContent = "Працює"; return; }
-  if (tested[p] === false){ el.classList.add("bad"); el.textContent = "Помилка"; return; }
-  el.classList.add("set"); el.textContent = "Ключ додано";
-}
-
-function keyHint(p){
-  const key = keyOf(p), P = PROVIDERS[p], msg = document.getElementById("msg-" + p), inp = document.getElementById("key-" + p);
-  const wrong = key && !key.startsWith(P.prefix);
-  inp.classList.toggle("warn", !!wrong);
-  if (tested[p] === true || tested[p] === false || tested[p] === "busy") return;
-  msg.className = "key-msg" + (wrong ? " warn" : "");
-  msg.textContent = wrong ? `Ключі ${P.name} зазвичай починаються з «${P.prefix}» — перевірте, чи не сплутано` : key ? `Ключ …${key.slice(-4)}` : "";
+  if (!wk.status){ el.textContent = "Перевіряємо…"; el.classList.add("busy"); return; }
+  const on = wk.status.configured[p];
+  el.classList.add(on ? "ok" : "bad");
+  el.textContent = on ? "Ключ у воркері" : "Немає ключа у воркері";
 }
 
 function renderFeatures(){
   document.getElementById("feat-grid").innerHTML = FEATURES.map(f => {
     const on = cur.flags[f.id], chosen = cur.prov[f.id];
     const other = chosen === "groq" ? "gemini" : "groq";
-    const eff = keyOf(chosen) ? chosen : keyOf(other) ? other : null;
-    const note = on && !keyOf(chosen)
-      ? (eff ? `Немає ключа ${PROVIDERS[chosen].name} — буде використано ${PROVIDERS[eff].name}` : "Немає жодного ключа — функція не працюватиме")
+    const eff = hasKey(chosen) ? chosen : hasKey(other) ? other : null;
+    const note = on && !hasKey(chosen)
+      ? (eff ? `Немає ключа ${PROVIDERS[chosen].name} у воркері — буде використано ${PROVIDERS[eff].name}` : "У воркері немає жодного ключа — функція не працюватиме")
       : "";
     return `<article class="feat${on ? "" : " off"}" data-feat="${f.id}">
       <div class="feat-h">
@@ -389,12 +345,7 @@ function renderDirty(){
 }
 
 function renderAll(){
-  ["groq", "gemini"].forEach(p => {
-    const ki = document.getElementById("key-" + p);
-    ki.value = cur[p + "Key"];
-    if (!isOwner){ ki.readOnly = true; ki.placeholder = "Ключ змінює лише власник"; ki.title = "Ключ змінює лише власник сервісу"; }
-    renderModels(p); renderProvState(p); keyHint(p);
-  });
+  ["groq", "gemini"].forEach(p => { renderModels(p); renderProvState(p); });
   renderFeatures(); renderDirty();
 }
 
@@ -402,12 +353,7 @@ function renderAll(){
 const root = document.getElementById("admin-content");
 root.addEventListener("input", e => {
   const t = e.target;
-  if (t.id === "key-groq" || t.id === "key-gemini"){
-    const p = t.id.slice(4);
-    cur[p + "Key"] = t.value;
-    tested[p] = null; fetched[p] = fetched[p];
-    renderProvState(p); keyHint(p); renderFeatures();
-  } else if (t.matches("input[data-custom]")){
+  if (t.matches("input[data-custom]")){
     const p = t.dataset.custom;
     document.querySelector(`input[name="model-${p}"][value="__custom"]`).checked = true;
     cur[p + "Model"] = t.value.trim();
@@ -425,25 +371,12 @@ root.addEventListener("change", e => {
       setTimeout(() => c?.focus(), 0);
     } else cur[p + "Model"] = t.value;
     renderModels(p); renderFeatures();
-  } else if (t.matches("select[data-custom]")){
-    const p = t.dataset.custom;
-    if (t.value){ cur[p + "Model"] = t.value; renderModels(p); renderFeatures(); }
   } else if (t.dataset.flag){
     cur.flags[t.dataset.flag] = t.checked; renderFeatures();
   }
   renderDirty();
 });
 root.addEventListener("click", e => {
-  const eye = e.target.closest("[data-eye]");
-  if (eye){
-    const inp = document.getElementById("key-" + eye.dataset.eye), show = inp.type === "password";
-    inp.type = show ? "text" : "password";
-    eye.innerHTML = SVG(show ? IC.eyeOff : IC.eye);
-    eye.setAttribute("aria-label", show ? "Сховати ключ" : "Показати ключ");
-    return;
-  }
-  const test = e.target.closest("[data-test]");
-  if (test) return testProvider(test.dataset.test, test);
   const pb = e.target.closest(".seg2 [data-prov]");
   if (pb){
     cur.prov[pb.closest("[data-feat]").dataset.feat] = pb.dataset.prov;
@@ -451,58 +384,10 @@ root.addEventListener("click", e => {
   }
 });
 
-// ─── Перевірка ключа: список моделей + короткий запит до обраної моделі ─────
-async function testProvider(p, btn){
-  const key = keyOf(p), msg = document.getElementById("msg-" + p);
-  if (!key){ msg.className = "key-msg bad"; msg.textContent = "Спершу вставте ключ"; document.getElementById("key-" + p).focus(); return; }
-  const model = cur[p + "Model"];
-  tested[p] = "busy"; renderProvState(p); btn.disabled = true;
-  msg.className = "key-msg"; msg.textContent = "Перевіряємо ключ і модель…";
-  const t0 = performance.now();
-  try {
-    let ids = [];
-    if (p === "groq"){
-      const r = await fetch("https://api.groq.com/openai/v1/models", { headers: { Authorization: "Bearer " + key } });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(d.error?.message || `HTTP ${r.status}`);
-      ids = (d.data || []).filter(m => m.active !== false && !/whisper|tts|guard|distil/i.test(m.id)).map(m => m.id).sort();
-      const c = await fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + key },
-        body: JSON.stringify({ model, messages: [{ role: "user", content: "Відповідай одним словом: так" }], max_tokens: 5 }) });
-      const cd = await c.json().catch(() => ({}));
-      if (!c.ok) throw new Error(`модель «${model}»: ` + (cd.error?.message || `HTTP ${c.status}`));
-    } else {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`);
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(d.error?.message || `HTTP ${r.status}`);
-      ids = (d.models || []).filter(m => (m.supportedGenerationMethods || []).includes("generateContent") && /gemini/i.test(m.name) && !/embedding|image|tts|audio/i.test(m.name))
-        .map(m => m.name.replace(/^models\//, "")).sort();
-      const c = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, { method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: "Відповідай одним словом: так" }] }], generationConfig: { maxOutputTokens: 16, ...(/flash/i.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : {}) } }) });
-      const cd = await c.json().catch(() => ({}));
-      if (!c.ok) throw new Error(`модель «${model}»: ` + (cd.error?.message || `HTTP ${c.status}`));
-    }
-    fetched[p] = ids;
-    tested[p] = true;
-    msg.className = "key-msg ok";
-    msg.textContent = `Ключ дійсний · модель ${model} відповіла за ${Math.round(performance.now() - t0)} мс`;
-    renderModels(p);
-  } catch (e){
-    tested[p] = false;
-    msg.className = "key-msg bad";
-    msg.textContent = "Не вдалося: " + (e.message === "Failed to fetch" ? "немає з'єднання з провайдером" : e.message);
-  } finally {
-    btn.disabled = false; renderProvState(p); renderFeatures();
-  }
-}
-
 // ─── Завантаження / збереження ─────────────────────────────────────────────
 function fromDb(s){
   const x = structuredClone(DEF);
   if (!s) return x;
-  x.groqKey = s.groqApiKey || (s.provider !== "gemini" ? s.apiKey : "") || "";
-  x.geminiKey = s.geminiApiKey || "";
   x.groqModel = s.groqModel || s.model || DEF.groqModel;
   x.geminiModel = s.geminiModel || DEF.geminiModel;
   FEATURES.forEach(f => { x.flags[f.id] = s[f.flag] !== false; x.prov[f.id] = s.featProviders?.[f.id] === "gemini" ? "gemini" : "groq"; });
@@ -510,25 +395,18 @@ function fromDb(s){
 }
 
 async function save(){
-  const anyOn = Object.values(cur.flags).some(Boolean);
-  const gk = keyOf("groq"), mk = keyOf("gemini");
-  if (!wk.viaWorker && anyOn && !gk && !mk){ toast("Додайте хоча б один API-ключ або вимкніть усі функції", "err"); return; }
   for (const p of ["groq", "gemini"]) if (!cur[p + "Model"].trim()){ toast(`Вкажіть модель ${PROVIDERS[p].name}`, "err"); return; }
   const btns = [document.getElementById("btn-save-ai"), document.getElementById("btn-save-bar")];
   btns.forEach(b => b.disabled = true);
   try {
     await dbUpd("settings/ai", {
-      // Ключі змінює лише власник (правила бази теж це перевіряють)
-      ...(isOwner && !wk.viaWorker ? { groqApiKey: gk, geminiApiKey: mk, apiKey: gk || mk, provider: gk ? "groq" : "gemini" } : {}),
       groqModel: cur.groqModel.trim(), geminiModel: cur.geminiModel.trim(),
       // Сумісність зі старими читачами налаштувань
-      model: gk ? cur.groqModel.trim() : cur.geminiModel.trim(),
+      model: hasKey("groq") ? cur.groqModel.trim() : cur.geminiModel.trim(),
       aiComments: cur.flags.comments, aiAnalysis: cur.flags.analysis, aiGeneration: cur.flags.generation, aiTextCheck: cur.flags.textcheck, aiMail: cur.flags.mail,
       featProviders: { ...cur.prov }, updatedAt: Date.now(),
     });
-    cur.groqKey = gk; cur.geminiKey = mk;
     const ch = [];
-    if (saved.groqKey !== gk) ch.push("ключ Groq"); if (saved.geminiKey !== mk) ch.push("ключ Gemini");
     if (saved.groqModel !== cur.groqModel || saved.geminiModel !== cur.geminiModel) ch.push("моделі");
     Object.keys(cur.flags).forEach(k => { if (saved.flags[k] !== cur.flags[k]) ch.push(`${k}: ${cur.flags[k] ? "увімк." : "вимк."}`); });
     if (JSON.stringify(saved.prov) !== JSON.stringify(cur.prov)) ch.push("провайдери функцій");
@@ -545,7 +423,7 @@ async function save(){
 }
 document.getElementById("btn-save-ai").addEventListener("click", save);
 document.getElementById("btn-save-bar").addEventListener("click", save);
-document.getElementById("btn-discard").addEventListener("click", () => { cur = structuredClone(saved); tested.groq = tested.gemini = null; renderAll(); });
+document.getElementById("btn-discard").addEventListener("click", () => { cur = structuredClone(saved); renderAll(); });
 document.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s"){ e.preventDefault(); if (!same(cur, saved)) save(); }
 });
@@ -576,13 +454,12 @@ try {
 }
 hideLoader();
 
-// ─── Ключі у воркері ────────────────────────────────────────────────────────
-// Ключі Groq і Gemini лежать у секретах Cloudflare, а не в базі. Власник вмикає перехід, коли воркер їх бачить.
+// ─── Воркер: ключі, перемикання, перевірка ─────────────────────────────────
+// Ключі Groq і Gemini лежать у секретах Cloudflare. Сторінка лише показує стан і сама вмикає режим воркера.
 {
   const host = document.createElement("section");
   host.id = "wk-panel"; host.className = "wk";
-  host.setAttribute("aria-label", "Ключі у воркері");
-  // Панель стоїть під заголовком сторінки, а не над ним
+  host.setAttribute("aria-label", "Воркер AI");
   const head = document.querySelector("#admin-content .page-head");
   head ? head.after(host) : document.getElementById("admin-content").prepend(host);
   const ok = (v, yes, no) => `<span class="wk-st ${v ? "yes" : "no"}">${v ? yes : no}</span>`;
@@ -591,40 +468,32 @@ hideLoader();
     wk.err = ""; wk.status = null;
     try { wk.url = await mailWorkerUrl(); wk.status = await mailApi("/ai/status"); }
     catch (e){ wk.err = e.message; }
-    renderWk();
+    // Є ключі у воркері, а режим воркера ще не ввімкнено — вмикаємо (лише власник)
+    const st = wk.status;
+    if (st && isOwner && !wk.viaWorker && (st.configured.groq || st.configured.gemini)){
+      try { await dbUpd("settings/ai", { viaWorker: true, updatedAt: Date.now() }); wk.viaWorker = true; logAction("ai.worker", { type: "service", label: "AI через воркер" }, "увімкнено автоматично"); }
+      catch {}
+    }
+    renderWk(); renderAll();
   }
   function renderWk(){
-    // Коли ключі у воркері, поля ключів у браузері не потрібні
-    document.querySelectorAll("[data-keyblock]").forEach(el => { el.hidden = wk.viaWorker; });
-    const sn = document.getElementById("sec-note"); if (sn) sn.hidden = wk.viaWorker;
     const st = wk.status, anyKey = !!(st && (st.configured.groq || st.configured.gemini));
     const legacy = !!(st && (st.legacyKeysInDb.groq || st.legacyKeysInDb.gemini));
     host.innerHTML = `
-      <div class="wk-h"><div><b>Ключі у воркері</b><p>Ключі Groq і Gemini зберігаються в секретах Cloudflare, а не в базі. Воркер сам перевіряє дозвіл, ліміт і веде облік. Налаштування: <code>docs/ai-setup.md</code>.</p></div>
-        <label class="toggle-sw" title="${anyKey ? "" : "Спершу додайте ключі у воркер"}"><input type="checkbox" id="wk-on" ${wk.viaWorker ? "checked" : ""} ${isOwner && (anyKey || wk.viaWorker) ? "" : "disabled"} aria-label="Використовувати воркер"><span class="toggle-sl"></span></label></div>
+      <div class="wk-h"><div><b>Воркер AI</b><p>Ключі зберігаються в секретах Cloudflare. Воркер сам перевіряє дозвіл і ліміт викладача та веде облік. Додати чи змінити ключ: <code>docs/ai-setup.md</code>.</p></div></div>
       ${wk.err ? `<div class="wk-err" role="alert">${esc(wk.err)}</div>` : !st ? `<div class="wk-row">Перевіряємо воркер…</div>` : `
         <div class="wk-grid">
-          <div class="wk-row"><span>Groq у воркері</span>${ok(st.configured.groq, "є ключ", "немає")}</div>
-          <div class="wk-row"><span>Gemini у воркері</span>${ok(st.configured.gemini, "є ключ", "немає")}</div>
-          <div class="wk-row"><span>Старі ключі в базі</span>${ok(!legacy, "немає", "лишились")}</div>
+          <div class="wk-row"><span>Режим воркера</span>${ok(wk.viaWorker, "увімкнено", "вимкнено")}</div>
+          ${legacy ? `<div class="wk-row"><span>Старі ключі в базі</span>${ok(false, "", "лишились")}</div>` : ""}
         </div>
+        ${!anyKey ? `<div class="wk-err" role="alert">У воркері немає жодного ключа: додайте <code>GROQ_API_KEY</code> або <code>GEMINI_API_KEY</code> у секрети Cloudflare.</div>` : ""}
         <div class="wk-acts">
           <button type="button" class="tb-btn" id="wk-test" ${anyKey ? "" : "disabled"}>Перевірити відповідь</button>
-          ${isOwner && wk.viaWorker && legacy ? `<button type="button" class="tb-btn danger" id="wk-del">${armed ? "Так, видалити ключі з бази" : "Видалити ключі з бази"}</button>` : ""}
+          ${isOwner && wk.viaWorker && legacy ? `<button type="button" class="tb-btn danger" id="wk-del">${armed ? "Так, видалити ключі з бази" : "Видалити старі ключі з бази"}</button>` : ""}
           <span class="wk-msg" id="wk-msg" role="status"></span>
         </div>
-        ${!isOwner ? `<div class="wk-note">Перехід і видалення ключів: лише власник.</div>` : ""}`}`;
+        ${!isOwner && legacy ? `<div class="wk-note">Видалити старі ключі з бази може лише власник.</div>` : ""}`}`;
   }
-  host.addEventListener("change", async e => {
-    if (e.target.id !== "wk-on") return;
-    const on = e.target.checked; e.target.disabled = true;
-    try {
-      await dbUpd("settings/ai", { viaWorker: on, updatedAt: Date.now() });
-      wk.viaWorker = on; logAction("ai.worker", { type: "service", label: "AI через воркер" }, on ? "увімкнено" : "вимкнено");
-      toast(on ? "Тепер AI працює через воркер" : "AI знову працює напряму з ключів у базі");
-    } catch (err){ toast("Помилка: " + err.message, "err"); wk.viaWorker = !on; }
-    renderWk();
-  });
   host.addEventListener("click", async e => {
     const msg = () => document.getElementById("wk-msg");
     if (e.target.closest("#wk-test")){
@@ -640,9 +509,8 @@ hideLoader();
       armed = false;
       try {
         await dbUpd("settings/ai", { groqApiKey: null, geminiApiKey: null, apiKey: null, updatedAt: Date.now() });
-        saved.groqKey = saved.geminiKey = cur.groqKey = cur.geminiKey = "";
         logAction("ai.keys.remove", { type: "service", label: "Ключі AI в базі" }, null);
-        toast("Ключі з бази видалено"); renderAll();
+        toast("Ключі з бази видалено");
       } catch (err){ toast("Помилка: " + err.message, "err"); }
       loadStatus();
     }

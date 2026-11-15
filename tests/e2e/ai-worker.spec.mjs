@@ -21,21 +21,20 @@ const db = (extra = {}) => {
   return d;
 };
 
-test("панель воркера: статус ключів, перевірка відповіді, перехід і видалення старих ключів", async ({ page, errors }) => {
+test("панель воркера: статус, перевірка відповіді, автоматичне ввімкнення режиму й видалення старих ключів", async ({ page, errors }) => {
   const calls = [];
   await fakeWorker(page, calls);
   await seed(page, db(), "t5");
   await page.goto("/ai-settings"); await page.waitForTimeout(1200);
-  await expect(page.locator("#wk-panel")).toContainText("Groq у воркері");
-  await expect(page.locator("#wk-panel .wk-row", { hasText: "Groq у воркері" })).toContainText("є ключ");
-  await expect(page.locator("#wk-panel .wk-row", { hasText: "Gemini у воркері" })).toContainText("немає");
+  await expect(page.locator("#wk-panel")).toContainText("Воркер AI");
   await expect(page.locator("#wk-panel .wk-row", { hasText: "Старі ключі" })).toContainText("лишились");
+  await expect(page.locator('[data-prov="groq"] .prov-state, .prov-state').first()).toContainText("Ключ у воркері");
+  await expect(page.locator("#st-gemini")).toContainText("Немає ключа у воркері");
   expect(calls[0].auth).toBe("Bearer mock-token-t5");
+  // режим воркера вмикається сам, коли у воркері є ключ
+  expect((await readDb(page)).settings.ai.viaWorker).toBe(true);
   await page.locator("#wk-test").click();
   await expect(page.locator("#wk-msg")).toContainText("Відповів Groq");
-  // перехід на воркер
-  await page.locator("#wk-on").evaluate(el => el.click()); await page.waitForTimeout(400);
-  expect((await readDb(page)).settings.ai.viaWorker).toBe(true);
   // видалення старих ключів із бази двома кроками
   await page.locator("#wk-del").click();
   await expect(page.locator("#wk-del")).toContainText("Так, видалити");
@@ -47,17 +46,17 @@ test("панель воркера: статус ключів, перевірка
   expect(errors).toEqual([]);
 });
 
-test("без ключів у воркері перехід недоступний; не власник нічого не перемикає", async ({ page }) => {
+test("без ключів у воркері: підказка, режим воркера не вмикається; не власник нічого не перемикає", async ({ page }) => {
   const calls = [];
   await fakeWorker(page, calls, { groq: false, legacy: true });
   await seed(page, db(), "t5");
   await page.goto("/ai-settings"); await page.waitForTimeout(1200);
-  await expect(page.locator("#wk-on")).toBeDisabled();
+  await expect(page.locator("#wk-panel")).toContainText("GROQ_API_KEY");
   await expect(page.locator("#wk-test")).toBeDisabled();
+  expect((await readDb(page)).settings.ai.viaWorker).toBeUndefined();
   const d = db(); d.settings.ownerUid = "someone-else";
   await seed(page, d, "t5");
   await page.goto("/ai-settings"); await page.waitForTimeout(1200);
-  await expect(page.locator("#wk-on")).toBeDisabled();
   await expect(page.locator("#wk-panel")).toContainText("лише власник");
 });
 

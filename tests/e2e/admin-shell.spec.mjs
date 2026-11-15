@@ -71,13 +71,13 @@ test.describe("телефон", () => {
   });
 });
 
-test("ai-settings: панель «Ключі у воркері» стоїть під заголовком сторінки; з воркером поля ключів ховаються", async ({ page }) => {
+test("ai-settings: панель воркера стоїть під заголовком сторінки; полів для ключів на сторінці немає", async ({ page }) => {
   const d = admSeed(Date.now()); d.settings.ownerUid = "t5"; d.settings.ai = { enabled: true, viaWorker: true };
   await seed(page, d, "t5");
   await page.goto("/ai-settings"); await page.waitForTimeout(900);
   const order = await page.evaluate(() => { const h = document.querySelector("#admin-content .page-head"), w = document.getElementById("wk-panel"); return h && w ? !!(h.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_FOLLOWING) : null; });
   expect(order).toBe(true);
-  await expect(page.locator("[data-keyblock]").first()).toBeHidden();
+  await expect(page.locator(".key-input, [data-keyblock]")).toHaveCount(0);
 });
 
 test("порожні списки: пошук і фільтри з нулями не показуються (запрошення, журнал)", async ({ page }) => {
