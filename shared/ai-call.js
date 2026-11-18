@@ -35,7 +35,7 @@ export async function workerAI(url, messages, { maxTokens, temp, feature = "anal
   const d = await res.json().catch(() => ({}));
   if (!res.ok || d.ok === false) throw Object.assign(new Error(d.error || `AI: помилка ${res.status}`), { code: d.code, viaWorker: true });
   // data — у тому ж вигляді, що в провайдера, тож tokensOf() працює однаково; _worker: облік уже веде воркер
-  return { text: d.text || "", data: { usage: { total_tokens: d.tokens || 0 }, _worker: true } };
+  return { text: d.text || "", data: { usage: { total_tokens: d.tokens || 0 }, _worker: true, _provider: d.provider || "", _fallback: d.fallback === true } };
 }
 
 const UA = "Ти — розумний асистент викладача. ОБОВ'ЯЗКОВО відповідай ВИКЛЮЧНО українською мовою. Жодних інших мов. Якщо щось не знаєш українською — все одно пиши по-українськи.";
@@ -45,13 +45,25 @@ export async function callAIRaw(db, messages, { maxTokens = 800, temp = 0.5, fea
   if (wurl) return workerAI(wurl, messages, { maxTokens, temp, feature, system: system === UA ? undefined : system, json });
   const snap = await get(ref(db, "settings/ai"));
   const s = snap.exists() ? snap.val() : {};
-  const geminiKey = s.geminiApiKey || (s.provider === "gemini" ? s.apiKey : "") || "";
-  const groqKeyCfg = s.groqApiKey || (s.provider !== "gemini" ? s.apiKey : "") || "";
+  const keys = {
+    gemini: s.geminiApiKey || (s.provider === "gemini" ? s.apiKey : "") || "",
+    groq: s.groqApiKey || (s.provider !== "gemini" ? s.apiKey : "") || "",
+  };
   const want = (s.featProviders && s.featProviders[feature]) || s.provider || "groq";
-  const provider = want === "gemini" ? (geminiKey || !groqKeyCfg ? "gemini" : "groq") : (groqKeyCfg || !geminiKey ? "groq" : "gemini");
+  const first = want === "gemini" ? (keys.gemini || !keys.groq ? "gemini" : "groq") : (keys.groq || !keys.gemini ? "groq" : "gemini");
+  const second = first === "gemini" ? "groq" : "gemini";
+  // Основний провайдер не відповів — автоматично пробуємо інший, якщо для нього є ключ
+  try { return await direct(first, keys[first], s, messages, { maxTokens, temp, system, json }); }
+  catch (e) {
+    if (!keys[second]) throw e;
+    const out = await direct(second, keys[second], s, messages, { maxTokens, temp, system, json });
+    out.data = { ...out.data, _provider: second, _fallback: true };
+    return out;
+  }
+}
 
+async function direct(provider, key, s, messages, { maxTokens, temp, system, json }) {
   if (provider === "gemini") {
-    const key = geminiKey;
     const model = s.geminiModel || "gemini-2.5-flash";
     if (!key) throw new Error("AI не налаштовано: немає ключа (адмінка → AI)");
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
@@ -68,9 +80,10 @@ export async function callAIRaw(db, messages, { maxTokens = 800, temp = 0.5, fea
     let d;
     try { d = JSON.parse(raw); } catch { throw new Error("Gemini: невалідна відповідь — " + raw.substring(0, 200)); }
     if (d.error) throw new Error("Gemini: " + (d.error.message || JSON.stringify(d.error)));
-    return { text: d.candidates?.[0]?.content?.parts?.[0]?.text || "", data: d };
+    const text = d.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!text.trim()) throw new Error("Gemini повернув порожню відповідь");
+    return { text, data: d };
   }
-  const key = groqKeyCfg;
   if (!key) throw new Error("AI не налаштовано: немає ключа Groq (адмінка → AI)");
   const model = s.groqModel || (s.provider !== "gemini" && s.model) || "llama-3.3-70b-versatile";
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -78,7 +91,9 @@ export async function callAIRaw(db, messages, { maxTokens = 800, temp = 0.5, fea
     headers: { "Content-Type": "application/json", Authorization: "Bearer " + key },
     body: JSON.stringify({ model, messages: [{ role: "system", content: system }, ...messages], max_tokens: maxTokens, temperature: temp, ...(json ? { response_format: { type: "json_object" } } : {}) }),
   });
-  const d = await res.json();
+  const d = await res.json().catch(() => ({}));
   if (d.error) throw new Error(d.error.message);
-  return { text: d.choices?.[0]?.message?.content || "", data: d };
+  const text = d.choices?.[0]?.message?.content || "";
+  if (!text.trim()) throw new Error("Groq повернув порожню відповідь");
+  return { text, data: d };
 }
