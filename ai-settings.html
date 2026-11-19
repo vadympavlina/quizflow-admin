@@ -85,6 +85,22 @@
 .model .tag{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--grn-100);color:var(--grn-700);white-space:nowrap}
 .model .tag.gray{background:var(--sf-2);color:var(--ink-500)}
 .model-custom{display:flex;gap:8px;align-items:center}
+.model.gone .nm{text-decoration:line-through;color:var(--ink-400)}
+.model .tag.bad{background:#FDECEC;color:#B42318}
+.model:has(.mp){align-items:flex-start}
+.model:has(.mp) > input{margin-top:3px}
+.mp{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.mp-q{padding:8px 11px;border-radius:10px;border:1.5px solid var(--line);font:inherit;font-size:13px;background:#fff;color:var(--ink-900);outline:none}
+.mp-q:focus{border-color:var(--v-500)}
+.mp-list{display:flex;flex-direction:column;gap:2px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:4px;background:#fff}
+.mp-it{display:flex;align-items:center;gap:8px;width:100%;padding:7px 9px;border:0;border-radius:8px;background:none;cursor:pointer;text-align:left;font:600 13px "Geist Mono",monospace;color:var(--ink-700)}
+.mp-it span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp-it small{font-size:11px;color:var(--ink-400);font-weight:600}
+.mp-it:hover{background:var(--sf-2)}
+.mp-it.on{background:#F3EEFF;color:var(--v-600)}
+.mp-it[hidden]{display:none}
+.mp-empty{padding:8px;font-size:13px;color:var(--ink-500)}
+.mp-warn{font-size:12px;color:#B42318}
 .model-custom select,.model-custom input{flex:1;padding:9px 11px;border-radius:10px;border:1.5px solid var(--line);font:inherit;font-size:13px;font-family:"Geist Mono",monospace;background:#fff;color:var(--ink-900);outline:none;min-width:0}
 .model-custom select:focus,.model-custom input:focus{border-color:var(--v-500)}
 
@@ -293,7 +309,9 @@ const DEF = { groqModel: "llama-3.3-70b-versatile", geminiModel: "gemini-2.5-fla
   prov: { comments: "groq", analysis: "groq", generation: "groq", textcheck: "groq", mail: "groq" } };
 let saved = structuredClone(DEF), cur = structuredClone(DEF);
 let perFeature = false;   // свій провайдер для кожної функції (відкрито, якщо вони вже різні)
-const wk = { viaWorker: false, status: null, err: "", url: "" };   // ключі у воркері
+const wk = { viaWorker: false, status: null, err: "", url: "", models: null };   // ключі у воркері; models — що зараз доступно в провайдерів
+const mq = { groq: "", gemini: "" };   // пошук у списку моделей
+const ctxLbl = n => !n ? "" : n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : `${Math.round(n / 1024)}K`;
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 // Ключі лежать у секретах воркера; поки статус не прийшов, вважаємо, що вони є
 const hasKey = p => wk.status ? !!wk.status.configured[p] : true;
@@ -303,16 +321,30 @@ function renderModels(p){
   const P = PROVIDERS[p], sel = cur[p + "Model"];
   const known = P.models.map(m => m.id);
   const isCustom = sel && !known.includes(sel);
-  document.getElementById("models-" + p).innerHTML = P.models.map(m => `
-    <label class="model"><input type="radio" name="model-${p}" value="${esc(m.id)}" ${sel === m.id ? "checked" : ""}>
-      <span><div class="nm">${esc(m.id)}</div><div class="desc">${esc(m.desc)}</div></span>
-      ${m.tag ? `<span class="tag${m.tag === "Швидка" ? " gray" : ""}">${m.tag}</span>` : ""}</label>`).join("") + `
-    <label class="model"><input type="radio" name="model-${p}" value="__custom" ${isCustom ? "checked" : ""}>
-      <span style="flex:1;min-width:0"><div class="nm">Інша модель</div>
+  const live = wk.models?.[p], liveOk = !!live?.ok, ids = new Set(liveOk ? live.models.map(m => m.id) : []);
+  const gone = id => liveOk && !ids.has(id);
+  const rest = liveOk ? live.models.filter(m => !known.includes(m.id)) : [];
+  const q = mq[p].trim().toLowerCase();
+  const list = liveOk ? `
+        <div class="mp">
+          ${rest.length > 6 ? `<input class="mp-q" data-mq="${p}" placeholder="Пошук моделі" value="${esc(mq[p])}" aria-label="Пошук моделі ${P.name}">` : ""}
+          <div class="mp-list" role="listbox" aria-label="Інші моделі ${P.name}">
+            ${rest.map(m => `<button type="button" class="mp-it${m.id === sel ? " on" : ""}" data-pick="${p}" data-id="${esc(m.id)}" role="option" aria-selected="${m.id === sel}"${q && !m.id.toLowerCase().includes(q) ? " hidden" : ""}><span>${esc(m.id)}</span>${m.ctx ? `<small>${ctxLbl(m.ctx)}</small>` : ""}</button>`).join("") || `<div class="mp-empty">Інших моделей немає</div>`}
+          </div>
+          ${isCustom && !ids.has(sel) ? `<div class="mp-warn">Збережена модель <b>${esc(sel)}</b> зараз недоступна в ${P.name}: оберіть іншу.</div>` : ""}
+        </div>`
+    : `
         <div class="model-custom" style="margin-top:6px">
           <input data-custom="${p}" placeholder="${p === "groq" ? "наприклад, qwen/qwen3-32b" : "наприклад, gemini-2.5-pro"}" value="${isCustom ? esc(sel) : ""}" aria-label="Назва моделі">
-        </div></span></label>`;
-  document.getElementById("mcount-" + p).textContent = "";
+        </div>`;
+  document.getElementById("models-" + p).innerHTML = P.models.map(m => `
+    <label class="model${gone(m.id) ? " gone" : ""}"><input type="radio" name="model-${p}" value="${esc(m.id)}" ${sel === m.id ? "checked" : ""}>
+      <span><div class="nm">${esc(m.id)}</div><div class="desc">${gone(m.id) ? "Зараз недоступна в " + P.name : esc(m.desc)}</div></span>
+      ${gone(m.id) ? `<span class="tag bad">Недоступна</span>` : m.tag ? `<span class="tag${m.tag === "Швидка" ? " gray" : ""}">${m.tag}</span>` : ""}</label>`).join("") + `
+    <label class="model"><input type="radio" name="model-${p}" value="__custom" ${isCustom ? "checked" : ""}>
+      <span style="flex:1;min-width:0"><div class="nm">${liveOk ? "Інша доступна модель" : "Інша модель"}</div>
+        ${isCustom || liveOk ? list : `<div class="desc">${live && !live.ok ? "Список моделей отримати не вдалося — впишіть назву" : "Назва моделі вручну"}</div>`}</span></label>`;
+  document.getElementById("mcount-" + p).textContent = liveOk ? `доступно ${live.models.length}` : live ? "список недоступний" : wk.status ? "завантаження списку…" : "";
 }
 
 function renderProvState(p){
@@ -372,6 +404,11 @@ function renderAll(){
 const root = document.getElementById("admin-content");
 root.addEventListener("input", e => {
   const t = e.target;
+  if (t.matches("input[data-mq]")){                     // фільтр без перемальовування, щоб не губити курсор
+    const p = t.dataset.mq, q = (mq[p] = t.value).trim().toLowerCase();
+    t.closest(".mp").querySelectorAll(".mp-it").forEach(b => { b.hidden = !!q && !b.dataset.id.toLowerCase().includes(q); });
+    return;
+  }
   if (t.matches("input[data-custom]")){
     const p = t.dataset.custom;
     document.querySelector(`input[name="model-${p}"][value="__custom"]`).checked = true;
@@ -396,6 +433,14 @@ root.addEventListener("change", e => {
   renderDirty();
 });
 root.addEventListener("click", e => {
+  const pick = e.target.closest("[data-pick]");
+  if (pick){
+    e.preventDefault();
+    const p = pick.dataset.pick;
+    cur[p + "Model"] = pick.dataset.id;
+    renderModels(p); renderFeatures(); renderDirty();
+    return;
+  }
   const pb = e.target.closest("#feat-grid .seg2 [data-prov]");
   if (pb){
     cur.prov[pb.closest("[data-feat]").dataset.feat] = pb.dataset.prov;
@@ -499,6 +544,8 @@ hideLoader();
     wk.err = ""; wk.status = null;
     try { wk.url = await mailWorkerUrl(); wk.status = await mailApi("/ai/status"); }
     catch (e){ wk.err = e.message; }
+    if (wk.status) mailApi("/ai/models").then(m => { wk.models = m; renderAll(); })
+      .catch(() => { wk.models = { groq: { ok: false, models: [] }, gemini: { ok: false, models: [] } }; renderAll(); });
     // Є ключі у воркері, а режим воркера ще не ввімкнено — вмикаємо (лише власник)
     const st = wk.status;
     if (st && isOwner && !wk.viaWorker && (st.configured.groq || st.configured.gemini)){
