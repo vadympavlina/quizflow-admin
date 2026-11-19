@@ -111,6 +111,15 @@
 .it-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .it-id{font-family:"Geist Mono",monospace;font-size:12px;color:var(--ink-400)}
 .it-msg{padding:12px 14px;border-radius:12px;background:var(--sf-3);border:1px solid var(--line);font-size:14px;line-height:1.6;color:var(--ink-900);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto}
+.ctx-w{display:flex;flex-wrap:wrap;gap:6px}
+.ctx-c{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:4px 9px;border-radius:8px;background:var(--sf-2);font-size:13px;color:var(--ink-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctx-c i{font-style:normal;font-size:12px;color:var(--ink-400);font-weight:600}
+.ctx-err{margin-top:8px;padding:8px 10px;border-radius:10px;background:#FEF2F2;border:1px solid #FECACA;display:flex;flex-direction:column;gap:4px}
+.ctx-err b{font-size:12px;color:#B42318}
+.ctx-err code{font:500 12px "Geist Mono",monospace;color:#7F1D1D;word-break:break-word}
+.it-shot{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--sf-3);cursor:zoom-in}
+.it-shot img{display:block;width:100%;max-height:200px;object-fit:cover}
+.it-shot.big{cursor:zoom-out}.it-shot.big img{max-height:none;object-fit:contain}
 .it-rep{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
 .it-rep .av{width:34px;height:34px;font-size:12px}
 .it-rep b{display:block;font-size:14px}
@@ -265,7 +274,8 @@ function normBug(id, b){
     title: b.message || b.title || b.description || b.text || "Без опису", text: b.message || b.description || b.text || "", col: b.status === "in_progress" ? "in_progress" : b.status === "resolved" ? "done" : "new",
     createdAt: b.createdAt || 0, doneAt: b.resolvedAt || 0, page: b.page && b.page !== "—" ? b.page : "",
     authorId: b.uid && b.uid !== "—" ? b.uid : "", authorName: (b.userName && b.userName !== "—" ? b.userName : "") || userName(b.uid),
-    assignee: b.assignee || "", assigneeId: b.assigneeId || "", deadline: b.deadline || "", priority: b.priority || "normal", note: b.note || "" };
+    assignee: b.assignee || "", assigneeId: b.assigneeId || "", deadline: b.deadline || "", priority: b.priority || "normal", note: b.note || "",
+    reply: b.reply || "", ctx: b.ctx && typeof b.ctx === "object" ? b.ctx : null, shot: typeof b.shot === "string" && b.shot.startsWith("data:image/") ? b.shot : "" };
 }
 function normTask(id, t){
   return { id, src: "task", kind: "task", title: t.title || "Без назви", text: t.description || "", col: t.col || "new",
@@ -359,6 +369,16 @@ function cardHtml(it){
 
 // ─── Зміни в базі ──────────────────────────────────────────────────────
 const pathOf = it => it.src === "bug" ? `bugReports/${it.id}` : `adminTasks/${it.id}`;
+// Автор бачить статус і відповідь у кульці «Підтримка» (bugStatus/{uid}/{id}). Пишемо повну копію —
+// так і старі звернення з'являться в його списку. Збій тут не заважає основній зміні.
+function syncAuthor(it, col, reply){
+  if (it.src !== "bug" || !it.authorId) return;
+  const r = reply !== undefined ? reply : it.reply;
+  update(ref(db, `bugStatus/${it.authorId}/${it.id}`), {
+    t: String(it.text || it.title || "").slice(0, 300) || "Без опису", k: it.kind === "idea" ? "idea" : "bug", p: String(it.page || "").slice(0, 80),
+    at: it.createdAt || Date.now(), s: BUG_STATUS[col] || "new", r: r ? String(r).slice(0, 1000) : null, up: Date.now(),
+  }).catch(() => {});
+}
 async function moveTo(id, col){
   const it = byId(id); if (!it || it.col === col) return;
   const upd = it.src === "bug" ? { status: BUG_STATUS[col], resolvedAt: col === "done" ? Date.now() : null } : { col, completedAt: col === "done" ? Date.now() : null };
@@ -366,6 +386,7 @@ async function moveTo(id, col){
   it.col = col; renderSoon();                    // миттєво, база підтвердить
   try {
     await update(ref(db, pathOf(it)), upd);
+    syncAuthor(it, col);
     logAction("problem.move", { type: it.src === "bug" ? "bug" : "task", id: it.id, label: it.title }, COLS.find(c => c.id === col).label);
     toast(`Переміщено в «${COLS.find(c => c.id === col).label}»`);
   } catch (e){ it.col = prev; renderSoon(); toast("Не вдалося перемістити: " + e.message, "err"); }
@@ -436,7 +457,9 @@ function openItem(id, col = "new"){
   document.getElementById("it-form").innerHTML = `
     ${reporter}
     ${src === "bug"
-      ? `<div class="field"><span class="field-l">Повідомлення</span><div class="it-msg">${esc(it.text || it.title)}</div></div>`
+      ? `<div class="field"><span class="field-l">Повідомлення</span><div class="it-msg">${esc(it.text || it.title)}</div></div>
+         ${ctxHtml(it)}
+         ${it.shot ? `<div class="field"><span class="field-l">Знімок екрана</span><button type="button" class="it-shot" onclick="this.classList.toggle('big')" aria-label="Збільшити знімок"><img src="${esc(it.shot)}" alt="Знімок екрана від викладача"></button></div>` : ""}`
       : `<div class="field"><label class="field-l" for="f-title">Що треба зробити *</label><textarea class="field-input" id="f-title" rows="2" maxlength="300" placeholder="Коротко й конкретно">${esc(it?.title === "—" ? "" : it?.title || "")}</textarea></div>
          <div class="field"><label class="field-l" for="f-text">Деталі</label><textarea class="field-input" id="f-text" rows="3" maxlength="3000" placeholder="Контекст, посилання, критерії готовності">${esc(it?.text || "")}</textarea></div>`}
     <div class="field"><span class="field-l">Статус</span>
@@ -447,6 +470,7 @@ function openItem(id, col = "new"){
     </div>
     <div class="field"><span class="field-l">Пріоритет</span>
       <div class="seg full" id="f-prio">${Object.entries(PRIO).map(([v, p]) => `<button type="button" data-v="${v}" class="${v === _edit.priority ? "on" : ""}"><span class="dot" style="--c:${p.c}"></span>${p.label}</button>`).join("")}</div></div>
+    ${src === "bug" ? `<div class="field"><label class="field-l" for="f-reply">Відповідь автору</label><textarea class="field-input" id="f-reply" rows="2" maxlength="1000" placeholder="Наприклад: виправили, оновіть сторінку">${esc(it?.reply || "")}</textarea><span class="field-h">Викладач побачить її в кнопці «Підтримка» → «Мої звернення»</span></div>` : ""}
     ${src === "bug" ? `<div class="field"><label class="field-l" for="f-note">Нотатка адміністратора</label><textarea class="field-input" id="f-note" rows="2" maxlength="2000" placeholder="Що з'ясували, що зроблено">${esc(it?.note || "")}</textarea><span class="field-h">Бачать лише адміністратори</span></div>` : ""}
     <div class="mod-err" id="f-err"></div>
     <button type="submit" hidden></button>`;
@@ -455,6 +479,16 @@ function openItem(id, col = "new"){
   document.querySelectorAll("#f-prio button").forEach(b => b.onclick = () => { _edit.priority = b.dataset.v; document.querySelectorAll("#f-prio button").forEach(x => x.classList.toggle("on", x === b)); });
   openModal("m-item");
   if (!it) setTimeout(() => document.getElementById("f-title")?.focus(), 70);
+}
+
+// Контекст, який кулька «Підтримка» додає сама: тест, питання, браузер, екран, помилки сторінки
+function ctxHtml(it){
+  const c = it.ctx; if (!c) return "";
+  const chip = (l, v) => v ? `<span class="ctx-c"><i>${l}</i>${esc(String(v))}</span>` : "";
+  const errs = Array.isArray(c.errors) ? c.errors.filter(Boolean) : [];
+  return `<div class="field"><span class="field-l">Де це сталося</span><div class="ctx-w">
+    ${chip("Тест", c.test)}${chip("Питання", c.q)}${chip("Браузер", c.browser)}${chip("Екран", c.screen)}${chip("Адреса", c.path)}</div>
+    ${errs.length ? `<div class="ctx-err"><b>Помилки на сторінці</b>${errs.map(e => `<code>${esc(String(e))}</code>`).join("")}</div>` : ""}</div>`;
 }
 
 // Дропдаун відповідального (без стандартного <select>)
@@ -503,9 +537,11 @@ async function saveItem(){
   try {
     if (_edit.src === "bug"){
       const it = byId(_edit.id);
-      const upd = { ...common, note: document.getElementById("f-note").value.trim() || null };
+      const reply = document.getElementById("f-reply").value.trim();
+      const upd = { ...common, note: document.getElementById("f-note").value.trim() || null, reply: reply || null };
       if (it.col !== _edit.col){ upd.status = BUG_STATUS[_edit.col]; upd.resolvedAt = _edit.col === "done" ? Date.now() : null; }
       await update(ref(db, `bugReports/${_edit.id}`), upd);
+      if (it.col !== _edit.col || (it.reply || "") !== reply) syncAuthor(it, _edit.col, reply);
     } else {
       const title = document.getElementById("f-title").value.trim();
       if (!title){ err.textContent = "Опишіть задачу"; document.getElementById("f-title").focus(); return; }
