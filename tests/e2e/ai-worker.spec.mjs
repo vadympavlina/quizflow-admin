@@ -3,7 +3,11 @@ import { test, expect, seed, readDb } from "./fixtures.mjs";
 import { admSeed } from "./seeds/admin.mjs";
 
 const WORKER = "https://mail.quizflow.test";
-async function fakeWorker(page, calls, { groq = true, gemini = false, legacy = true } = {}) {
+const MODELS = {
+  groq: { ok: true, models: [{ id: "llama-3.3-70b-versatile", ctx: 131072 }, { id: "openai/gpt-oss-120b", ctx: 131072 }, { id: "qwen/qwen3-32b", ctx: 131072 }, { id: "moonshotai/kimi-k2-instruct", ctx: 262144 }] },
+  gemini: { ok: false, error: "Немає ключа у воркері", models: [] },
+};
+async function fakeWorker(page, calls, { groq = true, gemini = false, legacy = true, models = MODELS } = {}) {
   await page.context().route(`${WORKER}/**`, async route => {
     const req = route.request(), path = new URL(req.url()).pathname;
     const body = req.postData() ? JSON.parse(req.postData()) : null;
@@ -12,6 +16,7 @@ async function fakeWorker(page, calls, { groq = true, gemini = false, legacy = t
     if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*" } });
     if (path === "/ai/status") return json({ ok: true, configured: { groq, gemini }, legacyKeysInDb: { groq: legacy, gemini: false } });
     if (path === "/ai") return json({ ok: true, text: "так", tokens: 3, provider: "groq" });
+    if (path === "/ai/models") return json({ ok: true, ...models });
     return json({ ok: false, error: "404" }, 404);
   });
 }
@@ -93,5 +98,24 @@ test("AI-сторінка: один провайдер для всіх функ�
   await expect(page.locator('#main-prov [aria-pressed="true"]')).toHaveCount(0);   // провайдери різні
   const order = await page.evaluate(() => { const u = document.getElementById("ai-usage"), f = document.getElementById("feat-grid"); return !!(f.compareDocumentPosition(u) & Node.DOCUMENT_POSITION_FOLLOWING); });
   expect(order).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("моделі: список доступних з воркера, недоступна рекомендована перекреслена, вибір іншої моделі зберігається", async ({ page, errors }) => {
+  const calls = [];
+  await fakeWorker(page, calls);
+  await seed(page, db({ viaWorker: true }), "t5");
+  await page.goto("/ai-settings");
+  await expect(page.locator("#mcount-groq")).toContainText("доступно 4");
+  await expect(page.locator("#models-groq .model.gone")).toContainText("llama-3.1-8b-instant");   // немає в списку провайдера
+  await expect(page.locator("#mcount-gemini")).toContainText("список недоступний");
+  await expect(page.locator("#models-gemini [data-custom]")).toHaveCount(0);                    // поле вручну лише для «Інша модель»
+  const pick = page.locator('#models-groq [data-pick="groq"][data-id="qwen/qwen3-32b"]');
+  await expect(pick).toBeVisible();
+  await pick.click();
+  await expect(pick).toHaveClass(/on/);
+  await expect(page.locator('#models-groq input[value="__custom"]')).toBeChecked();
+  await page.locator("#btn-save-bar").click();
+  await expect.poll(async () => (await readDb(page)).settings.ai.groqModel).toBe("qwen/qwen3-32b");
   expect(errors).toEqual([]);
 });
