@@ -117,9 +117,6 @@
 .ctx-err{margin-top:8px;padding:8px 10px;border-radius:10px;background:#FEF2F2;border:1px solid #FECACA;display:flex;flex-direction:column;gap:4px}
 .ctx-err b{font-size:12px;color:#B42318}
 .ctx-err code{font:500 12px "Geist Mono",monospace;color:#7F1D1D;word-break:break-word}
-.it-shot{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--sf-3);cursor:zoom-in}
-.it-shot img{display:block;width:100%;max-height:200px;object-fit:cover}
-.it-shot.big{cursor:zoom-out}.it-shot.big img{max-height:none;object-fit:contain}
 .it-rep{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
 .it-rep .av{width:34px;height:34px;font-size:12px}
 .it-rep b{display:block;font-size:14px}
@@ -275,7 +272,7 @@ function normBug(id, b){
     createdAt: b.createdAt || 0, doneAt: b.resolvedAt || 0, page: b.page && b.page !== "—" ? b.page : "",
     authorId: b.uid && b.uid !== "—" ? b.uid : "", authorName: (b.userName && b.userName !== "—" ? b.userName : "") || userName(b.uid),
     assignee: b.assignee || "", assigneeId: b.assigneeId || "", deadline: b.deadline || "", priority: b.priority || "normal", note: b.note || "",
-    reply: b.reply || "", ctx: b.ctx && typeof b.ctx === "object" ? b.ctx : null, shot: typeof b.shot === "string" && b.shot.startsWith("data:image/") ? b.shot : "" };
+    reply: b.reply || "", ctx: b.ctx && typeof b.ctx === "object" ? b.ctx : null };
 }
 function normTask(id, t){
   return { id, src: "task", kind: "task", title: t.title || "Без назви", text: t.description || "", col: t.col || "new",
@@ -458,8 +455,7 @@ function openItem(id, col = "new"){
     ${reporter}
     ${src === "bug"
       ? `<div class="field"><span class="field-l">Повідомлення</span><div class="it-msg">${esc(it.text || it.title)}</div></div>
-         ${ctxHtml(it)}
-         ${it.shot ? `<div class="field"><span class="field-l">Знімок екрана</span><button type="button" class="it-shot" onclick="this.classList.toggle('big')" aria-label="Збільшити знімок"><img src="${esc(it.shot)}" alt="Знімок екрана від викладача"></button></div>` : ""}`
+         ${ctxHtml(it)}`
       : `<div class="field"><label class="field-l" for="f-title">Що треба зробити *</label><textarea class="field-input" id="f-title" rows="2" maxlength="300" placeholder="Коротко й конкретно">${esc(it?.title === "—" ? "" : it?.title || "")}</textarea></div>
          <div class="field"><label class="field-l" for="f-text">Деталі</label><textarea class="field-input" id="f-text" rows="3" maxlength="3000" placeholder="Контекст, посилання, критерії готовності">${esc(it?.text || "")}</textarea></div>`}
     <div class="field"><span class="field-l">Статус</span>
