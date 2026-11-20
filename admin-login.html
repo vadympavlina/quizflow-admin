@@ -31,152 +31,30 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet"></noscript>
-<style>
-/* Палітра — як у фіолетовій навігації адмінки (admin-shell.css .asb) */
-:root{
-  --v-1:#140B3A; --v-2:#0D0A2E; --v-3:#080722;
-  --acc:#8B5CF6; --acc-2:var(--v-600); --acc-3:var(--ind-600); --acc-soft:var(--v-300);
-  --t:rgba(233,228,255,.7); --t-mute:rgba(233,228,255,.42); --ln:rgba(255,255,255,.08);
-  --ink:var(--ink-900); --ink-2:#24335A; --muted:#5B6A8F; --faint:#8691AC; --line:var(--line); --bg:#F6F4FD;
-  --bad:#DC2626; --ok:var(--grn-700); --ease:cubic-bezier(.32,.72,0,1);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:'Manrope',system-ui,sans-serif;font-size:14px;color:var(--ink);-webkit-font-smoothing:antialiased;
-  min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(480px,640px);
-  background:
-    radial-gradient(70% 55% at 8% 0%, rgba(139,92,246,.32) 0%, transparent 60%),
-    radial-gradient(55% 45% at 100% 100%, rgba(59,130,246,.16) 0%, transparent 60%),
-    linear-gradient(160deg,var(--v-1) 0%,var(--v-2) 55%,var(--v-3) 100%);
-}
-button,input{font:inherit;color:inherit}
-[hidden]{display:none!important}
-:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-
-/* ═══ Ліва частина ═══ */
-.hero{position:relative;padding:40px 56px;display:flex;flex-direction:column;gap:40px;color:var(--t);overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
-  background-size:44px 44px;mask-image:radial-gradient(70% 60% at 30% 40%,#000,transparent);-webkit-mask-image:radial-gradient(70% 60% at 30% 40%,#000,transparent)}
-.hero>*{position:relative}
-.logo{display:inline-flex;align-items:center;gap:11px;color:#fff;width:max-content}
-.logo-i{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
-  background:linear-gradient(140deg,var(--v-400) 0%,var(--v-500) 50%,var(--ind-600) 100%);box-shadow:0 10px 22px -10px rgba(139,92,246,.95),inset 0 1px 0 rgba(255,255,255,.35)}
-.logo-t{font-size:18px;font-weight:800;letter-spacing:-.01em}
-.logo-t em{font-style:normal;color:var(--acc-soft)}
-.logo-tag{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:7px;color:var(--acc-soft);background:rgba(139,92,246,.16);border:1px solid rgba(196,181,253,.25)}
-.hero-main{margin:auto 0;max-width:520px}
-.kicker{display:inline-flex;align-items:center;gap:8px;padding:5px 11px 5px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--ln);font-size:12px;font-weight:700;color:var(--acc-soft);margin-bottom:18px}
-.kicker svg{color:#6EE7B7}
-.hero h1{font-size:clamp(28px,3vw,40px);line-height:1.12;letter-spacing:-.03em;font-weight:800;color:#fff}
-.hero h1 span{background:linear-gradient(90deg,var(--acc-soft),#fff 75%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-p{margin-top:14px;font-size:16px;line-height:1.6;max-width:460px}
-.feats{margin-top:30px;display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:20px;max-width:440px;
-  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--ln);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 48px -24px rgba(0,0,0,.55)}
-.feat{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:13px}
-.feat.on{background:linear-gradient(135deg,rgba(139,92,246,.26),rgba(79,70,229,.14));box-shadow:inset 0 0 0 1px rgba(196,181,253,.28)}
-.feat-i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;color:var(--acc-soft);background:rgba(255,255,255,.06);border:1px solid var(--ln)}
-.feat.on .feat-i{background:linear-gradient(140deg,var(--v-400),var(--v-500) 55%,var(--ind-600));color:#fff;border-color:transparent;box-shadow:0 6px 16px -6px rgba(139,92,246,.95)}
-.feat b{display:block;color:#fff;font-size:14px;font-weight:700}
-.feat span{font-size:13px;color:var(--t-mute);line-height:1.4}
-.hero-foot{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t-mute)}
-.hero-foot svg{color:#6EE7B7;flex:0 0 auto}
-
-/* ═══ Картка ═══ */
-.side{display:flex;align-items:center;justify-content:center;padding:40px 56px 40px 24px}
-.card{width:100%;max-width:440px;background:#fff;border-radius:24px;padding:34px 36px 28px;
-  box-shadow:0 40px 90px -30px rgba(76,29,149,.75),0 2px 8px rgba(8,7,34,.25);animation:rise .45s var(--ease) both}
-@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
-.shield{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;margin-bottom:16px;color:#fff;
-  background:linear-gradient(140deg,var(--v-400),var(--v-500) 55%,var(--ind-600));box-shadow:0 14px 28px -12px rgba(124,58,237,.8),inset 0 1px 0 rgba(255,255,255,.3)}
-.card h2{font-size:24px;font-weight:800;letter-spacing:-.02em}
-.sub{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.5}
-.form{margin-top:22px;display:flex;flex-direction:column;gap:14px}
-.fld label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
-.inp{position:relative}
-.inp>svg{position:absolute;z-index:1;left:13px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none;transition:color .15s}
-.inp input{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 44px 0 40px;font-size:14px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
-.inp input::placeholder{color:#AAB3C7}
-.inp input:focus{border-color:#B9A5F7;box-shadow:0 0 0 4px rgba(139,92,246,.15)}
-.inp:focus-within>svg{color:var(--acc-2)}
-.inp input.bad{border-color:var(--bad);box-shadow:0 0 0 4px rgba(220,38,38,.1)}
-.shake{animation:shake .35s ease}
-@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
-.eye{position:absolute;z-index:1;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--faint);cursor:pointer;display:grid;place-items:center}
-.eye:hover{background:var(--bg);color:var(--ink)}
-.caps{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--amb-700)}
-.sw{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;user-select:none}
-.sw input{position:absolute;opacity:0;pointer-events:none}
-.sw b{width:34px;height:20px;border-radius:999px;background:#D3DAE8;position:relative;transition:background .2s;flex:0 0 auto}
-.sw b::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .2s var(--ease)}
-.sw input:checked+b{background:var(--acc-2)}
-.sw input:checked+b::after{transform:translateX(14px)}
-.sw input:focus-visible+b{outline:2px solid var(--acc);outline-offset:2px}
-.sw small{display:block;font-size:12px;font-weight:500;color:var(--faint)}
-.msg{display:flex;align-items:flex-start;gap:9px;padding:11px 13px;border-radius:12px;font-size:13px;font-weight:600;line-height:1.45}
-.msg svg{flex:0 0 auto;margin-top:1px}
-.msg.err{background:var(--red-50);color:var(--red-700);border:1px solid var(--red-200)}
-.msg.info{background:var(--v-50);color:var(--v-700);border:1px solid var(--v-200)}
-.msg.warn{background:#FFFBEB;color:#92400E;border:1px solid var(--amb-200)}
-.btn{height:48px;width:100%;border:0;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:14px;font-weight:800;cursor:pointer;transition:transform .12s var(--ease),box-shadow .2s,opacity .15s}
-.btn.pri{color:#fff;background:linear-gradient(135deg,#8B5CF6 0%,var(--v-600) 55%,var(--ind-600) 100%);box-shadow:0 14px 30px -12px rgba(109,40,217,.85),inset 0 1px 0 rgba(255,255,255,.2)}
-.btn.pri:hover:not(:disabled){transform:translateY(-1px)}
-.btn.ghost{background:#fff;color:var(--ink-2);border:1px solid var(--line)}
-.btn.ghost:hover{background:var(--bg)}
-.btn:disabled{opacity:.7;cursor:progress}
-.btn.done{background:linear-gradient(135deg,#22C55E,var(--grn-700))}
-.spin{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:rot .7s linear infinite}
-@keyframes rot{to{transform:rotate(360deg)}}
-.who{display:flex;align-items:center;gap:11px;margin-top:18px;padding:12px;border-radius:14px;background:var(--bg);border:1px solid #EAE5FB}
-.who-ava{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;color:#fff;font-weight:800;background:linear-gradient(140deg,#93C5FD,#3B82F6)}
-.who b{display:block;font-size:14px}
-.who span{font-size:13px;color:var(--muted)}
-.stack{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-.card-foot{margin-top:20px;padding-top:16px;border-top:1px solid #EEF1F7;display:flex;justify-content:center}
-.back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:9px}
-.back:hover{color:var(--ink);background:var(--bg)}
-.checking{text-align:center;padding:30px 0 12px}
-.checking .shield{margin:0 auto 16px}
-html.resume .views{display:none}
-html:not(.resume) .checking{display:none}
-
-@media (max-width:1080px){
-  body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .hero{padding:24px 20px 0;gap:0}
-  .hero-main,.hero-foot{display:none}
-  .side{padding:22px 16px 32px;align-items:flex-start}
-}
-@media (max-width:480px){.card{padding:26px 20px 22px;border-radius:20px}.card h2{font-size:20px}.inp input{font-size:16px}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
+<link rel="preload" as="image" href="assets/icons/admin/mascot-login.webp?v=1" type="image/webp" media="(min-width:981px)" fetchpriority="high">
+<link rel="stylesheet" href="shared/admin-login.css?v=1">
 </head>
-<body>
+<body class="lg">
 
-<aside class="hero">
-  <div class="logo">
-    <span class="logo-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
-    <span class="logo-t">quiz<em>flow</em></span>
-    <span class="logo-tag">Admin</span>
-  </div>
-
-  <div class="hero-main">
-    <div class="kicker"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>Захищена зона</div>
-    <h1>Керування <span>платформою QuizFlow</span></h1>
-    <p class="hero-p">Викладачі, ролі й доступи, налаштування AI, новини та звіти — в одній панелі.</p>
-    <div class="feats" aria-hidden="true">
-      <div class="feat on"><span class="feat-i"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span><div><b>Викладачі</b><span>Запрошення, блокування, скидання пароля</span></div></div>
-      <div class="feat"><span class="feat-i"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><div><b>Ролі й навігація</b><span>Хто які розділи бачить</span></div></div>
-      <div class="feat"><span class="feat-i"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9z"/></svg></span><div><b>AI та інтеграції</b><span>Ключі, моделі, Telegram-бот</span></div></div>
-      <div class="feat"><span class="feat-i"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><div><b>Статистика й звіти</b><span>Активність і повідомлення про проблеми</span></div></div>
-    </div>
-  </div>
-
-  <div class="hero-foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Вхід лише для адміністраторів. Усі дії в панелі записуються з вашим акаунтом.</div>
+<aside class="hero" aria-label="QuizFlow Admin">
+  <p class="hero-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Захищена зона</p>
+  <h1>Керування<br>платформою QuizFlow</h1>
+  <p class="hero-p">Викладачі, ролі й доступи, налаштування AI, новини та звіти — в одній панелі.</p>
+  <img class="mascot" src="assets/icons/admin/mascot-login.webp?v=1" alt="" width="800" height="800" decoding="async" fetchpriority="high" onload="this.classList.add('in')">
+  <script>(function(){var m=document.querySelector(".mascot");if(m&&m.complete&&m.naturalWidth)m.classList.add("in")})()</script>
 </aside>
 
 <main class="side">
-  <div class="card">
+<header class="top">
+  <a class="logo" href="./" aria-label="QuizFlow Admin">
+    <span class="logo-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+    <span class="logo-t">quiz<em>flow</em></span>
+    <span class="logo-tag">Admin</span>
+  </a>
+  <a class="top-link" href="https://app.quizflow.space/login">Я викладач<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+</header>
+<div class="stage">
+  <div class="panel">
     <div class="checking" aria-live="polite">
       <div class="shield"><span class="spin"></span></div>
       <h2>Перевіряємо доступ…</h2>
@@ -186,7 +64,7 @@ html:not(.resume) .checking{display:none}
     <div class="views">
       <!-- Вхід -->
       <section id="vLogin">
-        <div class="shield"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        
         <h2>Вхід в адмін-панель</h2>
         <p class="sub">Лише для адміністраторів QuizFlow.</p>
         <form class="form" id="loginF" novalidate>
@@ -210,7 +88,7 @@ html:not(.resume) .checking{display:none}
           <label class="sw"><input type="checkbox" id="stay"><b></b><span>Залишатися в системі<small>Інакше вихід — після закриття вкладки</small></span></label>
           <button type="submit" class="btn pri" id="loginBtn"><span>Увійти</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
         </form>
-        <div class="card-foot"><a class="back" href="https://app.quizflow.space/login"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Я викладач — до входу викладача</a></div>
+        
       </section>
 
       <!-- Увійшли акаунтом без прав адміністратора -->
@@ -226,6 +104,8 @@ html:not(.resume) .checking{display:none}
       </section>
     </div>
   </div>
+</div>
+<footer class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Вхід лише для адміністраторів. Усі дії в панелі записуються з вашим акаунтом.</footer>
 </main>
 
 <script type="module">
