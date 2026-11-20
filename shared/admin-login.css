@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Сторінка входу в адмінку (admin-login.html): фіолетова панель із совою зліва, світла форма справа.
+   Усі кольори — літерали (сторінка не підключає admin-shell.css).
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --v-300:#C4B5FD; --v-400:#A78BFA; --v-500:#8B5CF6; --v-600:#7C3AED; --v-700:#6D28D9; --ind-600:#4F46E5;
+  --ink:#0B1437; --ink-2:#24335A; --muted:#5B6A8F; --faint:#636E8B; --line:#E3E8F2; --bg:#F6F4FD;
+  --bad:#DC2626; --ease:cubic-bezier(.32,.72,0,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--v-500);outline-offset:2px}
+html,body{min-height:100%}
+body{
+  font-family:'Manrope',system-ui,sans-serif;font-size:14px;color:var(--ink);-webkit-font-smoothing:antialiased;
+  min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:minmax(0,1fr);background:#fff;
+}
+
+/* ── Ліва частина: текст над совою ── */
+.hero{
+  position:relative;z-index:0;padding:34px 56px 0 40px;overflow:hidden;
+  background:
+    radial-gradient(70% 46% at 50% 100%,rgba(139,92,246,.6) 0%,rgba(109,40,217,.2) 48%,transparent 74%),
+    radial-gradient(60% 40% at 0% 0%,rgba(139,92,246,.22),transparent 70%),
+    linear-gradient(180deg,#160C42 0%,#0C0830 100%);
+}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:rgba(233,228,255,.72)}
+.hero-tag svg{color:#6EE7B7}
+.hero h1{margin-top:clamp(36px,9vh,96px);text-align:center;font-size:clamp(32px,3.6vw,52px);line-height:1.08;letter-spacing:-.04em;font-weight:800;color:#fff}
+.hero-p{margin:16px auto 0;max-width:400px;text-align:center;font-size:15px;line-height:1.55;color:rgba(233,228,255,.64)}
+.mascot{position:absolute;left:50%;bottom:-3%;height:clamp(300px,52%,600px);width:auto;transform:translateX(-50%);pointer-events:none;user-select:none;
+  filter:drop-shadow(0 30px 50px rgba(8,4,34,.6));opacity:0}
+.mascot.in{animation:peek .7s var(--ease) both}
+@keyframes peek{from{opacity:0;transform:translate(-50%,28px)}to{opacity:1;transform:translateX(-50%)}}
+
+/* ── Права частина: біла панель, що заходить на ліву заокругленим краєм ── */
+.side{position:relative;z-index:1;display:flex;flex-direction:column;margin-left:-34px;border-radius:34px 0 0 34px;background:#fff;box-shadow:-24px 0 60px -34px rgba(8,4,34,.6)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:34px 56px 0}
+.logo{display:inline-flex;align-items:center;gap:11px;color:var(--ink);text-decoration:none;width:max-content}
+.logo-i{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--v-400) 0%,var(--v-500) 50%,var(--ind-600) 100%);box-shadow:0 10px 22px -10px rgba(139,92,246,.95),inset 0 1px 0 rgba(255,255,255,.35)}
+.logo-t{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.logo-t em{font-style:normal;color:var(--v-600)}
+.logo-tag{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:7px;color:var(--v-700);background:#F1ECFF;border:1px solid #DDD6FE}
+.top-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);text-decoration:none;padding:8px 2px;border-radius:8px;transition:color .15s}
+.top-link svg{transition:transform .2s var(--ease)}
+.top-link:hover{color:var(--ink)}.top-link:hover svg{transform:translateX(3px)}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 56px}
+.panel{width:100%;max-width:440px;animation:rise .5s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.panel h2{font-size:40px;line-height:1.08;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.sub{margin-top:10px;font-size:15px;line-height:1.5;color:var(--muted)}
+.foot{padding:0 56px 30px;font-size:13px;line-height:1.5;color:var(--faint);display:flex;align-items:center;gap:8px}
+.foot svg{color:#059669;flex:0 0 auto}
+
+/* ── Форма ── */
+.form{margin-top:34px;display:flex;flex-direction:column;gap:18px}
+.fld label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;padding:0 6px}
+.inp{position:relative}
+.inp>svg{display:none}
+.inp input{width:100%;height:54px;border:1px solid var(--line);border-radius:999px;padding:0 50px 0 22px;font-size:15px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+.inp input::placeholder{color:#AAB3C7}
+.inp input:hover{border-color:#CBD5EA}
+.inp input:focus{border-color:#B9A5F7;box-shadow:0 0 0 4px rgba(139,92,246,.16)}
+.inp input.bad{border-color:var(--bad);box-shadow:0 0 0 4px rgba(220,38,38,.1)}
+.shake{animation:shake .35s ease}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.eye{position:absolute;z-index:1;right:10px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--faint);cursor:pointer;display:grid;place-items:center}
+.eye:hover{background:var(--bg);color:var(--ink)}
+.caps{display:flex;align-items:center;gap:6px;margin-top:6px;padding:0 6px;font-size:12px;font-weight:700;color:#B45309}
+.sw{display:inline-flex;align-items:flex-start;gap:10px;padding:0 6px;font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer;user-select:none}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw b{width:34px;height:20px;border-radius:999px;background:#D3DAE8;position:relative;transition:background .2s;flex:0 0 auto;margin-top:1px}
+.sw b::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .2s var(--ease)}
+.sw input:checked+b{background:var(--v-600)}
+.sw input:checked+b::after{transform:translateX(14px)}
+.sw input:focus-visible+b{outline:2px solid var(--v-500);outline-offset:2px}
+.sw small{display:block;font-size:12px;font-weight:500;color:var(--faint);margin-top:1px}
+.msg{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;border-radius:16px;font-size:13.5px;font-weight:600;line-height:1.45}
+.msg svg{flex:0 0 auto;margin-top:1px}
+.msg.err{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA}
+.msg.info{background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE}
+.msg.warn{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.btn{height:54px;width:100%;border:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:15.5px;font-weight:800;cursor:pointer;text-decoration:none;transition:transform .12s var(--ease),box-shadow .2s,opacity .15s}
+.btn.pri{color:#fff;background:linear-gradient(135deg,#8B5CF6 0%,#7C3AED 55%,#4F46E5 100%);box-shadow:0 16px 34px -14px rgba(109,40,217,.85),inset 0 1px 0 rgba(255,255,255,.22)}
+.btn.pri:hover:not(:disabled){transform:translateY(-1px)}
+.btn.pri svg{transition:transform .2s var(--ease)}.btn.pri:hover:not(:disabled) svg{transform:translateX(3px)}
+.btn.ghost{background:#fff;color:var(--ink-2);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.btn:disabled{opacity:.7;cursor:progress}
+.btn.done{background:linear-gradient(135deg,#22C55E,#15803D);box-shadow:0 16px 34px -14px rgba(21,128,61,.7)}
+.spin{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ── Інші стани: перевірка доступу, акаунт без прав ── */
+.shield{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;margin-bottom:20px;color:#fff;
+  background:linear-gradient(140deg,#A78BFA,#8B5CF6 55%,#4F46E5);box-shadow:0 14px 28px -12px rgba(124,58,237,.8),inset 0 1px 0 rgba(255,255,255,.3)}
+.checking .shield{box-shadow:0 14px 28px -12px rgba(124,58,237,.8)}
+.who{display:flex;align-items:center;gap:12px;margin-top:22px;padding:12px 14px;border-radius:18px;background:var(--bg);border:1px solid #EAE5FB}
+.who-ava{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;color:#fff;font-weight:800;background:linear-gradient(140deg,#93C5FD,#3B82F6)}
+.who b{display:block;font-size:14px}
+.who span{font-size:13px;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+html.resume .views{display:none}
+html:not(.resume) .checking{display:none}
+
+/* ── Вузькі екрани: лише форма ── */
+@media (max-width:980px){
+  body{display:block;grid-template-rows:none}
+  .hero{display:none}
+  .side{margin:0;border-radius:0;box-shadow:none;min-height:100dvh}
+  .top{padding:22px 22px 0}
+  .stage{align-items:flex-start;padding:44px 22px 24px}
+  .panel{max-width:440px;margin:0 auto}
+  .panel h2{font-size:32px}
+  .foot{padding:0 22px 26px;justify-content:center;text-align:center}
+}
+@media (max-width:480px){.inp input{font-size:16px}.logo-tag{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.mascot{opacity:1}}
