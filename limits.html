@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/assets/icons/admin/favicon.ico?v=3" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/icons/admin/apple-touch-icon.png?v=3">
+<link rel="manifest" href="/assets/icons/admin/site.webmanifest?v=4">
+<title>QuizFlow Admin — Ліміти</title>
+<!-- Прев'ю посилання в месенджерах (картинки: у репозиторії quizflow, cd tests && npm run og) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="QuizFlow">
+<meta property="og:locale" content="uk_UA">
+<meta property="og:title" content="Адмін-панель · QuizFlow">
+<meta property="og:description" content="Лише для адміністраторів QuizFlow.">
+<meta property="og:image" content="https://admin.quizflow.space/assets/og/admin.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Адмін-панель QuizFlow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Адмін-панель · QuizFlow">
+<meta name="twitter:description" content="Лише для адміністраторів QuizFlow.">
+<meta name="twitter:image" content="https://admin.quizflow.space/assets/og/admin.jpg?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="shared/admin-shell.css?v=20">
+<style>
+.lim-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.lim-sum{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;font-size:14px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink-700)}
+.lim-sum svg{flex:0 0 auto}
+.lim-sum.ok{background:var(--grn-100);border-color:var(--grn-200);color:var(--grn-700)}
+.lim-sum.warn{background:var(--amb-100);border-color:var(--amb-200);color:var(--amb-700)}
+.lim-sum.bad{background:var(--red-100);border-color:var(--red-200);color:var(--red-700)}
+.lim-at{font-size:12px;color:var(--ink-500);font-family:"Geist Mono",monospace}
+.lim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px;align-items:start}
+.lim-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px 6px;display:flex;flex-direction:column;min-width:0}
+.lim-h{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.lim-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;color:#fff}
+.lim-ico.fb{background:linear-gradient(135deg,#F59E0B,#EA580C)}.lim-ico.cf{background:linear-gradient(135deg,#FB923C,#F97316)}.lim-ico.ai{background:linear-gradient(135deg,#8B5CF6,#4F46E5)}
+.lim-t{flex:1;min-width:0}.lim-t b{display:block;font-size:16px;font-weight:800;letter-spacing:-.01em}.lim-t span{font-size:12px;color:var(--ink-500)}
+.lim-st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--sf-2);color:var(--ink-500);white-space:nowrap}
+.lim-st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.lim-st.ok{background:var(--grn-100);color:var(--grn-700)}.lim-st.warn{background:var(--amb-100);color:var(--amb-700)}.lim-st.bad{background:var(--red-100);color:var(--red-700)}
+.lim-i{padding:12px 0;border-top:1px solid var(--line)}
+.lim-i:first-of-type{border-top:0}
+.lim-r{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.lim-l{font-weight:700;font-size:14px;flex:1;min-width:140px}
+.lim-v{font:700 14px "Geist Mono",monospace;color:var(--ink-900);white-space:nowrap}
+.lim-v small{font:500 12px "Geist Mono",monospace;color:var(--ink-500)}
+.lim-per{font-size:11px;font-weight:700;color:var(--ink-500);background:var(--sf-2);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.lim-track{height:8px;border-radius:4px;background:var(--sf-2);overflow:hidden;margin-top:8px}
+.lim-track i{display:block;height:100%;border-radius:4px;transition:width .5s}
+.lim-track i.ok{background:#22C55E}.lim-track i.warn{background:#F59E0B}.lim-track i.bad{background:#DC2626}
+.lim-n{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--ink-500);margin-top:5px}
+.lim-n b{font-family:"Geist Mono",monospace;font-weight:700}
+.lim-n b.ok{color:var(--grn-700)}.lim-n b.warn{color:var(--amb-700)}.lim-n b.bad{color:var(--red-700)}
+.lim-msg{margin:4px 0 14px;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.55;border:1px dashed var(--line-strong);background:var(--sf-2);color:var(--ink-700)}
+.lim-msg.bad{border-style:solid;border-color:var(--red-200);background:var(--red-50);color:var(--red-700)}
+.lim-msg code{font:600 12px "Geist Mono",monospace;background:#fff;border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+.lim-skel{height:150px;border-radius:18px;background:linear-gradient(90deg,var(--sf-2),#F7F9FC,var(--sf-2));background-size:200% 100%;animation:limsk 1.2s infinite}
+@keyframes limsk{to{background-position:-200% 0}}
+.lim-empty{padding:40px 20px;text-align:center;color:var(--ink-500);background:#fff;border:1px dashed var(--line-strong);border-radius:18px}
+.lim-spin{animation:limrot .8s linear infinite}@keyframes limrot{to{transform:rotate(360deg)}}
+@media (max-width:640px){.lim-card{padding:14px 14px 4px}.lim-v{font-size:13px}}
+@media (prefers-reduced-motion:reduce){.lim-skel,.lim-spin{animation:none}.lim-track i{transition:none}}
+</style>
+<!-- Модулі вантажимо одразу, паралельно зі стилями й шрифтами, а не після розбору всієї сторінки -->
+<link rel="modulepreload" href="shared/admin-shell.js?v=22">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js">
+</head>
+<body>
+
+<div id="admin-loader"><div class="spin"></div></div>
+<script src="shared/admin-nav.js?v=13"></script>
+<div id="admin-root"></div>
+<div id="admin-toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Підтвердження -->
+<div class="modal-bd" id="m-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-h"><span class="mh-ico red" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><h3 id="cf-title">Підтвердіть дію</h3>
+      <button class="close" type="button" onclick="closeModal('m-confirm')" aria-label="Закрити"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-b"><div id="cf-text" style="font-size:14px;color:var(--ink-700);line-height:1.55"></div></div>
+    <div class="modal-f">
+      <button class="tb-btn" type="button" onclick="closeModal('m-confirm')">Скасувати</button>
+      <button class="tb-btn danger" type="button" id="cf-ok">Видалити</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initAdminShell, esc, hideLoader, mailApi, mailWorkerUrl } from "./shared/admin-shell.js?v=22";
+
+const SVG = (p, w = 2) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const IC = {
+  firebase: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  cloudflare: '<path d="M17.5 19a4.5 4.5 0 100-9 6 6 0 00-11.6 1.5A4 4 0 006.5 19z"/>',
+  ai: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7z"/>',
+  ok: '<circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16 9.5"/>',
+  warn: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>',
+  refresh: '<path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+};
+const ICON_OF = { firebase: "firebase", cloudflare: "cloudflare", ai: "ai" };
+
+const content = `
+  <div class="page-head">
+    <div>
+      <h1>Безкоштовні квоти сервісів</h1>
+      <p>Скільки лишилось у Firebase, Cloudflare і AI-провайдерів. Дані збирає воркер.</p>
+    </div>
+  </div>
+  <div class="lim-bar">
+    <div class="lim-sum" id="lim-sum" role="status" aria-live="polite">Завантаження…</div>
+    <span class="lim-at" id="lim-at"></span>
+  </div>
+  <div class="lim-grid" id="lim-grid"><div class="lim-skel"></div><div class="lim-skel"></div><div class="lim-skel"></div></div>
+`;
+const topbarRight = `
+  <button class="tb-btn" id="lim-refresh" type="button">
+    <span id="lim-refresh-ic">${SVG(IC.refresh)}</span>
+    Оновити
+  </button>`;
+
+await initAdminShell({ activeId: "limits", crumbs: ["Ліміти"], content, topbarRight });
+const $ = id => document.getElementById(id);
+
+// ─── Формат ─────────────────────────────────────────────────────────────
+const fmtBytes = n => n >= 1024 ** 3 ? `${(n / 1024 ** 3).toLocaleString("uk", { maximumFractionDigits: 2 })} ГБ` : n >= 1024 ** 2 ? `${Math.round(n / 1024 ** 2).toLocaleString("uk")} МБ` : `${Math.round(n / 1024).toLocaleString("uk")} КБ`;
+const fmtCount = n => Number(n || 0).toLocaleString("uk");
+const fmt = (n, unit) => unit === "bytes" ? fmtBytes(n) : fmtCount(n);
+const tone = p => p >= 90 ? "bad" : p >= 70 ? "warn" : "ok";
+const hhmm = t => new Date(t).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" });
+
+function itemHtml(i) {
+  const has = i.limit > 0, pct = has ? Math.min(100, Math.round(i.used / i.limit * 100)) : null, tn = has ? tone(pct) : "";
+  const notes = [i.note, i.stale ? "дані застаріли, лічильник уже скинувся" : "", i.asOf ? `станом на ${hhmm(i.asOf)}` : ""].filter(Boolean).join(" · ");
+  return `<div class="lim-i" data-key="${esc(i.key)}">
+    <div class="lim-r"><span class="lim-l">${esc(i.label)}</span><span class="lim-per">${esc(i.period)}</span>
+      <span class="lim-v">${fmt(i.used, i.unit)}${has ? ` <small>/ ${fmt(i.limit, i.unit)}</small>` : ""}</span></div>
+    ${has ? `<div class="lim-track" role="progressbar" aria-label="${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i class="${tn}" style="width:${pct}%"></i></div>` : ""}
+    ${has || notes ? `<div class="lim-n"><span>${esc(notes)}</span>${has ? `<b class="${tn}">${pct}%</b>` : ""}</div>` : ""}
+  </div>`;
+}
+
+function sectionHtml(s) {
+  const items = s.items || [];
+  const worst = Math.max(0, ...items.filter(i => i.limit > 0).map(i => i.used / i.limit * 100));
+  const st = s.state === "ok" ? [tone(worst), worst >= 90 ? "Майже вичерпано" : worst >= 70 ? "Увага" : "У межах"] : s.state === "error" ? ["bad", "Помилка"] : ["", "Не налаштовано"];
+  let body = "";
+  if (s.state === "unconfigured") body = `<div class="lim-msg">${esc(s.hint || "")}${s.error ? `<br><small>${esc(s.error)}</small>` : ""}<br>Інструкція: <code>docs/limits.md</code> у репозиторії QuizFlow.</div>`;
+  else if (s.state === "error") body = `<div class="lim-msg bad">${esc(s.error || "Не вдалося отримати дані")}</div>`;
+  else body = items.map(itemHtml).join("") + (s.hint ? `<div class="lim-msg">${esc(s.hint)}</div>` : "");
+  return `<section class="lim-card" id="lim-${esc(s.id)}" aria-label="${esc(s.title)}">
+    <div class="lim-h"><span class="lim-ico ${s.id === "firebase" ? "fb" : s.id === "cloudflare" ? "cf" : "ai"}">${SVG(IC[ICON_OF[s.id]] || IC.ai)}</span>
+      <div class="lim-t"><b>${esc(s.title)}</b><span>${esc(s.plan || "")}</span></div><span class="lim-st ${st[0]}">${st[1]}</span></div>
+    ${body}
+  </section>`;
+}
+
+function render(data) {
+  $("lim-grid").innerHTML = data.sections.map(sectionHtml).join("");
+  const hot = data.sections.flatMap(s => (s.items || []).filter(i => i.limit > 0 && i.used / i.limit >= .9).map(i => `${i.label} (${Math.round(i.used / i.limit * 100)}%)`));
+  const warn = data.sections.flatMap(s => (s.items || []).filter(i => i.limit > 0 && i.used / i.limit >= .7 && i.used / i.limit < .9).map(i => i.label));
+  const off = data.sections.filter(s => s.state !== "ok").length;
+  const sum = $("lim-sum");
+  sum.className = "lim-sum " + (hot.length ? "bad" : warn.length ? "warn" : off === data.sections.length ? "" : "ok");
+  sum.innerHTML = SVG(hot.length || warn.length ? IC.warn : IC.ok) + `<span>${hot.length ? `Близько до ліміту: ${esc(hot.join(", "))}` : warn.length ? `Варто стежити: ${esc(warn.join(", "))}` : off === data.sections.length ? "Жодне джерело ще не налаштовано" : "Усе в межах безкоштовних квот" + (off ? ` (не налаштовано джерел: ${off})` : "")}</span>`;
+  $("lim-at").textContent = `оновлено ${hhmm(data.at)}`;
+}
+
+let busy = false;
+async function load() {
+  if (busy) return; busy = true;
+  $("lim-refresh").disabled = true; $("lim-refresh-ic").classList.add("lim-spin");
+  try {
+    if (!(await mailWorkerUrl())) throw new Error("Воркер не налаштовано — адресу задають на сторінці «Розсилки».");
+    render(await mailApi("/limits"));
+  } catch (e) {
+    $("lim-grid").innerHTML = `<div class="lim-empty">${esc(e.message || "Не вдалося отримати ліміти")}</div>`;
+    $("lim-sum").className = "lim-sum bad"; $("lim-sum").textContent = "Не вдалося отримати дані"; $("lim-at").textContent = "";
+  } finally { busy = false; $("lim-refresh").disabled = false; $("lim-refresh-ic").classList.remove("lim-spin"); }
+}
+$("lim-refresh").addEventListener("click", load);
+await load();
+hideLoader();
+// Дані повільно змінюються: оновлюємо раз на дві хвилини, лише коли вкладку видно
+setInterval(() => { if (!document.hidden) load(); }, 120000);
+</script>
+</body>
+</html>
