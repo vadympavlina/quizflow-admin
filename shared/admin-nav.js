@@ -40,6 +40,7 @@
     ann: '<path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/>',
     menu: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/><path d="M13 9h4M13 13h4"/>',
     ai: '<path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/>',
+    gauge: '<path d="M12 14l4-4"/><path d="M3.3 17a10 10 0 1117.4 0"/>',
     telegram: '<path d="M21.5 4.5L2.5 11.8l6.2 2.1 2.3 6.6 3.5-4.3 5 3.7z"/><path d="M8.7 13.9l9.8-7.4"/>',
     dashboard: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     live: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
@@ -71,6 +72,7 @@
     { label: "Інтеграції", items: [
       { id: "ai", label: "AI налаштування", href: "ai-settings", icon: "ai" },
       { id: "telegram", label: "Telegram", href: "telegram", icon: "telegram" },
+      { id: "limits", label: "Ліміти", href: "limits", icon: "gauge" },
       { id: "cleanup", label: "Обслуговування", href: "cleanup", icon: "db" },
     ] },
   ];
