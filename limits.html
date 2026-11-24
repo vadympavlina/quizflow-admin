@@ -141,13 +141,14 @@ const tone = p => p >= 90 ? "bad" : p >= 70 ? "warn" : "ok";
 const hhmm = t => new Date(t).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" });
 
 function itemHtml(i) {
-  const has = i.limit > 0, raw = has ? i.used / i.limit * 100 : 0, pct = has ? Math.round(i.paid ? raw : Math.min(100, raw)) : null;
+  const nodata = i.used === null || i.used === undefined;
+  const has = !nodata && i.limit > 0, raw = has ? i.used / i.limit * 100 : 0, pct = has ? Math.round(i.paid ? raw : Math.min(100, raw)) : null;
   // На Blaze перевищення безкоштовної частини не блокує, а оплачується: це застереження, а не червона тривога
   const tn = !has ? "" : i.paid ? (raw >= 80 ? "warn" : "ok") : tone(pct);
   const notes = [i.paid && raw >= 100 ? "платна частина" : "", i.note, i.stale ? "дані застаріли, лічильник уже скинувся" : "", i.asOf ? `станом на ${hhmm(i.asOf)}` : ""].filter(Boolean).join(" · ");
   return `<div class="lim-i" data-key="${esc(i.key)}">
     <div class="lim-r"><span class="lim-l">${esc(i.label)}</span><span class="lim-per">${esc(i.period)}</span>
-      <span class="lim-v">${fmt(i.used, i.unit)}${has ? ` <small>/ ${fmt(i.limit, i.unit)}</small>` : ""}</span></div>
+      <span class="lim-v">${nodata ? "немає даних" : fmt(i.used, i.unit)}${has ? ` <small>/ ${fmt(i.limit, i.unit)}</small>` : ""}</span></div>
     ${has ? `<div class="lim-track" role="progressbar" aria-label="${esc(i.label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i class="${tn}" style="width:${Math.min(100, pct)}%"></i></div>` : ""}
     ${has || notes ? `<div class="lim-n"><span>${esc(notes)}</span>${has ? `<b class="${tn}">${pct}%</b>` : ""}</div>` : ""}
   </div>`;
