@@ -117,3 +117,16 @@ test("ліміти: на Blaze перевищення безкоштовної �
   await expect.poll(() => calls.filter(c => c.path === "/limits").length).toBeGreaterThan(n);   // після вибору дані перезавантажуються
   expect(errors).toEqual([]);
 });
+
+test("ліміти: якщо Google не віддав значення, замість вигаданого нуля — «немає даних» без смуги", async ({ page, errors }) => {
+  const rep = REPORT();
+  rep.sections[0].items[0] = { key: "fb-storage", label: "Сховище бази", used: null, limit: GiB, unit: "bytes", period: "зараз", paid: true, note: "Google ще не віддав це значення" };
+  await fakeWorker(page, rep);
+  await seed(page, db(), "t5");
+  await page.goto("/limits");
+  const st = page.locator('[data-key="fb-storage"]');
+  await expect(st).toContainText("немає даних");
+  await expect(st.locator(".lim-track")).toHaveCount(0);
+  await expect(st).not.toContainText("0%");
+  expect(errors).toEqual([]);
+});
