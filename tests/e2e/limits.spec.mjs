@@ -1,5 +1,5 @@
 // Сторінка «Ліміти»: Firebase, Cloudflare і AI з воркера; стани «не налаштовано» й помилки. Воркер підмінено.
-import { test, expect, seed } from "./fixtures.mjs";
+import { test, expect, seed, readDb } from "./fixtures.mjs";
 import { admSeed } from "./seeds/admin.mjs";
 
 const WORKER = "https://mail.quizflow.test", GiB = 1024 ** 3;
@@ -91,4 +91,29 @@ test.describe("телефон", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
     expect(errors).toEqual([]);
   });
+});
+
+test("ліміти: на Blaze перевищення безкоштовної частини — застереження з вартістю, а не червона тривога; тариф перемикається", async ({ page, errors }) => {
+  const rep = REPORT();
+  const fb = rep.sections[0];
+  fb.planKey = "blaze"; fb.plan = "Blaze: безкоштовна частина, понад неї оплата за використання";
+  fb.items = [
+    { key: "fb-download", label: "Завантажено з бази", used: 13 * GiB, limit: 10 * GiB, unit: "bytes", period: "місяць", paid: true, note: "понад безкоштовну частину: ≈ $3.00" },
+    { key: "fb-conns", label: "Одночасні підключення (пік)", used: 80, limit: 200000, unit: "count", period: "24 години" } ];
+  const calls = await fakeWorker(page, rep);
+  await seed(page, db(), "t5");
+  await page.goto("/limits");
+  const dl = page.locator('[data-key="fb-download"]');
+  await expect(dl).toContainText("130%");
+  await expect(dl).toContainText("≈ $3.00");
+  await expect(dl.locator(".lim-track i")).toHaveClass(/warn/);                               // не bad
+  await expect(dl.locator(".lim-track i")).toHaveAttribute("style", /width:100%/);            // смуга не виходить за межі
+  await expect(page.locator("#lim-firebase .lim-st")).toHaveText("Є платна частина");
+  await expect(page.locator("#lim-sum")).not.toHaveClass(/bad/);
+  await expect(page.locator('#lim-firebase [data-plan="blaze"]')).toHaveAttribute("aria-pressed", "true");
+  const n = calls.filter(c => c.path === "/limits").length;
+  await page.locator('#lim-firebase [data-plan="spark"]').click();
+  await expect.poll(async () => (await readDb(page)).settings?.limits?.firebasePlan).toBe("spark");
+  await expect.poll(() => calls.filter(c => c.path === "/limits").length).toBeGreaterThan(n);   // після вибору дані перезавантажуються
+  expect(errors).toEqual([]);
 });
