@@ -488,10 +488,11 @@
           </div>
           <div class="list">
             <strong>Буде видалено:</strong><br>
-            • Акаунт користувача<br>
+            • Акаунт і вхід (Firebase Auth), профіль, історія змін імені<br>
             • Всі тести цього викладача (якщо не передати колезі)<br>
-            • Всі спроби, студенти, посилання, папки<br>
-            • Індивідуальні AI налаштування
+            • Усі спроби, студенти, посилання, папки, ігри наживо та історія ігор<br>
+            • Статистика, використання AI, індивідуальні налаштування<br>
+            • Звернення, сповіщення й записи в журналах, де згадується цей користувач
           </div>
         </div>
 
@@ -1400,14 +1401,11 @@ window.confirmDeleteTeacher = async () => {
   try {
     let moved = null;
     if (_xferTo) moved = await transferTests(_delUid, _xferTo);   // якщо не вдалося, нічого не видаляємо
-    await Promise.all([
-      dbRemove(`users/${_delUid}`),
-      dbRemove(`teachers/${_delUid}`),
-      // легкі дзеркала для статистики адмінки
-      ...["attemptLog", "gameLog", "teacherStats"].map(n => dbRemove(`${n}/${_delUid}`).catch(() => {})),
-    ]);
+    // Воркер стирає акаунт Auth і все пов'язане в базі: профіль, тести, журнали, звернення, ігри
+    await mailApi("/users/delete", { uid: _delUid });
     closeModal("m-delete");
-    logAction("teacher.delete", { type: "teacher", id: _delUid, label: fullName(byId(_delUid) || { email: _delLogin }) }, _delLogin + (moved !== null ? ` · тестів передано: ${moved} (${fullName(byId(_xferTo) || {})})` : ""));
+    // у журнал не пишемо ні імені, ні пошти: користувача має не лишитися ніде
+    logAction("teacher.delete", { type: "teacher", id: null, label: "Видалений акаунт" }, moved !== null ? `тестів передано колезі: ${moved}` : null);
     window._users = (window._users || []).filter(u => u.id !== _delUid);
     delete (window._stats || {})[_delUid];
     _delUid = ""; _delLogin = ""; _xferTo = null;
