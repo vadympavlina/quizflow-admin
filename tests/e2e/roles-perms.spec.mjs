@@ -264,7 +264,8 @@ test("видалення викладача: тести можна переда�
   const db = await readDb(page);
   const copies = Object.entries(db.teachers.t1.tests).filter(([id]) => id.startsWith("xf_"));
   expect(copies.length).toBe(srcCount);
-  expect(copies[0][1].transferredFrom).toContain("Мельник");
+  expect(copies[0][1].transferredFrom).toBe("Андрій");   // лише ім'я, без прізвища
+  expect(JSON.stringify(Object.values(db.teachers.t1.notifications || {}))).not.toContain("Мельник");
   expect(copies[0][1].folderId ?? null).toBeNull();
   const n = Object.values(db.teachers.t1.notifications || {}).find(x => x.title === "Вам передано тести");
   expect(n.msg).toContain(String(srcCount));

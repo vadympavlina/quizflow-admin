@@ -1379,7 +1379,8 @@ document.getElementById("del-xfer").addEventListener("click", e => {
 async function transferTests(fromId, toId){
   const tests = (await dbGet(`teachers/${fromId}/tests`)) || {};
   const entries = Object.entries(tests).filter(([, t]) => t && typeof t === "object");
-  const from = fullName(byId(fromId) || { email: _delLogin }), now = Date.now();
+  // лише ім'я: прізвища й пошти в копіях та сповіщенні не лишаємо
+  const from = String(byId(fromId)?.name || "").trim(), now = Date.now();
   for (let i = 0; i < entries.length; i += 20) {
     const upd = {};
     entries.slice(i, i + 20).forEach(([id, t], j) => { upd[`teachers/${toId}/tests/xf_${now.toString(36)}_${i + j}`] = { ...t, folderId: null, transferredFrom: from, transferredAt: now }; });
@@ -1387,7 +1388,7 @@ async function transferTests(fromId, toId){
   }
   if (entries.length) {
     const n = entries.length;
-    await dbUpd("", { [`teachers/${toId}/notifications/xfer_${now}`]: { title: "Вам передано тести", msg: `Адміністратор передав вам ${n} ${n % 10 === 1 && n % 100 !== 11 ? "тест" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? "тести" : "тестів"} від колеги ${from}. Вони лежать у вашій бібліотеці.`, color: "#2d5be3", read: false, ts: now } });
+    await dbUpd("", { [`teachers/${toId}/notifications/xfer_${now}`]: { title: "Вам передано тести", msg: `Адміністратор передав вам ${n} ${n % 10 === 1 && n % 100 !== 11 ? "тест" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? "тести" : "тестів"} від ${from ? "колеги " + from : "іншого викладача"}. Вони лежать у вашій бібліотеці.`, color: "#2d5be3", read: false, ts: now } });
   }
   return entries.length;
 }
