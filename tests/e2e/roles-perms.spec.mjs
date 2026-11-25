@@ -233,8 +233,23 @@ test("запрошення: ролі за замовчуванням і ролі
   expect(errors).toEqual([]);
 });
 
-test("видалення викладача: тести можна передати колезі", async ({ page, errors }) => {
-  const d = admSeed(Date.now());
+const WORKER = "https://mail.quizflow.test";
+// Воркер повністю стирає користувача на сервері, тож у тесті він підмінений: перевіряємо запит і те, що робить сторінка
+async function mockErase(page) {
+  const calls = [];
+  await page.context().route(`${WORKER}/**`, route => {
+    const req = route.request();
+    if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*" } });
+    calls.push({ path: new URL(req.url()).pathname, body: JSON.parse(req.postData() || "{}") });
+    route.fulfill({ contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ok: true, removed: 9 }) });
+  });
+  return calls;
+}
+const eraseSeed = () => { const d = admSeed(Date.now()); d.settings = { ...(d.settings || {}), mail: { workerUrl: WORKER } }; return d; };
+
+test("видалення викладача: тести можна передати колезі, решту стирає воркер", async ({ page, errors }) => {
+  const d = eraseSeed();
+  const calls = await mockErase(page);
   await seed(page, d, "t5");
   const srcCount = Object.keys(d.teachers.t2.tests).length;
   expect(srcCount).toBeGreaterThan(0);
@@ -245,28 +260,44 @@ test("видалення викладача: тести можна переда�
   await expect(page.locator("#del-xfer-pick")).toContainText("Олена");
   await page.locator("#del-confirm-inp").fill("a.melnyk@itstep.org");
   await page.locator("#del-confirm-btn").click(); await page.waitForTimeout(700);
+  expect(calls).toEqual([{ path: "/users/delete", body: { uid: "t2" } }]);
   const db = await readDb(page);
-  expect(db.users.t2).toBeUndefined();
-  expect(db.teachers.t2).toBeUndefined();
   const copies = Object.entries(db.teachers.t1.tests).filter(([id]) => id.startsWith("xf_"));
   expect(copies.length).toBe(srcCount);
   expect(copies[0][1].transferredFrom).toContain("Мельник");
   expect(copies[0][1].folderId ?? null).toBeNull();
   const n = Object.values(db.teachers.t1.notifications || {}).find(x => x.title === "Вам передано тести");
   expect(n.msg).toContain(String(srcCount));
+  // у журналі немає ні імені, ні пошти видаленого
+  const log = Object.values(db.adminLog || {}).find(x => x.action === "teacher.delete");
+  expect(JSON.stringify(log)).not.toMatch(/Мельник|melnyk|t2/i);
   expect(errors).toEqual([]);
 });
 
-test("видалення без передачі тестів працює як раніше", async ({ page, errors }) => {
-  await seed(page, admSeed(Date.now()), "t5");
+test("видалення без передачі тестів: лише виклик воркера, копій тестів немає", async ({ page, errors }) => {
+  const calls = await mockErase(page);
+  await seed(page, eraseSeed(), "t5");
   await page.goto("/teachers?id=t3"); await page.waitForTimeout(800);
   await page.locator('[data-act="delete"]').first().click();
   await page.locator("#del-confirm-inp").fill("shevchenko@itstep.org");
   await page.locator("#del-confirm-btn").click(); await page.waitForTimeout(600);
-  const db = await readDb(page);
-  expect(db.users.t3).toBeUndefined();
-  expect(Object.keys(db.teachers.t1.tests).some(id => id.startsWith("xf_"))).toBe(false);
+  expect(calls).toEqual([{ path: "/users/delete", body: { uid: "t3" } }]);
+  expect(Object.keys((await readDb(page)).teachers.t1.tests).some(id => id.startsWith("xf_"))).toBe(false);
   expect(errors).toEqual([]);
+});
+
+test("видалення: якщо воркер відмовив, показуємо помилку й модалка лишається", async ({ page }) => {
+  await page.context().route(`${WORKER}/**`, route => {
+    if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*" } });
+    route.fulfill({ status: 503, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ok: false, error: "На воркері не задано FIREBASE_SERVICE_ACCOUNT" }) });
+  });
+  await seed(page, eraseSeed(), "t5");
+  await page.goto("/teachers?id=t3"); await page.waitForTimeout(800);
+  await page.locator('[data-act="delete"]').first().click();
+  await page.locator("#del-confirm-inp").fill("shevchenko@itstep.org");
+  await page.locator("#del-confirm-btn").click();
+  await expect(page.locator("#del-err")).toContainText("FIREBASE_SERVICE_ACCOUNT");
+  expect((await readDb(page)).users.t3).toBeDefined();
 });
 
 function noDots(o, path = "db") { const bad = []; (function walk(v, p) { if (v && typeof v === "object") for (const k of Object.keys(v)) { if (/[.$#\[\]]/.test(k)) bad.push(p + "/" + k); walk(v[k], p + "/" + k); } })(o, path); return bad; }
