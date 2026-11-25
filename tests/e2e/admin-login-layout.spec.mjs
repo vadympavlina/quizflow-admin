@@ -41,3 +41,20 @@ test.describe("телефон", () => {
     expect(errors).toEqual([]);
   });
 });
+
+test("під формою є посилання на політику конфіденційності й умови, на телефоні без горизонтальної прокрутки", async ({ page, errors }) => {
+  await seed(page, { users: {} });
+  for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(vp);
+    await page.goto("/admin-login"); await page.waitForTimeout(700);
+    const links = page.locator(".legal a");
+    await expect(links).toHaveCount(2);
+    await expect(links.nth(0)).toBeVisible(); await expect(links.nth(1)).toBeVisible();
+    expect(await links.nth(0).getAttribute("href")).toBe("https://quizflow.space/privacy");
+    expect(await links.nth(1).getAttribute("href")).toBe("https://quizflow.space/terms");
+    expect(await links.nth(0).getAttribute("target")).toBe("_blank");
+    expect(await links.nth(0).getAttribute("rel")).toContain("noopener");
+    expect(await noOverflow(page)).toBe(true);
+  }
+  expect(errors).toEqual([]);
+});

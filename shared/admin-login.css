@@ -51,7 +51,11 @@ body{
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .panel h2{font-size:40px;line-height:1.08;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
 .sub{margin-top:10px;font-size:15px;line-height:1.5;color:var(--muted)}
-.foot{padding:0 56px 30px;font-size:13px;line-height:1.5;color:var(--faint);display:flex;align-items:center;gap:8px}
+.foot{padding:0 56px 12px;font-size:13px;line-height:1.5;color:var(--faint);display:flex;align-items:center;gap:8px}
+.legal{display:flex;flex-wrap:wrap;gap:4px 18px;padding:0 56px 30px;font-size:13px;line-height:1.5}
+.legal a{color:var(--faint);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(138,148,176,.5)}
+.legal a:hover{color:#0D1340}
+.legal a:focus-visible{outline:2px solid #2D5BE3;outline-offset:3px;border-radius:3px}
 .foot svg{color:#059669;flex:0 0 auto}
 
 /* ── Форма ── */
@@ -114,7 +118,8 @@ html:not(.resume) .checking{display:none}
   .stage{align-items:flex-start;padding:44px 22px 24px}
   .panel{max-width:440px;margin:0 auto}
   .panel h2{font-size:32px}
-  .foot{padding:0 22px 26px;justify-content:center;text-align:center}
+  .foot{padding:0 22px 10px;justify-content:center;text-align:center}
+  .legal{padding:0 22px 26px;justify-content:center}
 }
 @media (max-width:480px){.inp input{font-size:16px}.logo-tag{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.mascot{opacity:1}}
