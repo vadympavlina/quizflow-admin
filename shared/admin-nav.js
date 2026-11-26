@@ -330,3 +330,17 @@
   if (document.body) start();
   else document.addEventListener("DOMContentLoaded", start);
 })();
+
+/* ── Передзавантаження сторінок меню ─────────────────────────────────────────
+   Chrome/Edge: коли курсор затримався на пункті меню (або натиснули), сторінка вже готується
+   у фоні — перехід майже миттєвий. Лише внутрішні посилання меню, без нових вкладок. */
+(function () {
+  try {
+    if (!HTMLScriptElement.supports || !HTMLScriptElement.supports("speculationrules")) return;
+    if (document.querySelector("script[data-qf-spec]")) return;
+    var s = document.createElement("script");
+    s.type = "speculationrules"; s.setAttribute("data-qf-spec", "");
+    s.textContent = JSON.stringify({ prerender: [{ where: { and: [{ href_matches: "/*" }, { selector_matches: "a.asb-item:not([target])" }] }, eagerness: "moderate" }] });
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
