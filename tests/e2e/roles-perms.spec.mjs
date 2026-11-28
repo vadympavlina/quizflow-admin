@@ -369,3 +369,15 @@ test("картка викладача: вкладки; у «Доступі» л�
   await expect(page.locator("#tp-names-list")).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("редактор меню: сторінку «Оновлення» можна додати, іконка є в наборі", async ({ page, errors }) => {
+  await seed(page, legacyDb(), "t5");
+  await page.goto("/navigation"); await page.waitForTimeout(1200);
+  const chip = page.locator('#nav-missing [data-add-page="updates"]');
+  await expect(chip).toBeVisible();
+  await expect(chip.locator("svg path").first()).toBeAttached();       // іконка «updates» намальована
+  await chip.click();
+  await expect(page.locator('#nav-missing [data-add-page="updates"]')).toHaveCount(0);   // пункт додано в меню
+  await expect(page.locator("#nav-list, .nav-editor, main").first()).toContainText("Оновлення");
+  expect(errors).toEqual([]);
+});
